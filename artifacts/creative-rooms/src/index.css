@@ -213,9 +213,22 @@
   50%       { box-shadow: 0 0 0 4px rgba(74,222,128,0);    }
 }
 
+/* Cinematic warmth behind the logo — soft breathing.
+   Uses only opacity (no blur animation) so it stays smooth on mobile GPUs.
+   Avoids transform so it doesn't fight inline `translateY(-50%)` positioning. */
 @keyframes warm-glow {
-  0%, 100% { opacity: 0.55; }
-  50%       { opacity: 1;    }
+  0%   { opacity: 0.5;  }
+  20%  { opacity: 0.72; }
+  40%  { opacity: 0.92; }
+  55%  { opacity: 1;    }
+  75%  { opacity: 0.78; }
+  100% { opacity: 0.5;  }
+}
+
+/* Slower secondary drift for layered hero glow (used on landing nav logo) */
+@keyframes warm-glow-slow {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.65; }
 }
 
 @keyframes float-up {

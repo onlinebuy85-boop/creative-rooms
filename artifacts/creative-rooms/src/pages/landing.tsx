@@ -31,7 +31,10 @@ export function LandingPage() {
           className="hero-photo w-full h-full object-cover"
           style={{
             imageRendering: "auto",
-            filter: "saturate(1.05) contrast(1.04)",
+            filter: "saturate(1.08) contrast(1.06) brightness(1.02)",
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
             willChange: "transform",
           }}
         />
@@ -42,14 +45,22 @@ export function LandingPage() {
             background: "linear-gradient(100deg, rgba(5,3,10,0.96) 0%, rgba(5,3,10,0.80) 38%, rgba(5,3,10,0.42) 65%, rgba(5,3,10,0.1) 100%)",
           }}
         />
-        {/* Mobile vignette — softer top→bottom so warm lamp light stays visible */}
+        {/* Mobile vignette — softer so the cinematic warmth and detail show through */}
         <div
           className="absolute inset-0 md:hidden"
           style={{
-            background: "linear-gradient(180deg, rgba(5,3,10,0.86) 0%, rgba(5,3,10,0.55) 35%, rgba(5,3,10,0.4) 60%, rgba(5,3,10,0.78) 100%)",
+            background: "linear-gradient(180deg, rgba(5,3,10,0.78) 0%, rgba(5,3,10,0.42) 30%, rgba(5,3,10,0.28) 55%, rgba(5,3,10,0.72) 100%)",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+        {/* Mobile-only readability scrim around the headline area — keeps text legible without muddying the image */}
+        <div
+          className="absolute md:hidden pointer-events-none"
+          style={{
+            top: 0, left: 0, right: 0, height: "62%",
+            background: "linear-gradient(180deg, rgba(5,3,10,0.55) 0%, rgba(5,3,10,0.35) 45%, transparent 100%)",
+          }}
+        />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-black/40 via-transparent to-black/70" />
         <div
           className="absolute pointer-events-none"
           style={{
@@ -85,15 +96,31 @@ export function LandingPage() {
       {/* ── NAV ── */}
       <header className="relative z-10 flex items-center justify-between gap-4 px-5 md:px-10 pt-6 md:pt-8 max-w-[1280px] mx-auto">
         <Link href="/">
-          <div className="relative cursor-pointer flex items-center">
-            {/* Subtle ambient warmth behind the logo */}
+          <div
+            className="relative cursor-pointer flex items-center"
+            style={{ isolation: "isolate" }}
+          >
+            {/* Layered ambient warmth — primary drifting breath */}
             <div
               className="absolute pointer-events-none"
               style={{
                 left: -16, top: "50%", transform: "translateY(-50%)",
                 width: "108%", height: 80,
-                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.16) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
-                animation: "warm-glow 5s ease-in-out infinite",
+                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.18) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
+                animation: "warm-glow 7s ease-in-out infinite",
+                mixBlendMode: "screen",
+              }}
+            />
+            {/* Secondary slow off-phase glow — gives the alive layered feel */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: -28, top: "50%", transform: "translateY(-50%)",
+                width: "120%", height: 100,
+                background: "radial-gradient(ellipse at 55% 50%, rgba(224,176,80,0.12) 0%, rgba(180,110,20,0.04) 45%, transparent 75%)",
+                animation: "warm-glow-slow 11s ease-in-out infinite",
+                animationDelay: "1.5s",
+                mixBlendMode: "screen",
               }}
             />
             <img
