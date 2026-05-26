@@ -60,20 +60,51 @@ export function LandingPage() {
             background: "linear-gradient(180deg, rgba(5,3,10,0.55) 0%, rgba(5,3,10,0.35) 45%, transparent 100%)",
           }}
         />
-        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+        {/* Desktop bottom fade — deeper shadow tones for cinematic depth.
+            Top kept very light so it doesn't double-darken the top-left corner where
+            the left vignette is already 0.96 opacity. */}
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-transparent via-transparent to-black/75" />
+        {/* Desktop ambient warm light glow — lamp pool on the left of the photograph */}
         <div
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none hidden md:block"
           style={{
             left: "-5%", top: "5%", width: "55%", height: "70%",
-            background: "radial-gradient(ellipse at 30% 40%, rgba(180,110,20,0.12) 0%, rgba(140,80,10,0.04) 45%, transparent 70%)",
-            animation: "warm-glow 6s ease-in-out infinite",
+            background: "radial-gradient(ellipse at 30% 40%, rgba(212,150,40,0.18) 0%, rgba(160,90,15,0.06) 45%, transparent 72%)",
+            animation: "warm-glow 8s ease-in-out infinite",
+            mixBlendMode: "screen",
+          }}
+        />
+        {/* Desktop secondary warm rim light — adds dimensional depth on the right */}
+        <div
+          className="absolute pointer-events-none hidden md:block"
+          style={{
+            right: "-8%", top: "10%", width: "45%", height: "65%",
+            background: "radial-gradient(ellipse at 70% 50%, rgba(180,120,45,0.10) 0%, rgba(120,70,10,0.03) 50%, transparent 75%)",
+            animation: "warm-glow-slow 13s ease-in-out infinite",
+            animationDelay: "2s",
+            mixBlendMode: "screen",
+          }}
+        />
+        {/* Desktop film grain — subtle analog texture for cinematic feel */}
+        <div
+          className="absolute inset-0 hidden md:block pointer-events-none"
+          style={{
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            opacity: 0.055,
+            mixBlendMode: "overlay",
           }}
         />
       </div>
 
       <style>{`
         .hero-photo { object-position: 60% 30%; }
-        @media (min-width: 768px) { .hero-photo { object-position: center 20%; } }
+        @media (min-width: 768px) {
+          .hero-photo {
+            object-position: center 20%;
+            /* Richer cinematic grade on desktop — deeper blacks, warmer mids, more contrast */
+            filter: saturate(1.18) contrast(1.14) brightness(1.04) !important;
+          }
+        }
       `}</style>
 
       {/* ── FLOATING DUST PARTICLES ── */}
@@ -100,38 +131,46 @@ export function LandingPage() {
             className="relative cursor-pointer flex items-center"
             style={{ isolation: "isolate" }}
           >
-            {/* Layered ambient warmth — primary drifting breath */}
+            {/* Primary glow — drifts left↔right with a warm breath */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -16, top: "50%", transform: "translateY(-50%)",
+                left: -16, top: "50%",
                 width: "108%", height: 80,
-                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.18) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
-                animation: "warm-glow 7s ease-in-out infinite",
+                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.22) 0%, rgba(212,163,65,0.05) 50%, transparent 75%)",
+                animation: "warm-glow-drift 9s ease-in-out infinite",
                 mixBlendMode: "screen",
+                transform: "translateY(-50%)",
               }}
             />
-            {/* Secondary slow off-phase glow — gives the alive layered feel */}
+            {/* Secondary glow — counter-drifts at a slower pace for layered depth.
+                Tightened margins to fit within the header's px-10 padding even at peak drift. */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -28, top: "50%", transform: "translateY(-50%)",
-                width: "120%", height: 100,
-                background: "radial-gradient(ellipse at 55% 50%, rgba(224,176,80,0.12) 0%, rgba(180,110,20,0.04) 45%, transparent 75%)",
-                animation: "warm-glow-slow 11s ease-in-out infinite",
-                animationDelay: "1.5s",
+                left: -20, top: "50%",
+                width: "114%", height: 100,
+                background: "radial-gradient(ellipse at 55% 50%, rgba(224,176,80,0.14) 0%, rgba(180,110,20,0.05) 45%, transparent 75%)",
+                animation: "warm-glow-drift-counter 14s ease-in-out infinite",
+                animationDelay: "2s",
                 mixBlendMode: "screen",
+                transform: "translateY(-50%)",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Room"
+              decoding="sync"
               style={{
                 height: "clamp(32px, 7vw, 44px)",
                 width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))",
+                /* Crisp logo: lighter drop-shadow so edges stay sharp, no soft halo */
+                filter: "brightness(1.08) contrast(1.05) drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(212,163,65,0.28))",
+                imageRendering: "auto",
+                WebkitBackfaceVisibility: "hidden",
+                backfaceVisibility: "hidden",
               }}
             />
           </div>

@@ -231,6 +231,39 @@
   50%       { opacity: 0.65; }
 }
 
+/* Drifting warm light — translates left↔right while breathing.
+   Preserves the inline translateY(-50%) by re-applying it in the transform. */
+@keyframes warm-glow-drift {
+  0% {
+    opacity: 0.5;
+    transform: translate(-6px, -50%);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(6px, -50%);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translate(-6px, -50%);
+  }
+}
+
+/* Counter-drift for the secondary glow layer (off-phase + opposite direction) */
+@keyframes warm-glow-drift-counter {
+  0% {
+    opacity: 0.3;
+    transform: translate(5px, -50%);
+  }
+  50% {
+    opacity: 0.65;
+    transform: translate(-5px, -50%);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translate(5px, -50%);
+  }
+}
+
 @keyframes float-up {
   0%, 100% { transform: translateY(0);   opacity: 0.6; }
   50%       { transform: translateY(-3px); opacity: 1;  }
