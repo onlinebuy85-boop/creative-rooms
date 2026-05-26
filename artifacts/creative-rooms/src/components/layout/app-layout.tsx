@@ -271,52 +271,106 @@ export function AppLayout({ children }: AppLayoutProps) {
         <SidebarContent />
       </aside>
 
-      {/* ── Mobile top bar — logo only, no hamburger ── */}
+      {/* ── Mobile top bar — logo only ── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-4 h-12 border-b border-white/[0.05]"
-        style={{ background: "rgba(10,7,16,0.92)", backdropFilter: "blur(12px)" }}
+        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-4 border-b border-white/[0.05]"
+        style={{
+          background: "rgba(10,7,16,0.93)",
+          backdropFilter: "blur(14px)",
+          height: "52px",
+        }}
       >
         <Link href="/">
-          <img
-            src={logoImg}
-            alt="Creative Rooms"
-            style={{
-              height: 34,
-              width: "auto",
-              objectFit: "contain",
-              filter: "brightness(1.15) drop-shadow(0 0 8px rgba(212,163,65,0.35))",
-            }}
-          />
+          <div className="relative">
+            {/* Ambient pulse behind logo */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: -10, top: "50%", transform: "translateY(-50%)",
+                width: 80, height: 60,
+                background: "radial-gradient(ellipse at 40% 50%, rgba(212,163,65,0.22) 0%, transparent 70%)",
+                animation: "warm-glow 3.2s ease-in-out infinite",
+              }}
+            />
+            <img
+              src={logoImg}
+              alt="Creative Rooms"
+              style={{
+                height: 40,
+                width: "auto",
+                objectFit: "contain",
+                position: "relative",
+                filter: "brightness(1.2) drop-shadow(0 0 12px rgba(212,163,65,0.50))",
+              }}
+            />
+          </div>
         </Link>
       </div>
 
       {/* ── Main content ── */}
-      <main className="flex-1 md:ml-[240px] min-h-screen pt-12 md:pt-0 pb-16 md:pb-0 relative z-10">
+      <main className="flex-1 md:ml-[240px] min-h-screen pt-[52px] md:pt-0 pb-[72px] md:pb-0 relative z-10">
         {children}
       </main>
 
       {/* ── Mobile bottom navigation bar ── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-white/[0.07]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-end justify-around border-t border-white/[0.06]"
         style={{
-          background: "rgba(9,6,14,0.96)",
-          backdropFilter: "blur(20px)",
-          paddingBottom: "env(safe-area-inset-bottom, 4px)",
-          height: "calc(64px + env(safe-area-inset-bottom, 0px))",
+          background: "rgba(8,5,13,0.97)",
+          backdropFilter: "blur(24px)",
+          paddingBottom: "env(safe-area-inset-bottom, 6px)",
+          height: "calc(72px + env(safe-area-inset-bottom, 0px))",
         }}
       >
+        {/* Discover */}
         <BottomNavItem
           href="/discover"
           icon={Compass}
           label="Discover"
           active={location === "/discover" || location.startsWith("/discover")}
         />
+
+        {/* Hooks */}
         <BottomNavItem
           href="/hooks"
           icon={Radio}
           label="Hooks"
           active={location === "/hooks"}
         />
+
+        {/* ── CENTER PRIMARY ACTION — elevated gold button ── */}
+        <Link href={user ? "/rooms/new" : "/sign-up"}>
+          <div className="flex flex-col items-center gap-1.5 pb-2 cursor-pointer select-none" style={{ marginTop: "-18px" }}>
+            {/* Outer glow ring */}
+            <div className="relative">
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: "radial-gradient(circle, rgba(212,163,65,0.35) 0%, transparent 70%)",
+                  animation: "breathe 2.4s ease-in-out infinite",
+                  transform: "scale(1.5)",
+                }}
+              />
+              <div
+                className="relative w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95"
+                style={{
+                  background: "linear-gradient(145deg, #e8bc55, #c48c28)",
+                  boxShadow: "0 4px 24px rgba(212,163,65,0.45), 0 0 0 1px rgba(212,163,65,0.2)",
+                }}
+              >
+                <Plus className="w-6 h-6" style={{ color: "#1a0f00", strokeWidth: 2.5 }} />
+              </div>
+            </div>
+            <span
+              className="text-[9px] font-semibold tracking-widest uppercase"
+              style={{ color: "rgba(212,163,65,0.65)", letterSpacing: "0.12em" }}
+            >
+              {user ? "Create" : "Join"}
+            </span>
+          </div>
+        </Link>
+
+        {/* Profile (signed-in) or quiet placeholder (guest) */}
         {user && profile ? (
           <BottomNavItem
             href={`/profile/${profile.id}`}
@@ -324,26 +378,22 @@ export function AppLayout({ children }: AppLayoutProps) {
             label="Profile"
             active={location.startsWith("/profile")}
           />
-        ) : !user ? (
-          <Link href="/sign-up">
-            <div className="flex flex-col items-center gap-1 py-2 px-4 min-w-[60px] cursor-pointer">
-              <div
-                className="px-3 py-1 rounded-full text-[10px] font-semibold"
-                style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
-              >
-                Join
-              </div>
-            </div>
-          </Link>
-        ) : null}
-        {user && (
+        ) : (
           <BottomNavItem
-            href="/rooms/new"
-            icon={Plus}
-            label="New Room"
-            active={location === "/rooms/new"}
+            href="/sign-in"
+            icon={UserIcon}
+            label="Log in"
+            active={false}
           />
         )}
+
+        {/* Settings / extra nav slot — keeps symmetry */}
+        <BottomNavItem
+          href="/about"
+          icon={Compass}
+          label="About"
+          active={location === "/about"}
+        />
       </nav>
     </div>
   );
