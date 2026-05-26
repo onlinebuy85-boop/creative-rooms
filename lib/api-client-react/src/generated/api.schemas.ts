@@ -188,6 +188,10 @@ export interface Hook {
   createdAt: string;
 }
 
+export interface HookUpdateInput {
+  isActive?: boolean;
+}
+
 export interface HookInput {
   /** @minLength 1 */
   title: string;

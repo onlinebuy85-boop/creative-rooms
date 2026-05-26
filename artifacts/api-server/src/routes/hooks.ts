@@ -116,6 +116,44 @@ router.post("/hooks", requireAuth, async (req: any, res): Promise<void> => {
   res.status(201).json(await enrichHook(hook));
 });
 
+// PATCH /hooks/:id
+router.patch("/hooks/:id", requireAuth, async (req: any, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  const [hook] = await db.select().from(hooksTable).where(eq(hooksTable.id, id));
+  if (!hook) { res.status(404).json({ error: "Hook not found" }); return; }
+
+  const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.clerkId, req.clerkUserId));
+  if (!profile) { res.status(404).json({ error: "Profile not found" }); return; }
+  if (hook.creatorId !== profile.id) { res.status(403).json({ error: "Not authorized" }); return; }
+
+  const { isActive } = req.body as { isActive?: boolean };
+  const [updated] = await db
+    .update(hooksTable)
+    .set({ isActive: isActive !== undefined ? isActive : hook.isActive })
+    .where(eq(hooksTable.id, id))
+    .returning();
+
+  res.json(await enrichHook(updated));
+});
+
+// DELETE /hooks/:id
+router.delete("/hooks/:id", requireAuth, async (req: any, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  const [hook] = await db.select().from(hooksTable).where(eq(hooksTable.id, id));
+  if (!hook) { res.status(404).json({ error: "Hook not found" }); return; }
+
+  const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.clerkId, req.clerkUserId));
+  if (!profile) { res.status(404).json({ error: "Profile not found" }); return; }
+  if (hook.creatorId !== profile.id) { res.status(403).json({ error: "Not authorized" }); return; }
+
+  await db.delete(hooksTable).where(eq(hooksTable.id, id));
+  res.status(204).end();
+});
+
 // POST /hooks/:id/join
 router.post("/hooks/:id/join", requireAuth, async (req: any, res): Promise<void> => {
   const params = GetHookParams.safeParse(req.params);

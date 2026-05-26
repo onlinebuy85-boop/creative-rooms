@@ -1,25 +1,22 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useUser } from "@clerk/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
+import { HookManageMenu } from "@/components/hooks/hook-manage-menu";
 import type { Hook } from "@workspace/api-client-react";
-import { Play, Pause, Users, Lock } from "lucide-react";
+import { Play, Pause, Users, Lock, Loader2, AlertCircle, RotateCcw } from "lucide-react";
 
+/* ── Module-level singleton — only one audio plays at a time ──────────────── */
+type StopFn = () => void;
+let globalStop: StopFn | null = null;
+
+/* ── Static waveform seeded by hook id ───────────────────────────────────── */
 function seededWave(id: number, bars = 38): number[] {
   let s = ((id * 1664525) + 1013904223) >>> 0;
   return Array.from({ length: bars }, () => {
     s = ((s * 1664525) + 1013904223) >>> 0;
     return (s % 65) + 18;
   });
-}
-
-function seededDuration(id: number): string {
-  let s = ((id * 1664525) + 1013904223) >>> 0;
-  s = ((s * 1664525) + 1013904223) >>> 0;
-  const total = (s % 45) + 12;
-  const m = Math.floor(total / 60);
-  const sec = total % 60;
-  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
 function timeAgo(dateStr: string) {
@@ -42,35 +39,138 @@ const VIBE_COLORS: Record<string, string> = {
   experimental: "#d4cc5a",
 };
 
+type AudioState = "idle" | "loading" | "playing" | "paused" | "error";
+
 interface HookCardProps {
   hook: Hook;
   selected?: boolean;
   onClick?: () => void;
   onJoinRequest?: () => void;
+  currentProfileId?: number;
 }
 
-export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardProps) {
+export function HookCard({ hook, selected, onClick, onJoinRequest, currentProfileId }: HookCardProps) {
   const { isSignedIn } = useUser();
-  const [playing, setPlaying] = useState(false);
+  const [audioState, setAudioState] = useState<AudioState>("idle");
+  const [audioErrorMsg, setAudioErrorMsg] = useState<string | null>(null);
+  const [realDuration, setRealDuration] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
   const [guestReason, setGuestReason] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const stopRef = useRef<StopFn | null>(null);
+
   const bars = seededWave(hook.id);
-  const duration = seededDuration(hook.id);
   const accent = VIBE_COLORS[hook.vibe?.toLowerCase() ?? ""] ?? "#d4a341";
   const isFull = hook.seatsLeft === 0 || !hook.isActive;
+  const isOwner = currentProfileId != null && hook.creatorId === currentProfileId;
 
-  const handlePlay = (e: React.MouseEvent) => {
+  /* ── Audio element lifecycle ───────────────────────────────────────────── */
+  const getAudio = useCallback((): HTMLAudioElement => {
+    if (audioRef.current) return audioRef.current;
+
+    const audio = new Audio();
+    audio.preload = "none";
+
+    audio.addEventListener("loadedmetadata", () => {
+      const secs = Math.floor(audio.duration);
+      if (!isNaN(secs) && isFinite(secs)) {
+        setRealDuration(`${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`);
+      }
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (audio.duration > 0) setProgress(audio.currentTime / audio.duration);
+    });
+
+    audio.addEventListener("ended", () => {
+      setAudioState("idle");
+      setProgress(0);
+      if (globalStop === stopRef.current) globalStop = null;
+    });
+
+    audio.addEventListener("error", () => {
+      const code = audio.error?.code;
+      const msgs: Record<number, string> = {
+        1: "Playback stopped.",
+        2: "Network error — check connection.",
+        3: "Audio could not be decoded.",
+        4: "Audio format not supported by this browser.",
+      };
+      const msg = (code && msgs[code]) || "Could not load audio.";
+      console.error("[HookCard] Audio error — code:", code, "| src:", audio.src, "| message:", audio.error?.message);
+      setAudioState("error");
+      setAudioErrorMsg(msg);
+      if (globalStop === stopRef.current) globalStop = null;
+    });
+
+    audioRef.current = audio;
+    return audio;
+  }, []);
+
+  /* ── Stop function (stable ref for singleton tracking) ─────────────────── */
+  const stopFn: StopFn = useCallback(() => {
+    audioRef.current?.pause();
+    setAudioState("paused");
+  }, []);
+
+  useEffect(() => {
+    stopRef.current = stopFn;
+  }, [stopFn]);
+
+  /* ── Cleanup on unmount ─────────────────────────────────────────────────── */
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      if (globalStop === stopRef.current) globalStop = null;
+    };
+  }, []);
+
+  /* ── Play / pause handler ───────────────────────────────────────────────── */
+  const handlePlay = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!audioRef.current) {
-      audioRef.current = new Audio(hook.audioUrl);
-      audioRef.current.onended = () => setPlaying(false);
+
+    const audio = getAudio();
+
+    if (audioState === "playing") {
+      audio.pause();
+      setAudioState("paused");
+      return;
     }
-    if (playing) {
-      audioRef.current.pause();
-      setPlaying(false);
-    } else {
-      audioRef.current.play().catch(() => {});
-      setPlaying(true);
+
+    /* Stop whatever else is playing */
+    if (globalStop && globalStop !== stopRef.current) {
+      globalStop();
+    }
+
+    /* Set src if needed (or if retrying after error) */
+    if (!audio.src || audioState === "error") {
+      const url = hook.audioUrl;
+      console.log("[HookCard] Setting audio src:", url, "| hook:", hook.id, hook.title);
+      audio.src = url;
+      setAudioErrorMsg(null);
+      setProgress(0);
+    }
+
+    setAudioState("loading");
+
+    try {
+      await audio.play();
+      setAudioState("playing");
+      globalStop = stopRef.current;
+      console.log("[HookCard] Playback started — hook:", hook.id, "| url:", audio.src);
+    } catch (err: unknown) {
+      console.error("[HookCard] play() rejected:", err, "| src:", audio.src);
+      setAudioState("error");
+      setAudioErrorMsg(
+        err instanceof Error && err.name === "NotAllowedError"
+          ? "Tap again to start playback."
+          : err instanceof Error
+          ? err.message
+          : "Playback failed."
+      );
     }
   };
 
@@ -83,56 +183,91 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
     onJoinRequest?.();
   };
 
+  /* ── Derived display values ─────────────────────────────────────────────── */
+  const isPlaying = audioState === "playing";
+  const isLoading = audioState === "loading";
+  const hasError = audioState === "error";
+  const displayDuration = realDuration ?? "--:--";
+
   return (
     <>
       <div
         onClick={onClick}
         className="group relative w-full cursor-pointer transition-all duration-200 active:scale-[0.99]"
         style={{
-          background: selected ? "rgba(212,163,65,0.07)" : "rgba(255,255,255,0.025)",
+          background: selected
+            ? "rgba(212,163,65,0.07)"
+            : isPlaying
+            ? "rgba(212,163,65,0.04)"
+            : "rgba(255,255,255,0.025)",
           border: selected
             ? "1px solid rgba(212,163,65,0.28)"
+            : isPlaying
+            ? `1px solid ${accent}33`
             : "1px solid rgba(255,255,255,0.07)",
           borderRadius: 14,
-          boxShadow: selected ? "0 0 0 1px rgba(212,163,65,0.12), 0 4px 16px rgba(0,0,0,0.2)" : "none",
+          boxShadow: isPlaying
+            ? `0 0 20px ${accent}18, 0 4px 16px rgba(0,0,0,0.2)`
+            : selected
+            ? "0 0 0 1px rgba(212,163,65,0.12), 0 4px 16px rgba(0,0,0,0.2)"
+            : "none",
+          transition: "all 0.3s ease",
         }}
         onMouseEnter={(e) => {
-          if (!selected) {
+          if (!selected && !isPlaying) {
             (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
             (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.12)";
           }
         }}
         onMouseLeave={(e) => {
-          if (!selected) {
+          if (!selected && !isPlaying) {
             (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)";
             (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.07)";
           }
         }}
       >
-        {/* Selected accent bar */}
-        {selected && (
+        {/* Selected / playing accent bar */}
+        {(selected || isPlaying) && (
           <div
             className="absolute left-0 top-4 bottom-4 w-[3px] rounded-full"
-            style={{ background: accent, boxShadow: `0 0 8px ${accent}88` }}
+            style={{
+              background: accent,
+              boxShadow: isPlaying ? `0 0 12px ${accent}` : `0 0 8px ${accent}88`,
+            }}
           />
         )}
 
         <div className="px-4 py-5 sm:py-4">
           {/* Top row: play + waveform + meta */}
-          <div className="flex items-center gap-3 mb-3.5">
-            {/* Play button — larger on mobile */}
+          <div className="flex items-center gap-3 mb-2.5">
+            {/* Play / pause button */}
             <button
               onClick={handlePlay}
               className="flex-shrink-0 rounded-full flex items-center justify-center transition-all active:scale-95"
               style={{
                 width: 40,
                 height: 40,
-                background: playing ? `${accent}22` : "rgba(255,255,255,0.08)",
-                border: playing ? `1.5px solid ${accent}66` : "1.5px solid rgba(255,255,255,0.14)",
-                boxShadow: playing ? `0 0 12px ${accent}44` : "none",
+                background: isPlaying
+                  ? `${accent}22`
+                  : hasError
+                  ? "rgba(212,74,74,0.12)"
+                  : "rgba(255,255,255,0.08)",
+                border: isPlaying
+                  ? `1.5px solid ${accent}66`
+                  : hasError
+                  ? "1.5px solid rgba(212,74,74,0.35)"
+                  : "1.5px solid rgba(255,255,255,0.14)",
+                boxShadow: isPlaying ? `0 0 12px ${accent}44` : "none",
               }}
             >
-              {playing ? (
+              {isLoading ? (
+                <Loader2
+                  className="w-4 h-4 animate-spin"
+                  style={{ color: accent }}
+                />
+              ) : hasError ? (
+                <RotateCcw className="w-4 h-4" style={{ color: "rgba(212,100,100,0.8)" }} />
+              ) : isPlaying ? (
                 <Pause className="w-4 h-4" style={{ color: accent }} />
               ) : (
                 <Play className="w-4 h-4 ml-0.5" style={{ color: "rgba(255,255,255,0.7)" }} />
@@ -148,14 +283,16 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
                   style={{
                     minWidth: 2,
                     height: `${h}%`,
-                    background: playing
+                    background: isPlaying
                       ? `${accent}${i % 3 === 0 ? "bb" : i % 3 === 1 ? "77" : "44"}`
+                      : hasError
+                      ? `rgba(212,100,100,${i % 2 === 0 ? "0.25" : "0.12"})`
                       : `rgba(255,255,255,${i % 2 === 0 ? "0.18" : "0.09"})`,
-                    animation: playing
+                    animation: isPlaying
                       ? `breathe ${1.1 + (i % 6) * 0.2}s ease-in-out infinite`
                       : undefined,
-                    animationDelay: playing ? `${i * 0.04}s` : undefined,
-                    transition: "background 0.3s ease, height 0.3s ease",
+                    animationDelay: isPlaying ? `${i * 0.04}s` : undefined,
+                    transition: "background 0.3s ease",
                   }}
                 />
               ))}
@@ -166,10 +303,10 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
               className="flex-shrink-0 text-[12px] tabular-nums"
               style={{ color: "rgba(255,255,255,0.35)" }}
             >
-              {duration}
+              {displayDuration}
             </span>
 
-            {/* Creator */}
+            {/* Creator + manage menu */}
             <div className="flex items-center gap-2 flex-shrink-0">
               <Avatar className="h-7 w-7">
                 <AvatarImage src={hook.creatorAvatarUrl ?? undefined} />
@@ -188,8 +325,56 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
                   {timeAgo(hook.createdAt)} ago
                 </p>
               </div>
+              {isOwner && (
+                <HookManageMenu
+                  hookId={hook.id}
+                  hookTitle={hook.title}
+                  isActive={hook.isActive}
+                />
+              )}
             </div>
           </div>
+
+          {/* Progress bar (shows during play) */}
+          {(isPlaying || (audioState === "paused" && progress > 0)) && (
+            <div
+              style={{
+                height: 2,
+                borderRadius: 99,
+                background: "rgba(255,255,255,0.1)",
+                marginBottom: 10,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progress * 100}%`,
+                  background: `linear-gradient(90deg, ${accent}, ${accent}99)`,
+                  borderRadius: 99,
+                  transition: "width 0.25s linear",
+                }}
+              />
+            </div>
+          )}
+
+          {/* Error message */}
+          {hasError && audioErrorMsg && (
+            <div
+              className="flex items-center gap-2 mb-2"
+              style={{
+                padding: "7px 10px",
+                borderRadius: 8,
+                background: "rgba(212,74,74,0.08)",
+                border: "1px solid rgba(212,74,74,0.2)",
+              }}
+            >
+              <AlertCircle size={13} style={{ color: "rgba(212,100,100,0.8)", flexShrink: 0 }} />
+              <span className="text-[12px]" style={{ color: "rgba(212,130,130,0.9)" }}>
+                {audioErrorMsg} Tap to retry.
+              </span>
+            </div>
+          )}
 
           {/* Title + description */}
           <div className="mb-3.5">
@@ -200,7 +385,6 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
               >
                 {hook.title}
               </h3>
-              {/* Creator name on mobile (hidden on desktop where it's in the top row) */}
               <span
                 className="sm:hidden flex-shrink-0 text-[11px] mt-0.5"
                 style={{ color: "rgba(255,255,255,0.3)" }}
@@ -220,7 +404,6 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
 
           {/* Footer: tags + spots */}
           <div className="flex items-center justify-between gap-3">
-            {/* Tags */}
             <div className="flex flex-wrap gap-1.5 min-w-0">
               {hook.vibe && (
                 <span
@@ -249,7 +432,6 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
               ))}
             </div>
 
-            {/* Spots + join */}
             <div className="flex items-center gap-2.5 flex-shrink-0">
               <div className="flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
                 {isFull ? (

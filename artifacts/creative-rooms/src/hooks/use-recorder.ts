@@ -101,6 +101,8 @@ export function useRecorder(): UseRecorderResult {
 
       /* Collect data every 250ms for responsive stop */
       recorder.start(250);
+      /* IMPORTANT: capture the *actual* mimeType used by the browser (may differ from requested) */
+      mimeRef.current = recorder.mimeType || mime;
       setState("recording");
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);

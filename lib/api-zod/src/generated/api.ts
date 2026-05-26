@@ -492,6 +492,44 @@ export const GetHookResponse = zod.object({
 
 
 /**
+ * @summary Update a hook (owner only)
+ */
+export const UpdateHookParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateHookBody = zod.object({
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateHookResponse = zod.object({
+  "id": zod.number(),
+  "creatorId": zod.number(),
+  "creatorName": zod.string().nullish(),
+  "creatorAvatarUrl": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "audioUrl": zod.string(),
+  "vibe": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "lookingFor": zod.array(zod.string()),
+  "maxSeats": zod.number(),
+  "seatsLeft": zod.number(),
+  "roomId": zod.number().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a hook (owner only)
+ */
+export const DeleteHookParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Join a hook — creates or joins the associated room
  */
 export const JoinHookParams = zod.object({

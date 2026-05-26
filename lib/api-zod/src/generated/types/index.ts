@@ -11,6 +11,7 @@ export * from './demoInput';
 export * from './healthStatus';
 export * from './hook';
 export * from './hookInput';
+export * from './hookUpdateInput';
 export * from './listRoomsParams';
 export * from './message';
 export * from './messageInput';

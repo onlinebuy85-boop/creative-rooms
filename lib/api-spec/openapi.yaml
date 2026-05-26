@@ -482,6 +482,50 @@ paths:
                 $ref: "#/components/schemas/Hook"
         "404":
           description: Not found
+    patch:
+      operationId: updateHook
+      tags: [hooks]
+      summary: Update a hook (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HookUpdateInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hook"
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteHook
+      tags: [hooks]
+      summary: Delete a hook (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
 
   /hooks/{id}/join:
     post:
@@ -819,6 +863,12 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    HookUpdateInput:
+      type: object
+      properties:
+        isActive:
+          type: boolean
 
     HookInput:
       type: object

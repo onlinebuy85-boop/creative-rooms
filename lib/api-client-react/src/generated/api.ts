@@ -25,6 +25,7 @@ import type {
   HealthStatus,
   Hook,
   HookInput,
+  HookUpdateInput,
   ListRoomsParams,
   Message,
   MessageInput,
@@ -1840,6 +1841,148 @@ export function useGetHook<TData = Awaited<ReturnType<typeof getHook>>, TError =
 
 
 
+
+export const getUpdateHookUrl = (id: number,) => {
+
+
+
+
+  return `/api/hooks/${id}`
+}
+
+/**
+ * @summary Update a hook (owner only)
+ */
+export const updateHook = async (id: number,
+    hookUpdateInput: HookUpdateInput, options?: RequestInit): Promise<Hook> => {
+
+  return customFetch<Hook>(getUpdateHookUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      hookUpdateInput,)
+  }
+);}
+
+
+
+
+export const getUpdateHookMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateHook>>, TError,{id: number;data: BodyType<HookUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateHook>>, TError,{id: number;data: BodyType<HookUpdateInput>}, TContext> => {
+
+const mutationKey = ['updateHook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateHook>>, {id: number;data: BodyType<HookUpdateInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateHook(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateHookMutationResult = NonNullable<Awaited<ReturnType<typeof updateHook>>>
+    export type UpdateHookMutationBody = BodyType<HookUpdateInput>
+    export type UpdateHookMutationError = ErrorType<void>
+
+    /**
+ * @summary Update a hook (owner only)
+ */
+export const useUpdateHook = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateHook>>, TError,{id: number;data: BodyType<HookUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateHook>>,
+        TError,
+        {id: number;data: BodyType<HookUpdateInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateHookMutationOptions(options));
+    }
+
+export const getDeleteHookUrl = (id: number,) => {
+
+
+
+
+  return `/api/hooks/${id}`
+}
+
+/**
+ * @summary Delete a hook (owner only)
+ */
+export const deleteHook = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteHookUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteHookMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteHook>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteHook>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteHook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteHook>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteHook(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteHookMutationResult = NonNullable<Awaited<ReturnType<typeof deleteHook>>>
+
+    export type DeleteHookMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a hook (owner only)
+ */
+export const useDeleteHook = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteHook>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteHook>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteHookMutationOptions(options));
+    }
 
 export const getJoinHookUrl = (id: number,) => {
 

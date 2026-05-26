@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useUser } from "@clerk/react";
-import { useListHooks } from "@workspace/api-client-react";
+import { useListHooks, useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import type { Hook } from "@workspace/api-client-react";
 import { HookCard } from "@/components/hooks/hook-card";
 import { HookRoomPanel } from "@/components/hooks/hook-room-panel";
@@ -127,6 +127,9 @@ function HowHooksWork() {
 export function HooksPage() {
   const { isSignedIn } = useUser();
   const { data: hooks, isLoading } = useListHooks();
+  const { data: myProfile } = useGetMyProfile({
+    query: { queryKey: getGetMyProfileQueryKey(), enabled: isSignedIn === true, retry: false },
+  });
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedHook, setSelectedHook] = useState<Hook | null>(null);
   const [dropModalOpen, setDropModalOpen] = useState(false);
@@ -286,6 +289,7 @@ export function HooksPage() {
                   selected={selectedHook?.id === hook.id}
                   onClick={() => handleCardClick(hook)}
                   onJoinRequest={() => handleJoinRequest(hook)}
+                  currentProfileId={myProfile?.id}
                 />
               ))
             )}
