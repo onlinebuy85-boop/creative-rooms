@@ -18,35 +18,20 @@ const PALETTES = [
 
 const AVATAR_COLORS = ["#7c4a1e","#1e3a5f","#4a1d6e","#7f1d1d","#14532d","#1a3a2a"];
 
-/* Deterministic atmospheric empty-room phrases based on room ID — never fake metrics */
+/* Deterministic atmospheric empty-room phrases — never fake metrics */
 const EMPTY_PHRASES = [
   "Waiting for the first sound",
   "Open for collaborators",
   "Quiet room",
   "Room forming",
-  "No one here yet",
   "Listening for someone",
   "Still and waiting",
   "An empty studio",
+  "Open session",
 ];
 
 function emptyPhrase(roomId: number): string {
   return EMPTY_PHRASES[roomId % EMPTY_PHRASES.length];
-}
-
-function atmosphericLine(room: Room): string {
-  if (room.description && room.description.trim().length > 6) return room.description;
-  const vibe = (room.vibe || "").toLowerCase();
-  if (vibe.includes("ambient")) return "Space for slow textures and quiet creation.";
-  if (vibe.includes("acoustic")) return "Warm instruments and honest songwriting.";
-  if (vibe.includes("late night") || vibe.includes("midnight")) return "For unfinished thoughts and late melodies.";
-  if (vibe.includes("pop")) return "Atmospheric collaboration and cinematic textures.";
-  if (vibe.includes("jazz") || vibe.includes("soul")) return "Human imperfections. Live instruments. Warmth.";
-  if (vibe.includes("experimental")) return "Sound without limits. Explore freely.";
-  const genre = room.genres?.[0]?.toLowerCase() || "";
-  if (genre.includes("folk")) return "Stories told through strings and silence.";
-  if (genre.includes("electronic")) return "Machines and hearts making music together.";
-  return "A quiet place to create together.";
 }
 
 /* Mini waveform — always gently alive, brightens when people are present */
@@ -78,7 +63,6 @@ function CardWaveform({ accent, active }: { accent: string; active: boolean }) {
 export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomCardProps) {
   const [, setLocation] = useLocation();
   const palette = PALETTES[index % PALETTES.length];
-  const tagline = atmosphericLine(room);
   const spotsLeft = (room.maxMembers || 4) - (room.memberCount || 0);
   const isFull = spotsLeft <= 0;
   const isOwner = !!currentProfileId && currentProfileId === room.ownerId;
@@ -86,6 +70,9 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
   /* Real live presence — undefined means still loading, treat as empty */
   const realCount = liveCount ?? 0;
   const isLive = realCount > 0;
+
+  /* Genre tags — up to 3, shown as minimal editorial pills */
+  const genreTags = (room.genres ?? []).slice(0, 3);
 
   return (
     <Link href={`/rooms/${room.id}`}>
@@ -129,14 +116,14 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
         {/* Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/25 to-black/12" />
 
-        {/* Resting ambient glow — subtle even when empty */}
+        {/* Resting ambient glow */}
         <div
           className="absolute inset-0 transition-opacity duration-700"
           style={{
             background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},${isLive ? 0.14 : 0.06}) 0%, transparent 60%)`,
           }}
         />
-        {/* Hover glow — full intensity on hover */}
+        {/* Hover glow */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.26) 0%, transparent 65%)` }}
@@ -160,7 +147,7 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-          {/* Vibe pill */}
+          {/* Mood / vibe pill */}
           {(room.vibe || room.genres?.[0]) && (
             <span
               className="text-[10px] tracking-wider uppercase px-2.5 py-0.5 rounded-full"
@@ -175,7 +162,7 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
             </span>
           )}
 
-          {/* Live indicator — only shown when real people are present */}
+          {/* Live indicator — only when real people are present */}
           {isLive && (
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
@@ -196,7 +183,7 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
           )}
         </div>
 
-        {/* Spots-left indicator — when nearly full and real members exist */}
+        {/* Spots-left indicator — only when actually live and nearly full */}
         {!isFull && spotsLeft <= 2 && isLive && (
           <div className="absolute top-10 right-3 mt-1">
             <span
@@ -213,7 +200,8 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
         )}
 
         {/* Card body */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2">
+        <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2.5">
+
           {/* Room name */}
           <h3
             className="font-serif leading-tight text-white group-hover:text-white/96 transition-colors"
@@ -222,21 +210,27 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
             {room.name}
           </h3>
 
-          {/* Tagline */}
-          <p
-            className="text-[11.5px] font-light leading-snug line-clamp-2"
-            style={{ color: "rgba(255,255,255,0.38)", fontStyle: "italic" }}
-          >
-            "{tagline}"
-          </p>
+          {/* Genre tags — real data only, no invented copy */}
+          {genreTags.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {genreTags.map((g) => (
+                <span
+                  key={g}
+                  className="text-[9.5px] tracking-[0.05em] uppercase"
+                  style={{ color: "rgba(255,255,255,0.28)" }}
+                >
+                  {g}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Presence row */}
-          <div className="flex items-center justify-between mt-0.5">
+          <div className="flex items-center justify-between">
 
             {isLive ? (
-              /* ── Real presence — actual people are here ── */
+              /* Real presence — actual people are here */
               <div className="flex items-center gap-2.5">
-                {/* Avatar stack based on real count */}
                 <div className="flex -space-x-2">
                   {Array.from({ length: Math.min(realCount, 4) }).map((_, i) => (
                     <div
@@ -254,9 +248,8 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
                 </span>
               </div>
             ) : (
-              /* ── Empty — poetic atmospheric state, never fake metrics ── */
+              /* Empty — atmospheric state, never fake metrics */
               <div className="flex items-center gap-2">
-                {/* Single waiting circle — pulsing gold to feel intentional */}
                 <div
                   className="w-5 h-5 rounded-full border-[1px]"
                   style={{
@@ -275,7 +268,7 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
               </div>
             )}
 
-            {/* Waveform — always present, intensity reflects live activity */}
+            {/* Waveform — always present, intensity reflects live state */}
             <div
               className={`transition-opacity duration-500 ${isLive ? "opacity-70 group-hover:opacity-100" : "opacity-15 group-hover:opacity-40"}`}
               style={{ paddingBottom: "1px" }}
