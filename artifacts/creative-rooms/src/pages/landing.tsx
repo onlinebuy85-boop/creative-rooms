@@ -2,47 +2,6 @@ import { Link } from "wouter";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
-/* ── Atmospheric signals — evocative, never fake-numeric ── */
-const SIGNALS_TOP = [
-  { text: "A room is forming" },
-  { text: "Someone needs a vocalist" },
-  { text: "Late-night session active" },
-];
-const SIGNALS_BOTTOM = [
-  { text: "Hooks drifting tonight" },
-  { text: "A feeling becoming a song" },
-];
-
-function LiveChip({ text, delay = 0 }: { text: string; delay?: number }) {
-  return (
-    <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full shrink-0"
-      style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(8px)",
-        animation: `pageIn 0.7s ease both`,
-        animationDelay: `${delay}ms`,
-      }}
-    >
-      <span
-        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-        style={{
-          background: "#4ade80",
-          animation: "pulse-dot 2.4s ease-in-out infinite",
-          animationDelay: `${delay * 0.4}ms`,
-        }}
-      />
-      <span
-        className="text-[11px] font-light tracking-wide whitespace-nowrap"
-        style={{ color: "rgba(255,255,255,0.46)" }}
-      >
-        {text}
-      </span>
-    </div>
-  );
-}
-
 /* ── Floating dust particles ── */
 const PARTICLES = [
   { x: 8,  y: 72, size: 2,   dur: 9,  delay: 0 },
@@ -53,6 +12,81 @@ const PARTICLES = [
   { x: 18, y: 30, size: 2,   dur: 11, delay: 5 },
   { x: 35, y: 85, size: 1.5, dur: 13, delay: 0.5 },
   { x: 12, y: 20, size: 1,   dur: 9,  delay: 6 },
+];
+
+/* ── Avatar cluster ── */
+const AVATAR_COLORS = ["#7c4a1e","#1e3a5f","#4a1d6e","#14532d","#7f1d1d"];
+function AvatarCluster({ count = 4 }: { count?: number }) {
+  return (
+    <div className="flex -space-x-2">
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="w-7 h-7 rounded-full border-[1.5px] flex-shrink-0"
+          style={{
+            background: AVATAR_COLORS[i % AVATAR_COLORS.length],
+            borderColor: "rgba(8,5,14,0.9)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Live activity card (desktop right panel + mobile list) ── */
+interface ActivityCardProps {
+  dot?: string;
+  label: string;
+  sub: string;
+  avatars?: number;
+  delay?: number;
+}
+function ActivityCard({ dot = "#4ade80", label, sub, avatars = 3, delay = 0 }: ActivityCardProps) {
+  return (
+    <div
+      className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl"
+      style={{
+        background: "rgba(8,5,14,0.78)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        backdropFilter: "blur(16px)",
+        animation: "pageIn 0.7s ease both",
+        animationDelay: `${delay}ms`,
+        minWidth: 240,
+      }}
+    >
+      <div className="flex items-start gap-2.5 min-w-0">
+        <span
+          className="mt-0.5 w-2 h-2 rounded-full flex-shrink-0"
+          style={{ background: dot, animation: "pulse-dot 2.4s ease-in-out infinite", animationDelay: `${delay * 0.5}ms` }}
+        />
+        <div className="min-w-0">
+          <p className="text-[12px] font-medium text-white/85 leading-tight truncate">{label}</p>
+          <p className="text-[11px] font-light leading-tight mt-0.5 truncate" style={{ color: "rgba(255,255,255,0.38)" }}>{sub}</p>
+        </div>
+      </div>
+      <AvatarCluster count={avatars} />
+    </div>
+  );
+}
+
+/* ── Feature pillar icon ── */
+function PillarIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+      style={{ background: "rgba(212,163,65,0.08)", border: "1px solid rgba(212,163,65,0.14)" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ── Live activity data ── */
+const ACTIVITY = [
+  { label: "A room is forming",     sub: "2 producers joining",         dot: "#4ade80", avatars: 2 },
+  { label: "Late-night session",    sub: "Session active now",          dot: "#4ade80", avatars: 3 },
+  { label: "Live recording",        sub: "Someone just dropped a hook", dot: "#fbbf24", avatars: 2 },
 ];
 
 export function LandingPage() {
@@ -69,16 +103,13 @@ export function LandingPage() {
           className="w-full h-full object-cover"
           style={{ objectPosition: "center 20%" }}
         />
-        {/* Heavy left vignette */}
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(100deg, rgba(5,3,10,0.96) 0%, rgba(5,3,10,0.80) 35%, rgba(5,3,10,0.40) 62%, rgba(5,3,10,0.12) 100%)",
+            background: "linear-gradient(100deg, rgba(5,3,10,0.97) 0%, rgba(5,3,10,0.82) 38%, rgba(5,3,10,0.42) 65%, rgba(5,3,10,0.1) 100%)",
           }}
         />
-        {/* Top & bottom fades */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/78" />
-        {/* Warm ambient light — breathes slowly */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/80" />
         <div
           className="absolute pointer-events-none"
           style={{
@@ -117,10 +148,8 @@ export function LandingPage() {
 
       {/* ── NAV ── */}
       <header className="relative z-10 flex items-center justify-between px-5 md:px-10 pt-5 md:pt-6 max-w-[1280px] mx-auto">
-        {/* Brand */}
         <Link href="/">
           <div className="relative group cursor-pointer">
-            {/* Primary warm glow — wide, breathes slowly */}
             <div
               className="absolute pointer-events-none"
               style={{
@@ -130,7 +159,6 @@ export function LandingPage() {
                 animation: "warm-glow 3.5s ease-in-out infinite",
               }}
             />
-            {/* Tight inner pulse — waveform-icon hotspot */}
             <div
               className="absolute pointer-events-none"
               style={{
@@ -166,21 +194,16 @@ export function LandingPage() {
           </div>
         </Link>
 
-        {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-9">
           {[
             { label: "Rooms", href: "/discover" },
             { label: "Hooks", href: "/hooks" },
             { label: "About", href: "/about" },
-          ].map(({ label, href }, i) => (
+          ].map(({ label, href }) => (
             <Link key={label} href={href}>
               <span
                 className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/80"
-                style={{
-                  color: i === 0 ? "rgba(212,163,65,0.9)" : "rgba(255,255,255,0.42)",
-                  borderBottom: i === 0 ? "1px solid rgba(212,163,65,0.45)" : "none",
-                  paddingBottom: i === 0 ? "2px" : "0",
-                }}
+                style={{ color: "rgba(255,255,255,0.42)" }}
               >
                 {label}
               </span>
@@ -188,7 +211,6 @@ export function LandingPage() {
           ))}
         </nav>
 
-        {/* Auth CTAs */}
         <div className="flex items-center gap-3 md:gap-4">
           <Link href="/sign-in">
             <span
@@ -201,10 +223,7 @@ export function LandingPage() {
           <Link href="/sign-up">
             <button
               className="px-4 md:px-5 py-2 rounded-full text-[12px] md:text-[13px] font-semibold transition-all hover:brightness-110 hover:scale-[1.03]"
-              style={{
-                background: "linear-gradient(135deg,#e0b050,#c89030)",
-                color: "#1a0f00",
-              }}
+              style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
             >
               Join free
             </button>
@@ -212,146 +231,208 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* ── HERO COPY ── */}
-      {/* Mobile: reduced top padding so content is visible faster */}
-      <section className="relative z-10 px-5 md:px-10 pt-10 md:pt-20 pb-20 md:pb-36 max-w-[1280px] mx-auto">
-        <div className="max-w-[580px]">
+      {/* ── HERO SECTION ── */}
+      <section className="relative z-10 px-5 md:px-10 pt-8 md:pt-16 pb-16 md:pb-28 max-w-[1280px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10 md:gap-6">
 
-          {/* Atmospheric signals — top row */}
-          <div className="flex flex-wrap gap-2 mb-7 md:mb-8">
-            {SIGNALS_TOP.map((s, i) => (
-              <LiveChip key={i} text={s.text} delay={i * 100} />
-            ))}
-          </div>
+          {/* ── LEFT: Copy column ── */}
+          <div className="max-w-[520px]">
 
-          {/* Headline */}
-          <h1
-            className="font-serif font-normal leading-[1.06] tracking-tight mb-6 md:mb-7 text-white"
-            style={{
-              fontSize: "clamp(2.4rem, 5.5vw, 4.4rem)",
-              animation: "pageIn 0.8s ease both",
-              animationDelay: "200ms",
-            }}
-          >
-            Where music is<br />
-            made between<br />
-            <em className="not-italic" style={{ color: "rgba(212,163,65,0.88)" }}>real people.</em>
-          </h1>
-
-          {/* Sub */}
-          <p
-            className="text-[14px] md:text-[15px] font-light leading-relaxed mb-7 md:mb-8 max-w-[430px]"
-            style={{
-              color: "rgba(255,255,255,0.4)",
-              animation: "pageIn 0.8s ease both",
-              animationDelay: "350ms",
-            }}
-          >
-            Intimate creative rooms for musicians, producers, singers and songwriters.
-            Drop a hook. Find a collaborator. Make something that matters.
-          </p>
-
-          {/* CTAs — clear hierarchy */}
-          <div
-            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
-            style={{ animation: "pageIn 0.8s ease both", animationDelay: "500ms" }}
-          >
-            {/* PRIMARY — dominant, glowing */}
-            <Link href="/sign-up">
-              <button
-                className="w-full sm:w-auto h-13 px-8 rounded-full font-semibold text-[14px] tracking-wide transition-all hover:scale-[1.04] hover:brightness-110 active:scale-[0.98]"
+            {/* LIVE NOW bar */}
+            <div
+              className="inline-flex items-center gap-2.5 mb-7 md:mb-8"
+              style={{ animation: "pageIn 0.5s ease both", animationDelay: "0ms" }}
+            >
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full"
                 style={{
-                  background: "linear-gradient(135deg,#e0b050,#c89030)",
-                  color: "#1a0f00",
-                  height: "52px",
-                  boxShadow: "0 0 32px rgba(212,163,65,0.32), 0 4px 20px rgba(0,0,0,0.4)",
+                  background: "rgba(74,222,128,0.08)",
+                  border: "1px solid rgba(74,222,128,0.2)",
+                  backdropFilter: "blur(8px)",
                 }}
               >
-                Find your room
-              </button>
-            </Link>
-
-            {/* SECONDARY — quiet, text-only */}
-            <Link href="/about">
-              <span
-                className="inline-flex items-center gap-1.5 text-[13px] font-light tracking-wide cursor-pointer transition-colors hover:text-white/60"
-                style={{ color: "rgba(255,255,255,0.3)" }}
-              >
-                Watch the vibe
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.5 }}>
-                  <path d="M2.5 6h7M6.5 3.5L9 6l-2.5 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            </Link>
-          </div>
-
-          {/* Atmospheric signals — bottom row, quieter */}
-          <div
-            className="flex flex-wrap gap-2 mt-6 md:mt-7"
-            style={{ animation: "pageIn 0.8s ease both", animationDelay: "700ms" }}
-          >
-            {SIGNALS_BOTTOM.map((s, i) => (
-              <LiveChip key={i} text={s.text} delay={800 + i * 100} />
-            ))}
-            {/* Live sessions indicator — atmospheric, no fake counts */}
-            <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0"
-              style={{
-                background: "rgba(212,163,65,0.05)",
-                border: "1px solid rgba(212,163,65,0.12)",
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: "#d4a341", animation: "breathe 2s ease-in-out infinite" }}
-              />
-              <span className="text-[11px] font-light" style={{ color: "rgba(212,163,65,0.55)" }}>
-                Live sessions open
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: "#4ade80", animation: "pulse-dot 2s ease-in-out infinite" }}
+                />
+                <span className="text-[11px] font-semibold tracking-widest uppercase" style={{ color: "rgba(74,222,128,0.85)" }}>
+                  Live Now
+                </span>
+              </div>
+              <span className="text-[12px] font-light" style={{ color: "rgba(255,255,255,0.32)" }}>
+                Sessions active around the world
               </span>
             </div>
+
+            {/* Headline */}
+            <h1
+              className="font-serif font-normal leading-[1.06] tracking-tight mb-5 md:mb-6 text-white"
+              style={{
+                fontSize: "clamp(2.5rem, 5.5vw, 4.5rem)",
+                animation: "pageIn 0.7s ease both",
+                animationDelay: "80ms",
+              }}
+            >
+              Where music is<br />
+              made between<br />
+              <em className="not-italic" style={{ color: "rgba(212,163,65,0.9)" }}>real people.</em>
+            </h1>
+
+            {/* Sub */}
+            <p
+              className="text-[14px] md:text-[15px] font-light leading-relaxed mb-8 max-w-[400px]"
+              style={{
+                color: "rgba(255,255,255,0.42)",
+                animation: "pageIn 0.7s ease both",
+                animationDelay: "160ms",
+              }}
+            >
+              Intimate creative rooms for musicians, producers, singers and songwriters.
+              Drop a hook. Find a collaborator. Make something that matters.
+            </p>
+
+            {/* CTAs */}
+            <div
+              className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5"
+              style={{ animation: "pageIn 0.7s ease both", animationDelay: "240ms" }}
+            >
+              {/* PRIMARY: Explore rooms — no login needed */}
+              <Link href="/discover">
+                <button
+                  className="w-full sm:w-auto flex flex-col items-center justify-center gap-0.5 px-8 rounded-2xl font-semibold transition-all hover:scale-[1.03] hover:brightness-110 active:scale-[0.98]"
+                  style={{
+                    background: "linear-gradient(135deg,#e0b050,#c89030)",
+                    color: "#1a0f00",
+                    height: "60px",
+                    minWidth: "180px",
+                    boxShadow: "0 0 36px rgba(212,163,65,0.36), 0 4px 22px rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <span className="text-[14px] font-bold tracking-wide">Explore rooms</span>
+                  <span className="text-[10px] font-medium opacity-60 tracking-wide">No signup needed to explore</span>
+                </button>
+              </Link>
+
+              {/* SECONDARY: Join free — ghost */}
+              <Link href="/sign-up">
+                <button
+                  className="w-full sm:w-auto flex items-center justify-center px-8 rounded-2xl font-medium text-[14px] tracking-wide transition-all hover:bg-white/8 hover:border-white/25 active:scale-[0.98]"
+                  style={{
+                    height: "60px",
+                    minWidth: "140px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "rgba(255,255,255,0.72)",
+                    background: "rgba(255,255,255,0.04)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  Join free
+                </button>
+              </Link>
+            </div>
+
+            {/* Tagline */}
+            <p
+              className="text-[12px] font-light tracking-wide mb-8"
+              style={{
+                color: "rgba(255,255,255,0.28)",
+                animation: "pageIn 0.6s ease both",
+                animationDelay: "320ms",
+              }}
+            >
+              Listen first. Join when it feels right.
+            </p>
+
+            {/* Social proof */}
+            <div
+              className="flex items-center gap-3"
+              style={{ animation: "pageIn 0.6s ease both", animationDelay: "380ms" }}
+            >
+              <AvatarCluster count={4} />
+              <div>
+                <p className="text-[12px] font-light" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  People are connecting worldwide
+                </p>
+                <p className="text-[11px] font-light mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                  Tokyo • London • LA • Stockholm • São Paulo
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile-only: activity cards */}
+            <div
+              className="md:hidden flex flex-col gap-2.5 mt-8"
+              style={{ animation: "pageIn 0.6s ease both", animationDelay: "420ms" }}
+            >
+              {ACTIVITY.map((a, i) => (
+                <ActivityCard key={i} {...a} delay={420 + i * 50} />
+              ))}
+            </div>
           </div>
+
+          {/* ── RIGHT: Activity cards — desktop only ── */}
+          <div
+            className="hidden md:flex flex-col gap-3 flex-shrink-0"
+            style={{ animation: "pageIn 0.6s ease both", animationDelay: "300ms" }}
+          >
+            {ACTIVITY.map((a, i) => (
+              <ActivityCard key={i} {...a} delay={300 + i * 80} />
+            ))}
+          </div>
+
         </div>
       </section>
 
-      {/* ── MOOD STRIP ── */}
+      {/* ── FEATURE PILLARS ── */}
       <section
-        className="relative z-10 border-t border-white/[0.05] px-5 md:px-10 py-6 md:py-7 max-w-[1280px] mx-auto"
-        style={{ animation: "pageIn 0.8s ease both", animationDelay: "900ms" }}
+        className="relative z-10 border-t border-white/[0.05] px-5 md:px-10 py-8 md:py-10 max-w-[1280px] mx-auto"
+        style={{ animation: "pageIn 0.6s ease both", animationDelay: "450ms" }}
       >
-        <div className="flex items-center gap-8 md:gap-12 flex-wrap">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {[
-            { num: "2–4", label: "creators per room" },
-            { num: "Live", label: "voice & text sessions" },
-            { num: "∞",   label: "hooks waiting" },
-          ].map(({ num, label }) => (
-            <div key={label} className="flex items-baseline gap-2.5 md:gap-3">
-              <span
-                className="font-serif text-[1.7rem] md:text-[2rem] font-light"
-                style={{ color: "rgba(212,163,65,0.78)" }}
-              >
-                {num}
-              </span>
-              <span className="text-[11px] md:text-[12px] tracking-wide" style={{ color: "rgba(255,255,255,0.27)" }}>
-                {label}
-              </span>
+            {
+              label: "Real-time rooms",
+              sub: "Jump in. Listen. Create.",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
+                  <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+                </svg>
+              ),
+            },
+            {
+              label: "Share hooks",
+              sub: "Drop ideas. Get inspired.",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
+                  <path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0" /><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1" />
+                </svg>
+              ),
+            },
+            {
+              label: "Find collaborators",
+              sub: "Connect with real humans.",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
+                  <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" />
+                </svg>
+              ),
+            },
+            {
+              label: "Global community",
+              sub: "One room. Many worlds.",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="9" /><path d="M12 3c-2 3-3 5.5-3 9s1 6 3 9M12 3c2 3 3 5.5 3 9s-1 6-3 9M3 12h18" />
+                </svg>
+              ),
+            },
+          ].map(({ label, sub, icon }) => (
+            <div key={label} className="flex flex-col">
+              <PillarIcon>{icon}</PillarIcon>
+              <p className="text-[13px] font-medium text-white/80 mb-1">{label}</p>
+              <p className="text-[11px] font-light" style={{ color: "rgba(255,255,255,0.3)" }}>{sub}</p>
             </div>
           ))}
-
-          {/* Ambient waveform — desktop only */}
-          <div className="ml-auto hidden lg:flex items-end gap-[3px] h-8 opacity-20">
-            {[4,7,5,9,6,8,4,10,7,5,8,4,6,9,5,7,4,8,6,5].map((h, i) => (
-              <div
-                key={i}
-                className="w-[2px] rounded-full"
-                style={{
-                  height: `${h * 10}%`,
-                  background: "#d4a341",
-                  animation: `breathe ${2 + (i % 5) * 0.4}s ease-in-out infinite`,
-                  animationDelay: `${i * 0.1}s`,
-                }}
-              />
-            ))}
-          </div>
         </div>
       </section>
     </div>
