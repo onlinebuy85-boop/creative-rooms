@@ -1,25 +1,76 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779820980322.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
-/* ── Floating dust particles ── */
+/* ── More particles for a denser atmospheric field ── */
 const PARTICLES = [
-  { x: 8,  y: 72, size: 2,   dur: 9,  delay: 0 },
-  { x: 14, y: 55, size: 1.5, dur: 12, delay: 2 },
-  { x: 22, y: 80, size: 1,   dur: 8,  delay: 4 },
-  { x: 5,  y: 40, size: 2.5, dur: 14, delay: 1 },
-  { x: 30, y: 65, size: 1,   dur: 10, delay: 3 },
-  { x: 18, y: 30, size: 2,   dur: 11, delay: 5 },
+  { x: 8,  y: 72, size: 2,   dur: 9,  delay: 0   },
+  { x: 14, y: 55, size: 1.5, dur: 12, delay: 2   },
+  { x: 22, y: 80, size: 1,   dur: 8,  delay: 4   },
+  { x: 5,  y: 40, size: 2.5, dur: 14, delay: 1   },
+  { x: 30, y: 65, size: 1,   dur: 10, delay: 3   },
+  { x: 18, y: 30, size: 2,   dur: 11, delay: 5   },
   { x: 35, y: 85, size: 1.5, dur: 13, delay: 0.5 },
-  { x: 12, y: 20, size: 1,   dur: 9,  delay: 6 },
+  { x: 12, y: 20, size: 1,   dur: 9,  delay: 6   },
+  { x: 42, y: 48, size: 1.5, dur: 11, delay: 2.5 },
+  { x: 28, y: 92, size: 1,   dur: 10, delay: 4.5 },
+  { x: 7,  y: 58, size: 2,   dur: 13, delay: 1.5 },
+  { x: 38, y: 22, size: 1,   dur: 15, delay: 3.5 },
+  { x: 20, y: 14, size: 1.5, dur: 12, delay: 7   },
+  { x: 32, y: 44, size: 1,   dur: 9,  delay: 0.8 },
 ];
 
+/* ── Scroll fade-in ── */
+function useFadeIn(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+/* ── Ambient waveform ornament ── */
+function WaveOrnament({ color = "rgba(212,163,65,0.28)" }: { color?: string }) {
+  const heights = [8, 14, 10, 18, 12, 22, 9, 16, 11, 20, 8, 15, 10, 18, 12, 20, 9, 14, 11, 16];
+  return (
+    <div className="flex items-center justify-center gap-[3px]" style={{ height: 28 }}>
+      {heights.map((h, i) => (
+        <div
+          key={i}
+          className="rounded-full"
+          style={{
+            width: 2,
+            height: h,
+            background: color,
+            animation: `breathe ${1.4 + (i % 5) * 0.22}s ease-in-out infinite`,
+            animationDelay: `${i * 0.065}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function LandingPage() {
+  const featRef  = useFadeIn(0.08);
+  const quoteRef = useFadeIn(0.08);
+  const footRef  = useFadeIn(0.05);
+
   return (
     <div
       className="relative w-full overflow-x-hidden"
       style={{ minHeight: "100dvh", background: "#0a080c" }}
     >
+
       {/* ── HERO PHOTOGRAPH ── */}
       <div className="absolute inset-0 z-0">
         <img
@@ -38,22 +89,20 @@ export function LandingPage() {
             willChange: "transform",
           }}
         />
-        {/* Desktop vignette — softer left gradient so the warm photo stays visible.
-            Pulled back from 0.96/0.80/0.42 to 0.78/0.52/0.22 to match the reference look. */}
+        {/* Desktop vignette */}
         <div
           className="absolute inset-0 hidden md:block"
           style={{
-            background: "linear-gradient(100deg, rgba(5,3,10,0.78) 0%, rgba(5,3,10,0.52) 38%, rgba(5,3,10,0.22) 65%, rgba(5,3,10,0.05) 100%)",
+            background: "linear-gradient(100deg, rgba(5,3,10,0.84) 0%, rgba(5,3,10,0.56) 38%, rgba(5,3,10,0.26) 65%, rgba(5,3,10,0.08) 100%)",
           }}
         />
-        {/* Mobile vignette — softer so the cinematic warmth and detail show through */}
+        {/* Mobile vignette */}
         <div
           className="absolute inset-0 md:hidden"
           style={{
-            background: "linear-gradient(180deg, rgba(5,3,10,0.78) 0%, rgba(5,3,10,0.42) 30%, rgba(5,3,10,0.28) 55%, rgba(5,3,10,0.72) 100%)",
+            background: "linear-gradient(180deg, rgba(5,3,10,0.82) 0%, rgba(5,3,10,0.44) 30%, rgba(5,3,10,0.28) 55%, rgba(5,3,10,0.80) 100%)",
           }}
         />
-        {/* Mobile-only readability scrim around the headline area — keeps text legible without muddying the image */}
         <div
           className="absolute md:hidden pointer-events-none"
           style={{
@@ -61,11 +110,8 @@ export function LandingPage() {
             background: "linear-gradient(180deg, rgba(5,3,10,0.55) 0%, rgba(5,3,10,0.35) 45%, transparent 100%)",
           }}
         />
-        {/* Desktop bottom fade — deeper shadow tones for cinematic depth.
-            Top kept very light so it doesn't double-darken the top-left corner where
-            the left vignette is already 0.96 opacity. */}
-        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-transparent via-transparent to-black/75" />
-        {/* Desktop ambient warm light glow — lamp pool on the left of the photograph */}
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-transparent via-transparent to-black/80" />
+        {/* Warm ambient lamp glow */}
         <div
           className="absolute pointer-events-none hidden md:block"
           style={{
@@ -75,7 +121,6 @@ export function LandingPage() {
             mixBlendMode: "screen",
           }}
         />
-        {/* Desktop secondary warm rim light — adds dimensional depth on the right */}
         <div
           className="absolute pointer-events-none hidden md:block"
           style={{
@@ -86,7 +131,7 @@ export function LandingPage() {
             mixBlendMode: "screen",
           }}
         />
-        {/* Desktop film grain — subtle analog texture for cinematic feel */}
+        {/* Film grain */}
         <div
           className="absolute inset-0 hidden md:block pointer-events-none"
           style={{
@@ -101,21 +146,78 @@ export function LandingPage() {
         .hero-photo { object-position: 60% 30%; }
         @media (min-width: 768px) {
           .hero-photo {
-            /* Show the whole scene horizontally — keep elderly guitarist visible on the left */
             object-position: 50% 35%;
-            /* Warm natural cinematic grade — no over-crush, just rich warm lamp light */
             filter: saturate(1.1) contrast(1.06) brightness(1.08) !important;
           }
         }
-        /* Integer pixel sizing for the landing logo — avoids fractional clamp() heights
-           which browsers must anti-alias, producing visible softness. */
         .cr-landing-logo { height: 32px; }
-        @media (min-width: 640px) { .cr-landing-logo { height: 36px; } }
+        @media (min-width: 640px)  { .cr-landing-logo { height: 36px; } }
         @media (min-width: 1024px) { .cr-landing-logo { height: 40px; } }
         @media (min-width: 1280px) { .cr-landing-logo { height: 44px; } }
+
+        .cr-btn-enter {
+          background: linear-gradient(135deg,#e0b050,#c89030);
+          color: #1a0f00;
+          height: 58px;
+          min-width: 210px;
+          box-shadow: 0 0 34px rgba(212,163,65,0.26), 0 4px 18px rgba(0,0,0,0.4);
+          font-weight: 700;
+          font-size: 15px;
+          letter-spacing: 0.03em;
+          border-radius: 16px;
+          border: none;
+          transition: all 0.32s ease;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .cr-btn-enter:hover {
+          box-shadow: 0 0 56px rgba(212,163,65,0.46), 0 6px 28px rgba(0,0,0,0.48);
+          transform: scale(1.025);
+          filter: brightness(1.1);
+        }
+        .cr-btn-enter:active { transform: scale(0.98); }
+
+        .cr-nav-link {
+          position: relative;
+          color: rgba(255,255,255,0.4);
+          font-size: 13px;
+          letter-spacing: 0.035em;
+          cursor: pointer;
+          transition: color 0.2s ease;
+        }
+        .cr-nav-link:hover { color: rgba(255,255,255,0.75); }
+        .cr-nav-link::after {
+          content: '';
+          position: absolute;
+          left: 0; bottom: -3px;
+          width: 0; height: 1px;
+          background: rgba(212,163,65,0.45);
+          transition: width 0.25s ease;
+        }
+        .cr-nav-link:hover::after { width: 100%; }
+
+        .cr-ghost-btn {
+          height: 52px;
+          padding: 0 32px;
+          border-radius: 14px;
+          background: rgba(212,163,65,0.07);
+          border: 1px solid rgba(212,163,65,0.2);
+          color: rgba(212,163,65,0.8);
+          font-size: 14px;
+          font-weight: 500;
+          letter-spacing: 0.05em;
+          cursor: pointer;
+          transition: all 0.28s ease;
+        }
+        .cr-ghost-btn:hover {
+          background: rgba(212,163,65,0.12);
+          border-color: rgba(212,163,65,0.35);
+          color: rgba(212,163,65,0.95);
+          transform: scale(1.03);
+          box-shadow: 0 0 28px rgba(212,163,65,0.15);
+        }
       `}</style>
 
-      {/* ── FLOATING DUST PARTICLES ── */}
+      {/* ── FLOATING DUST ── */}
       <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
         {PARTICLES.map((p, i) => (
           <div
@@ -124,7 +226,7 @@ export function LandingPage() {
             style={{
               left: `${p.x}%`, top: `${p.y}%`,
               width: `${p.size}px`, height: `${p.size}px`,
-              background: `rgba(212,163,65,${0.14 + (i % 3) * 0.09})`,
+              background: `rgba(212,163,65,${0.12 + (i % 3) * 0.09})`,
               animation: `float-up ${p.dur}s ease-in-out infinite`,
               animationDelay: `${p.delay}s`,
             }}
@@ -135,11 +237,7 @@ export function LandingPage() {
       {/* ── NAV ── */}
       <header className="relative z-10 flex items-center justify-between gap-4 px-5 md:px-10 pt-6 md:pt-8 max-w-[1280px] mx-auto">
         <Link href="/">
-          <div
-            className="relative cursor-pointer flex items-center"
-            style={{ isolation: "isolate" }}
-          >
-            {/* Primary glow — drifts left↔right with a warm breath */}
+          <div className="relative cursor-pointer flex items-center" style={{ isolation: "isolate" }}>
             <div
               className="absolute pointer-events-none"
               style={{
@@ -151,8 +249,6 @@ export function LandingPage() {
                 transform: "translateY(-50%)",
               }}
             />
-            {/* Secondary glow — counter-drifts at a slower pace for layered depth.
-                Tightened margins to fit within the header's px-10 padding even at peak drift. */}
             <div
               className="absolute pointer-events-none"
               style={{
@@ -173,11 +269,7 @@ export function LandingPage() {
               height={177}
               className="cr-landing-logo"
               style={{
-                width: "auto",
-                objectFit: "contain",
-                position: "relative",
-                /* Crisp wordmark — saturation/contrast lift sharpens perceived edges;
-                   tight 1px dark shadow separates gold edges from background cleanly. */
+                width: "auto", objectFit: "contain", position: "relative",
                 filter: "saturate(1.15) contrast(1.12) drop-shadow(0 1px 1px rgba(0,0,0,0.6))",
                 imageRendering: "auto",
               }}
@@ -188,16 +280,11 @@ export function LandingPage() {
         <nav className="hidden md:flex items-center gap-9">
           {[
             { label: "Rooms", href: "/discover" },
-            { label: "Hooks", href: "/hooks" },
-            { label: "About", href: "/about" },
+            { label: "Hooks", href: "/hooks"    },
+            { label: "About", href: "/about"    },
           ].map(({ label, href }) => (
             <Link key={label} href={href}>
-              <span
-                className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/80"
-                style={{ color: "rgba(255,255,255,0.42)" }}
-              >
-                {label}
-              </span>
+              <span className="cr-nav-link">{label}</span>
             </Link>
           ))}
         </nav>
@@ -205,16 +292,16 @@ export function LandingPage() {
         <div className="flex items-center gap-4 md:gap-5">
           <Link href="/sign-in">
             <span
-              className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/75 hidden sm:inline"
-              style={{ color: "rgba(255,255,255,0.4)" }}
+              className="cr-nav-link hidden sm:inline"
+              style={{ color: "rgba(255,255,255,0.38)" }}
             >
-              Log in
+              Sign in
             </span>
           </Link>
           <Link href="/sign-up">
             <span
-              className="text-[12px] md:text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/80"
-              style={{ color: "rgba(255,255,255,0.46)" }}
+              className="text-[12px] md:text-[13px] tracking-[0.05em] cursor-pointer transition-colors hover:text-amber-400/75"
+              style={{ color: "rgba(212,163,65,0.6)" }}
             >
               Join free
             </span>
@@ -223,15 +310,27 @@ export function LandingPage() {
       </header>
 
       {/* ── HERO ── */}
-      <section className="relative z-10 px-5 md:px-10 pt-20 md:pt-28 pb-16 md:pb-28 max-w-[1280px] mx-auto">
-        <div className="max-w-[560px]">
+      <section className="relative z-10 px-5 md:px-10 pt-20 md:pt-28 pb-16 md:pb-32 max-w-[1280px] mx-auto">
+        <div className="max-w-[580px]">
+
+          {/* Eyebrow */}
+          <p
+            className="text-[10.5px] tracking-[0.22em] uppercase mb-6 font-medium"
+            style={{
+              color: "rgba(212,163,65,0.52)",
+              animation: "pageIn 0.6s ease both",
+            }}
+          >
+            A late-night creative space
+          </p>
 
           {/* Headline */}
           <h1
-            className="font-serif font-normal leading-[1.08] tracking-tight mb-7 md:mb-8 text-white"
+            className="font-serif font-normal leading-[1.06] tracking-tight mb-7 md:mb-9 text-white"
             style={{
-              fontSize: "clamp(2.4rem, 5.4vw, 4.6rem)",
+              fontSize: "clamp(2.5rem, 5.6vw, 4.8rem)",
               animation: "pageIn 0.7s ease both",
+              animationDelay: "70ms",
             }}
           >
             Where music is<br />
@@ -241,120 +340,227 @@ export function LandingPage() {
 
           {/* Sub */}
           <p
-            className="text-[14.5px] md:text-[15.5px] font-light leading-[1.75] mb-10 md:mb-11 max-w-[440px]"
+            className="text-[14.5px] md:text-[15.5px] font-light leading-[1.82] mb-10 md:mb-12 max-w-[420px]"
             style={{
-              color: "rgba(255,255,255,0.52)",
+              color: "rgba(255,255,255,0.46)",
               animation: "pageIn 0.7s ease both",
-              animationDelay: "140ms",
+              animationDelay: "150ms",
             }}
           >
-            Intimate creative rooms for musicians, producers, singers and songwriters.
-            Drop a hook. Find a collaborator. Make something that matters.
+            Intimate rooms for musicians, producers, and songwriters.
+            Two to four people. No audience. Just the work.
           </p>
 
-          {/* CTAs — primary dominant, secondary quiet */}
+          {/* CTAs */}
           <div
-            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
-            style={{ animation: "pageIn 0.7s ease both", animationDelay: "220ms" }}
+            className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
+            style={{ animation: "pageIn 0.7s ease both", animationDelay: "240ms" }}
           >
-            {/* PRIMARY — the main door in */}
             <Link href="/discover">
-              <button
-                className="w-full sm:w-auto flex items-center justify-center px-9 rounded-2xl font-semibold transition-all hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
-                style={{
-                  background: "linear-gradient(135deg,#e0b050,#c89030)",
-                  color: "#1a0f00",
-                  height: "58px",
-                  minWidth: "220px",
-                  boxShadow: "0 0 32px rgba(212,163,65,0.32), 0 4px 18px rgba(0,0,0,0.4)",
-                }}
-              >
-                <span className="text-[15px] font-bold tracking-wide">Explore rooms</span>
+              <button className="cr-btn-enter w-full sm:w-auto">
+                Enter the room
               </button>
             </Link>
-
-            {/* SECONDARY — quiet text link, not a competing button */}
             <Link href="/sign-up">
               <span
-                className="cursor-pointer inline-block text-[13px] tracking-wide transition-colors hover:text-white/80 text-center sm:text-left py-3 px-2 -my-3"
-                style={{ color: "rgba(255,255,255,0.42)" }}
+                className="cursor-pointer inline-block text-[13px] tracking-[0.04em] transition-colors hover:text-white/65 text-center sm:text-left py-3 px-2 -my-3"
+                style={{ color: "rgba(255,255,255,0.35)" }}
               >
-                or join free
+                or listen first
               </span>
             </Link>
           </div>
 
-          {/* Guest access — single calm line, directly under primary action */}
+          {/* Guest note */}
           <p
-            className="text-[12.5px] font-light tracking-wide mt-7 md:mt-8"
+            className="text-[11.5px] font-light tracking-[0.06em] mt-8"
             style={{
-              color: "rgba(255,255,255,0.42)",
+              color: "rgba(255,255,255,0.24)",
               animation: "pageIn 0.6s ease both",
-              animationDelay: "320ms",
+              animationDelay: "360ms",
+              fontStyle: "italic",
             }}
           >
-            Listen first. Join only if it feels right.
+            No account needed to listen.
           </p>
         </div>
       </section>
 
-      {/* ── WHAT THIS IS ── honest, descriptive — not engagement metrics */}
-      <section
-        className="relative z-10 border-t border-white/[0.05] px-5 md:px-10 py-10 md:py-12 max-w-[1280px] mx-auto"
-        style={{ animation: "pageIn 0.6s ease both", animationDelay: "420ms" }}
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            {
-              label: "Small rooms",
-              sub: "Two to four people. No audiences. No noise.",
-              icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
-                  <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" />
-                </svg>
-              ),
-            },
-            {
-              label: "Live together",
-              sub: "Chat, voice, and shared demos in real time.",
-              icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
-                  <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
-                </svg>
-              ),
-            },
-            {
-              label: "Share a hook",
-              sub: "Drop the idea you can't stop humming.",
-              icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
-                  <path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0" /><path d="M12 3v3m0 12v3M3 12h3m12 0h3" />
-                </svg>
-              ),
-            },
-            {
-              label: "No social games",
-              sub: "No likes, no follows, no feeds. Just the work.",
-              icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.75)" strokeWidth="1.6" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="9" /><path d="M8 12h8" />
-                </svg>
-              ),
-            },
-          ].map(({ label, sub, icon }) => (
-            <div key={label} className="flex flex-col">
+      {/* ── WHAT THIS IS ── emotional, honest ── */}
+      <div ref={featRef.ref}>
+        <section
+          className="relative z-10 border-t px-5 md:px-10 py-12 md:py-16 max-w-[1280px] mx-auto"
+          style={{
+            borderColor: "rgba(255,255,255,0.04)",
+            opacity: featRef.visible ? 1 : 0,
+            transform: featRef.visible ? "translateY(0)" : "translateY(22px)",
+            transition: "opacity 0.95s ease, transform 0.95s ease",
+          }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+            {[
+              {
+                label: "Just people",
+                sub: "Two to four creators. No crowd. No noise. The right size for real work.",
+                icon: (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.68)" strokeWidth="1.5" strokeLinecap="round">
+                    <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" />
+                  </svg>
+                ),
+              },
+              {
+                label: "Actually live",
+                sub: "Voice, chat, and shared takes. Not async. Not delayed. Right now, together.",
+                icon: (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.68)" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+                  </svg>
+                ),
+              },
+              {
+                label: "Drop a fragment",
+                sub: "The half-finished riff. The lyric at 2am. The melody you can't stop humming.",
+                icon: (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.68)" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z" /><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                  </svg>
+                ),
+              },
+              {
+                label: "Nothing to perform for",
+                sub: "No likes. No followers. No algorithm watching. Just you and the music.",
+                icon: (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(212,163,65,0.68)" strokeWidth="1.5" strokeLinecap="round">
+                    <circle cx="12" cy="12" r="9" /><path d="M8 12h8" />
+                  </svg>
+                ),
+              },
+            ].map(({ label, sub, icon }, i) => (
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: "rgba(212,163,65,0.06)", border: "1px solid rgba(212,163,65,0.12)" }}
+                key={label}
+                className="flex flex-col group"
+                style={{
+                  opacity: featRef.visible ? 1 : 0,
+                  transform: featRef.visible ? "translateY(0)" : "translateY(16px)",
+                  transition: `opacity 0.8s ease ${i * 100}ms, transform 0.8s ease ${i * 100}ms`,
+                }}
               >
-                {icon}
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center mb-4 transition-all duration-500 group-hover:scale-110 group-hover:border-amber-400/20"
+                  style={{
+                    background: "rgba(212,163,65,0.055)",
+                    border: "1px solid rgba(212,163,65,0.1)",
+                  }}
+                >
+                  {icon}
+                </div>
+                <p className="text-[13px] font-medium mb-2" style={{ color: "rgba(255,255,255,0.80)" }}>
+                  {label}
+                </p>
+                <p className="text-[12px] font-light leading-[1.75]" style={{ color: "rgba(255,255,255,0.34)" }}>
+                  {sub}
+                </p>
               </div>
-              <p className="text-[13px] font-medium text-white/85 mb-1">{label}</p>
-              <p className="text-[12px] font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{sub}</p>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* ── ATMOSPHERIC QUOTE ── */}
+      <div ref={quoteRef.ref}>
+        <section
+          className="relative z-10 px-5 md:px-10 py-24 md:py-36 text-center overflow-hidden"
+          style={{
+            opacity: quoteRef.visible ? 1 : 0,
+            transform: quoteRef.visible ? "translateY(0)" : "translateY(28px)",
+            transition: "opacity 1.1s ease, transform 1.1s ease",
+          }}
+        >
+          {/* Ambient glow */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: "50%", top: "50%",
+              width: 700, height: 500,
+              transform: "translate(-50%, -50%)",
+              background: "radial-gradient(ellipse, rgba(212,163,65,0.045) 0%, transparent 68%)",
+              animation: "warm-glow 12s ease-in-out infinite",
+            }}
+          />
+
+          <div className="relative max-w-[640px] mx-auto">
+            <WaveOrnament />
+
+            <h2
+              className="font-serif font-normal leading-[1.1] tracking-tight mt-10 mb-8"
+              style={{ fontSize: "clamp(1.9rem, 4.4vw, 3.8rem)", color: "rgba(255,255,255,0.87)" }}
+            >
+              A place musicians come<br />
+              when they want to feel<br />
+              <em className="not-italic" style={{ color: "rgba(212,163,65,0.82)" }}>understood.</em>
+            </h2>
+
+            <p
+              className="text-[14px] md:text-[15px] font-light leading-[1.9] max-w-[380px] mx-auto mb-12"
+              style={{ color: "rgba(255,255,255,0.30)" }}
+            >
+              Not another music app. A late-night creative space
+              where the only thing that matters is what you make together.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/sign-up">
+                <button className="cr-ghost-btn">Find your people</button>
+              </Link>
+              <Link href="/discover">
+                <span
+                  className="cursor-pointer text-[13px] tracking-[0.04em] transition-colors hover:text-white/50"
+                  style={{ color: "rgba(255,255,255,0.24)" }}
+                >
+                  or explore sessions →
+                </span>
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
+
+      {/* ── CLOSING LINE ── */}
+      <div ref={footRef.ref}>
+        <section
+          className="relative z-10 border-t px-5 md:px-10 py-9 max-w-[1280px] mx-auto"
+          style={{
+            borderColor: "rgba(255,255,255,0.03)",
+            opacity: footRef.visible ? 1 : 0,
+            transition: "opacity 1.2s ease",
+          }}
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
+            <p
+              className="text-[11.5px] font-light tracking-[0.08em]"
+              style={{ color: "rgba(255,255,255,0.18)", fontStyle: "italic" }}
+            >
+              The room is always open.
+            </p>
+            <div className="flex items-center gap-7">
+              {[
+                { label: "Rooms", href: "/discover" },
+                { label: "Hooks", href: "/hooks"    },
+                { label: "About", href: "/about"    },
+              ].map(({ label, href }) => (
+                <Link key={label} href={href}>
+                  <span
+                    className="text-[12px] tracking-wide cursor-pointer transition-colors hover:text-white/40"
+                    style={{ color: "rgba(255,255,255,0.18)" }}
+                  >
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

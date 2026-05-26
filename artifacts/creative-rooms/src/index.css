@@ -304,6 +304,44 @@
   to   { transform: translateY(100%); }
 }
 
+/* ── Atmospheric micro-interaction keyframes ─────────────────────────────── */
+
+/* Gold CTA button breathing glow — used on primary gold buttons */
+@keyframes gold-breathe {
+  0%, 100% { box-shadow: 0 0 28px rgba(212,163,65,0.20), 0 4px 18px rgba(0,0,0,0.38); }
+  50%       { box-shadow: 0 0 56px rgba(212,163,65,0.46), 0 4px 26px rgba(0,0,0,0.46); }
+}
+
+/* Ambient flicker — for session-presence "live" indicators */
+@keyframes ambient-flicker {
+  0%, 100% { opacity: 0.52; }
+  37%       { opacity: 0.88; }
+  72%       { opacity: 0.64; }
+}
+
+/* Glow ring — for online presence dots */
+@keyframes glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(74,222,128,0.42);  opacity: 0.75; }
+  50%       { box-shadow: 0 0 0 3px rgba(74,222,128,0.0);   opacity: 1;    }
+}
+
+/* Card heartbeat — border glow on active room cards */
+@keyframes card-heartbeat {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 1;    }
+}
+
+/* Waveform scan — room-view live recording waveform bars */
+@keyframes miniWave {
+  0%, 100% { transform: scaleY(0.35); }
+  50%       { transform: scaleY(1);    }
+}
+
+/* Primary CTA breathing glow utility */
+.cr-glow-primary {
+  animation: gold-breathe 5s ease-in-out infinite;
+}
+
 /* Ambient noise overlay */
 .bg-noise {
   position: fixed;

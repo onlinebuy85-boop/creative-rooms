@@ -96,12 +96,17 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
         )}
 
         {/* Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/20 to-black/15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/25 to-black/12" />
 
-        {/* Hover glow from bottom — accent colour */}
+        {/* Resting ambient glow — very subtle, always present */}
+        <div
+          className="absolute inset-0 opacity-30 group-hover:opacity-0 transition-opacity duration-500"
+          style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.10) 0%, transparent 60%)` }}
+        />
+        {/* Hover glow from bottom — accent colour, full intensity on hover */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.22) 0%, transparent 65%)` }}
+          style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.26) 0%, transparent 65%)` }}
         />
 
         {/* Owner manage menu — top-right corner */}
@@ -144,13 +149,14 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
               style={{
                 background: "rgba(0,0,0,0.55)",
                 backdropFilter: "blur(8px)",
-                border: "1px solid rgba(74,222,128,0.32)",
-                color: "rgba(74,222,128,0.9)",
+                border: "1px solid rgba(74,222,128,0.28)",
+                color: "rgba(74,222,128,0.88)",
+                animation: "ambient-flicker 6s ease-in-out infinite",
               }}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full"
-                style={{ background: "#4ade80", animation: "pulse-dot 2s ease-in-out infinite" }}
+                style={{ background: "#4ade80", animation: "glow-ring 2.4s ease-in-out infinite" }}
               />
               Live
             </div>
@@ -213,23 +219,26 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
                   <div
                     className="w-6 h-6 rounded-full border-[1.5px]"
                     style={{
-                      background: "rgba(255,255,255,0.07)",
-                      borderColor: "rgba(255,255,255,0.12)",
+                      background: "rgba(212,163,65,0.04)",
+                      borderColor: "rgba(212,163,65,0.18)",
                       borderStyle: "dashed",
+                      animation: "breathe 3.5s ease-in-out infinite",
                     }}
                   />
                 )}
               </div>
 
-              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.32)" }}>
-                {room.memberCount || 0} creating
+              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.30)" }}>
+                {(room.memberCount || 0) === 0
+                  ? "Open session"
+                  : `${room.memberCount} in the room`}
               </span>
 
             </div>
 
-            {/* Waveform — appears on hover, accent coloured */}
+            {/* Waveform — always gently alive, brightens on hover */}
             <div
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              className="opacity-20 group-hover:opacity-100 transition-opacity duration-500"
               style={{ paddingBottom: "1px" }}
             >
               <CardWaveform accent={palette.accent} />

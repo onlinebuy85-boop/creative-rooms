@@ -48,7 +48,7 @@ export function DiscoverPage() {
             className="text-[14px] font-light max-w-md leading-relaxed"
             style={{ color: "rgba(255,255,255,0.42)" }}
           >
-            Open sessions waiting for collaborators. Each room is a different energy.
+            Every session is a different world. Step inside one.
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export function DiscoverPage() {
             }}
           >
             <Plus className="w-4 h-4" />
-            New room
+            Open a room
           </Link>
         ) : (
           <button
@@ -77,7 +77,7 @@ export function DiscoverPage() {
             }}
           >
             <Plus className="w-4 h-4" />
-            New room
+            Open a room
           </button>
         )}
       </div>
@@ -133,7 +133,7 @@ export function DiscoverPage() {
             className="text-[13px] max-w-xs font-light leading-relaxed mb-8"
             style={{ color: "rgba(255,255,255,0.35)" }}
           >
-            No active sessions yet. Start the first one and invite someone to create with.
+            No sessions open right now. Start the first one and invite someone to create with.
           </p>
           {isSignedIn ? (
             <Link
@@ -146,7 +146,7 @@ export function DiscoverPage() {
               }}
             >
               <Plus className="w-4 h-4" />
-              Start a room
+              Start a session
             </Link>
           ) : (
             <button
@@ -160,7 +160,7 @@ export function DiscoverPage() {
               }}
             >
               <Plus className="w-4 h-4" />
-              Start a room
+              Start a session
             </button>
           )}
         </div>
