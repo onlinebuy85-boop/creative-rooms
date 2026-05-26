@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
-import logoImg from "@assets/creative-rooms-logo-transparent.png";
+import logoImg from "@assets/creative-rooms-wordmark.png";
 
 const SOCIAL_AVATARS = [
   { initials: "LV", bg: "#7c4a1e" },
@@ -44,25 +44,12 @@ export function LandingPage() {
       <header className="relative z-10 flex items-center justify-between px-10 pt-7 max-w-[1280px] mx-auto">
 
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div
-            className="shrink-0"
-            style={{
-              width: 38,
-              height: 38,
-              backgroundImage: `url(${logoImg})`,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "120px auto",
-              backgroundPosition: "center -3px",
-              filter: "drop-shadow(0 0 10px rgba(212,163,65,0.55))",
-            }}
+        <Link href="/">
+          <img
+            src={logoImg}
+            alt="Creative Rooms"
+            style={{ height: 30, width: "auto", objectFit: "contain" }}
           />
-          <span
-            className="font-serif text-[18px] tracking-wide group-hover:opacity-90 transition-opacity"
-            style={{ color: "rgba(255,255,255,0.88)" }}
-          >
-            Creative Rooms
-          </span>
         </Link>
 
         {/* Nav links */}
