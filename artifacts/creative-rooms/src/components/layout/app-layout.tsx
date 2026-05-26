@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import logoImg from "../../assets/images/creative-rooms-logo-v4.png";
+import iconImg from "../../assets/images/creative-rooms-icon.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon,
@@ -265,30 +266,41 @@ export function AppLayout({ children }: AppLayoutProps) {
         style={{
           background: "rgba(10,7,16,0.94)",
           backdropFilter: "blur(14px)",
-          height: "60px",
+          height: "68px",
         }}
       >
         <Link href="/">
-          <div className="relative">
-            {/* Subtle ambient warmth — cinematic, not aggressive */}
+          <div className="relative flex items-center gap-2.5">
+            {/* Subtle ambient warmth */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -14, top: "50%", transform: "translateY(-50%)",
-                width: 180, height: 70,
-                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.20) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
+                left: -18, top: "50%", transform: "translateY(-50%)",
+                width: 230, height: 80,
+                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.18) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
+              }}
+            />
+            <img
+              src={iconImg}
+              alt=""
+              style={{
+                height: "46px",
+                width: "auto",
+                objectFit: "contain",
+                position: "relative",
+                filter: "brightness(1.05) drop-shadow(0 0 10px rgba(212,163,65,0.4))",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Room"
               style={{
-                width: "min(260px, 68vw)",
-                height: "auto",
+                height: "26px",
+                width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.15) drop-shadow(0 0 12px rgba(212,163,65,0.32))",
+                filter: "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))",
               }}
             />
           </div>
@@ -296,7 +308,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* ── Main content ── */}
-      <main className="flex-1 md:ml-[240px] min-h-screen pt-[60px] md:pt-0 pb-[72px] md:pb-0 relative z-10">
+      <main className="flex-1 md:ml-[240px] min-h-screen pt-[68px] md:pt-0 pb-[72px] md:pb-0 relative z-10">
         {children}
       </main>
 

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
+import iconImg from "../assets/images/creative-rooms-icon.png";
 
 /* ── Floating dust particles ── */
 const PARTICLES = [
@@ -76,29 +77,39 @@ export function LandingPage() {
       </div>
 
       {/* ── NAV ── */}
-      <header className="relative z-10 flex items-center justify-between px-5 md:px-10 pt-5 md:pt-6 max-w-[1280px] mx-auto">
+      <header className="relative z-10 flex items-center justify-between px-5 md:px-10 pt-9 md:pt-8 max-w-[1280px] mx-auto">
         <Link href="/">
-          <div className="relative cursor-pointer">
-            {/* Subtle ambient warmth behind the logo — cinematic, not aggressive */}
+          <div className="relative cursor-pointer flex items-center gap-2.5 md:gap-3">
+            {/* Subtle ambient warmth behind the logo */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -16, top: "50%", transform: "translateY(-50%)",
-                width: 180, height: 90,
-                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.18) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
+                left: -18, top: "50%", transform: "translateY(-50%)",
+                width: 220, height: 110,
+                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.16) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
+              }}
+            />
+            <img
+              src={iconImg}
+              alt=""
+              style={{
+                height: "clamp(48px, 13vw, 64px)",
+                width: "auto",
+                objectFit: "contain",
+                position: "relative",
+                filter: "brightness(1.05) drop-shadow(0 0 12px rgba(212,163,65,0.38))",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Room"
               style={{
-                width: "clamp(240px, 62vw, 320px)",
-                height: "auto",
+                height: "clamp(26px, 6.6vw, 38px)",
+                width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.15) drop-shadow(0 0 14px rgba(212,163,65,0.35))",
-                transition: "filter 0.4s ease",
+                filter: "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.28))",
               }}
             />
           </div>
@@ -121,33 +132,33 @@ export function LandingPage() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-4 md:gap-5">
           <Link href="/sign-in">
             <span
-              className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white hidden sm:inline"
+              className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/75 hidden sm:inline"
               style={{ color: "rgba(255,255,255,0.4)" }}
             >
               Log in
             </span>
           </Link>
           <Link href="/sign-up">
-            <button
-              className="px-4 md:px-5 py-2 rounded-full text-[12px] md:text-[13px] font-semibold transition-all hover:brightness-110 hover:scale-[1.03]"
-              style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+            <span
+              className="text-[12px] md:text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/80"
+              style={{ color: "rgba(255,255,255,0.46)" }}
             >
               Join free
-            </button>
+            </span>
           </Link>
         </div>
       </header>
 
       {/* ── HERO ── */}
-      <section className="relative z-10 px-5 md:px-10 pt-12 md:pt-24 pb-20 md:pb-32 max-w-[1280px] mx-auto">
+      <section className="relative z-10 px-5 md:px-10 pt-16 md:pt-24 pb-14 md:pb-24 max-w-[1280px] mx-auto">
         <div className="max-w-[560px]">
 
           {/* Headline */}
           <h1
-            className="font-serif font-normal leading-[1.06] tracking-tight mb-6 md:mb-7 text-white"
+            className="font-serif font-normal leading-[1.06] tracking-tight mb-5 md:mb-6 text-white"
             style={{
               fontSize: "clamp(2.6rem, 5.5vw, 4.6rem)",
               animation: "pageIn 0.7s ease both",
@@ -160,7 +171,7 @@ export function LandingPage() {
 
           {/* Sub */}
           <p
-            className="text-[14px] md:text-[15px] font-light leading-relaxed mb-9 max-w-[420px]"
+            className="text-[14px] md:text-[15px] font-light leading-relaxed mb-8 max-w-[420px]"
             style={{
               color: "rgba(255,255,255,0.5)",
               animation: "pageIn 0.7s ease both",
@@ -171,56 +182,48 @@ export function LandingPage() {
             Drop a hook. Find a collaborator. Make something that matters.
           </p>
 
-          {/* CTAs */}
+          {/* CTAs — primary dominant, secondary quiet */}
           <div
-            className="flex flex-col sm:flex-row sm:items-center gap-3"
+            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
             style={{ animation: "pageIn 0.7s ease both", animationDelay: "220ms" }}
           >
-            {/* PRIMARY */}
+            {/* PRIMARY — the main door in */}
             <Link href="/discover">
               <button
-                className="w-full sm:w-auto flex flex-col items-center justify-center gap-0.5 px-8 rounded-2xl font-semibold transition-all hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+                className="w-full sm:w-auto flex items-center justify-center px-9 rounded-2xl font-semibold transition-all hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg,#e0b050,#c89030)",
                   color: "#1a0f00",
-                  height: "60px",
-                  minWidth: "200px",
-                  boxShadow: "0 0 28px rgba(212,163,65,0.28), 0 4px 18px rgba(0,0,0,0.4)",
+                  height: "58px",
+                  minWidth: "220px",
+                  boxShadow: "0 0 32px rgba(212,163,65,0.32), 0 4px 18px rgba(0,0,0,0.4)",
                 }}
               >
-                <span className="text-[14px] font-bold tracking-wide">Explore rooms</span>
-                <span className="text-[10px] font-medium opacity-65 tracking-wide">No signup needed to explore</span>
+                <span className="text-[15px] font-bold tracking-wide">Explore rooms</span>
               </button>
             </Link>
 
-            {/* SECONDARY */}
+            {/* SECONDARY — quiet text link, not a competing button */}
             <Link href="/sign-up">
-              <button
-                className="w-full sm:w-auto flex items-center justify-center px-8 rounded-2xl font-medium text-[14px] tracking-wide transition-all hover:bg-white/8 active:scale-[0.98]"
-                style={{
-                  height: "60px",
-                  minWidth: "140px",
-                  border: "1px solid rgba(255,255,255,0.16)",
-                  color: "rgba(255,255,255,0.78)",
-                  background: "rgba(255,255,255,0.03)",
-                  backdropFilter: "blur(8px)",
-                }}
+              <span
+                className="cursor-pointer inline-block text-[13px] tracking-wide transition-colors hover:text-white/80 text-center sm:text-left py-3 px-2 -my-3"
+                style={{ color: "rgba(255,255,255,0.42)" }}
               >
-                Join free
-              </button>
+                or join free
+              </span>
             </Link>
           </div>
 
-          {/* Tagline */}
+          {/* Guest access — single calm line, directly under primary action */}
           <p
-            className="text-[12px] font-light tracking-wide mt-7"
+            className="text-[12.5px] font-light tracking-wide mt-5"
             style={{
-              color: "rgba(255,255,255,0.36)",
+              color: "rgba(255,255,255,0.42)",
               animation: "pageIn 0.6s ease both",
               animationDelay: "320ms",
             }}
           >
-            Listen first. Join when it feels right.
+            Listen first. Join only if it feels right.
           </p>
         </div>
       </section>
