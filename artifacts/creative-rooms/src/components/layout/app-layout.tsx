@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import logoImg from "../../assets/images/creative-rooms-logo-v3.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import {
-  Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon, Menu,
+  Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon,
 } from "lucide-react";
 
 interface NavLinkProps {
@@ -50,7 +47,6 @@ function WhatIsHooks() {
         border: "1px solid rgba(212,163,65,0.12)",
       }}
     >
-      {/* atmospheric glow */}
       <div
         className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(212,163,65,0.15) 0%, transparent 70%)" }}
@@ -99,58 +95,37 @@ function SidebarContent() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}
       >
         <Link href="/">
-          <div
-            className="relative group cursor-pointer"
-            title="Return to home"
-          >
-            {/* Atmospheric waveform glow — always present, intensifies on hover */}
+          <div className="relative group cursor-pointer" title="Return to home">
             <div
               className="absolute pointer-events-none transition-opacity duration-700"
               style={{
-                left: -8,
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: 90,
-                height: 80,
+                left: -8, top: "50%", transform: "translateY(-50%)",
+                width: 90, height: 80,
                 background: "radial-gradient(ellipse at 38% 50%, rgba(200,130,30,0.32) 0%, rgba(212,163,65,0.10) 45%, transparent 70%)",
                 animation: "warm-glow 3.5s ease-in-out infinite",
               }}
             />
             <div
               className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{
-                background: "radial-gradient(ellipse at 25% 50%, rgba(212,163,65,0.18) 0%, transparent 65%)",
-              }}
+              style={{ background: "radial-gradient(ellipse at 25% 50%, rgba(212,163,65,0.18) 0%, transparent 65%)" }}
             />
             <img
               src={logoImg}
               alt="Creative Rooms"
               style={{
-                width: "100%",
-                height: "auto",
-                objectFit: "contain",
-                position: "relative",
+                width: "100%", height: "auto", objectFit: "contain", position: "relative",
                 filter: "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))",
                 transition: "filter 0.4s ease, transform 0.3s ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.35) drop-shadow(0 0 20px rgba(212,163,65,0.65))";
+                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.35) drop-shadow(0 0 20px rgba(212,163,65,0.65))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1.02)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))";
+                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
               }}
             />
-            {/* "Home" label — appears on hover */}
-            <span
-              className="absolute -bottom-5 left-0 text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-              style={{ color: "rgba(212,163,65,0.55)" }}
-            >
-              ↑ home
-            </span>
           </div>
         </Link>
       </div>
@@ -164,41 +139,12 @@ function SidebarContent() {
 
       {/* Nav */}
       <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
-        <NavLink
-          href="/discover"
-          icon={Compass}
-          label="Discover"
-          active={location === "/discover" || location.startsWith("/discover")}
-        />
-        {user && (
-          <NavLink
-            href="/dashboard"
-            icon={LayoutDashboard}
-            label="Dashboard"
-            active={location === "/dashboard"}
-          />
-        )}
-        <NavLink
-          href="/hooks"
-          icon={Radio}
-          label="Hooks"
-          active={location === "/hooks"}
-        />
-        {user && (
-          <NavLink
-            href="/rooms/new"
-            icon={Plus}
-            label="New Room"
-            active={location === "/rooms/new"}
-          />
-        )}
+        <NavLink href="/discover" icon={Compass} label="Discover" active={location === "/discover" || location.startsWith("/discover")} />
+        {user && <NavLink href="/dashboard" icon={LayoutDashboard} label="Dashboard" active={location === "/dashboard"} />}
+        <NavLink href="/hooks" icon={Radio} label="Hooks" active={location === "/hooks"} />
+        {user && <NavLink href="/rooms/new" icon={Plus} label="New Room" active={location === "/rooms/new"} />}
         {user && profile && (
-          <NavLink
-            href={`/profile/${profile.id}`}
-            icon={UserIcon}
-            label="Your Profile"
-            active={location.startsWith("/profile")}
-          />
+          <NavLink href={`/profile/${profile.id}`} icon={UserIcon} label="Your Profile" active={location.startsWith("/profile")} />
         )}
       </nav>
 
@@ -209,9 +155,7 @@ function SidebarContent() {
             <Avatar className="h-7 w-7 flex-shrink-0">
               <AvatarImage src={profile?.avatarUrl || user?.imageUrl} />
               <AvatarFallback className="text-[10px] bg-muted">
-                {profile?.displayName?.charAt(0).toUpperCase() ||
-                  user?.firstName?.charAt(0).toUpperCase() ||
-                  "?"}
+                {profile?.displayName?.charAt(0).toUpperCase() || user?.firstName?.charAt(0).toUpperCase() || "?"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -240,19 +184,15 @@ function SidebarContent() {
             </button>
           </Link>
           <Link href="/sign-in">
-            <button
-              className="w-full py-2 rounded-lg text-[12px] transition-colors"
-              style={{ color: "rgba(255,255,255,0.4)" }}
-            >
+            <button className="w-full py-2 rounded-lg text-[12px] transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               Log in
             </button>
           </Link>
         </div>
       )}
 
-      {/* Ambient waveform + tagline */}
+      {/* Ambient waveform */}
       <div className="flex-shrink-0 px-5 pb-5">
-        {/* Breathing bars */}
         <div className="flex items-end gap-[3px] h-[18px] mb-3 opacity-30">
           {[5,8,4,10,6,9,4,7,3,8,5,9,4,7,5,8,3,6].map((h, i) => (
             <div
@@ -276,18 +216,54 @@ function SidebarContent() {
   );
 }
 
+/* ── Mobile bottom nav tab ── */
+function BottomNavItem({
+  href, icon: Icon, label, active,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link href={href}>
+      <div className="flex flex-col items-center gap-1 py-2 px-4 min-w-[60px] cursor-pointer select-none">
+        <div style={{ color: active ? "#d4a341" : "rgba(255,255,255,0.38)" }}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <span
+          className="text-[10px] font-medium tracking-wide"
+          style={{ color: active ? "#d4a341" : "rgba(255,255,255,0.32)" }}
+        >
+          {label}
+        </span>
+        {active && (
+          <div
+            className="absolute bottom-0 w-6 h-[2px] rounded-full"
+            style={{ background: "#d4a341" }}
+          />
+        )}
+      </div>
+    </Link>
+  );
+}
+
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [location] = useLocation();
+  const { user } = useUser();
+  const { data: profile } = useGetMyProfile({
+    query: { enabled: !!user, queryKey: getGetMyProfileQueryKey() },
+  });
 
   return (
     <div className="min-h-[100dvh] flex bg-background relative">
       <div className="bg-noise" />
 
-      {/* Desktop sidebar */}
+      {/* ── Desktop sidebar ── */}
       <aside
         className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 border-r border-white/[0.06]"
         style={{ background: "hsl(270 16% 6%)" }}
@@ -295,45 +271,80 @@ export function AppLayout({ children }: AppLayoutProps) {
         <SidebarContent />
       </aside>
 
-      {/* Mobile top bar */}
+      {/* ── Mobile top bar — logo only, no hamburger ── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 border-b border-white/[0.06]"
-        style={{ background: "hsl(270 16% 6%)" }}
+        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-4 h-12 border-b border-white/[0.05]"
+        style={{ background: "rgba(10,7,16,0.92)", backdropFilter: "blur(12px)" }}
       >
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="-ml-2">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="w-[260px] p-0 border-r border-white/[0.06]"
-            style={{ background: "hsl(270 16% 6%)" }}
-          >
-            <SidebarContent />
-          </SheetContent>
-        </Sheet>
-        {/* Mobile logo — centered */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+        <Link href="/">
           <img
             src={logoImg}
             alt="Creative Rooms"
             style={{
-              height: 32,
+              height: 34,
               width: "auto",
               objectFit: "contain",
-              filter: "brightness(1.15) drop-shadow(0 0 6px rgba(212,163,65,0.3))",
+              filter: "brightness(1.15) drop-shadow(0 0 8px rgba(212,163,65,0.35))",
             }}
           />
         </Link>
-        <div /> {/* spacer */}
       </div>
 
-      {/* Main content */}
-      <main className="flex-1 md:ml-[240px] min-h-screen pt-14 md:pt-0 relative z-10">
+      {/* ── Main content ── */}
+      <main className="flex-1 md:ml-[240px] min-h-screen pt-12 md:pt-0 pb-16 md:pb-0 relative z-10">
         {children}
       </main>
+
+      {/* ── Mobile bottom navigation bar ── */}
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-white/[0.07]"
+        style={{
+          background: "rgba(9,6,14,0.96)",
+          backdropFilter: "blur(20px)",
+          paddingBottom: "env(safe-area-inset-bottom, 4px)",
+          height: "calc(64px + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
+        <BottomNavItem
+          href="/discover"
+          icon={Compass}
+          label="Discover"
+          active={location === "/discover" || location.startsWith("/discover")}
+        />
+        <BottomNavItem
+          href="/hooks"
+          icon={Radio}
+          label="Hooks"
+          active={location === "/hooks"}
+        />
+        {user && profile ? (
+          <BottomNavItem
+            href={`/profile/${profile.id}`}
+            icon={UserIcon}
+            label="Profile"
+            active={location.startsWith("/profile")}
+          />
+        ) : !user ? (
+          <Link href="/sign-up">
+            <div className="flex flex-col items-center gap-1 py-2 px-4 min-w-[60px] cursor-pointer">
+              <div
+                className="px-3 py-1 rounded-full text-[10px] font-semibold"
+                style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+              >
+                Join
+              </div>
+            </div>
+          </Link>
+        ) : null}
+        {user && (
+          <BottomNavItem
+            href="/rooms/new"
+            icon={Plus}
+            label="New Room"
+            active={location === "/rooms/new"}
+          />
+        )}
+      </nav>
     </div>
   );
 }

@@ -21,7 +21,7 @@ import {
   MoreHorizontal, Plus, Send, Loader2,
   Crown, CloudUpload,
 } from "lucide-react";
-import wordmarkImg from "@assets/creative-rooms-wordmark.png";
+import logoImg from "../assets/images/creative-rooms-logo-v3.png";
 
 /* ── Helpers ── */
 function moodColor(vibe = "", genres: string[] = []): string {
@@ -312,6 +312,7 @@ export function RoomPage() {
   const messagesEndRef                       = useRef<HTMLDivElement>(null);
   const typingTimersRef                      = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const typingDebounceRef                    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [mobileTab, setMobileTab]            = useState<"chat" | "studio" | "people">("chat");
 
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -458,8 +459,339 @@ export function RoomPage() {
   /* ══════════════════════════════════════════
      RENDER
   ══════════════════════════════════════════ */
+  const TABS = [
+    { id: "chat",    label: "Chat" },
+    { id: "studio",  label: "Studio" },
+    { id: "people",  label: "People" },
+  ] as const;
+
   return (
-    <div className="flex h-[100dvh] overflow-hidden" style={{ background: "#0b0910" }}>
+    <>
+    {/* ══════════════════════════════════════════
+        MOBILE LAYOUT  (hidden on md+)
+    ══════════════════════════════════════════ */}
+    <div
+      className="flex flex-col md:hidden overflow-hidden"
+      style={{ height: "100dvh", background: "#0b0910" }}
+    >
+      {/* Mobile header */}
+      <header
+        className="flex-shrink-0 flex items-center gap-3 px-4 h-14"
+        style={{
+          background: "rgba(9,7,14,0.95)",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        <Link href="/discover">
+          <button
+            type="button"
+            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </Link>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[14px] font-semibold truncate leading-tight" style={{ color: "rgba(255,255,255,0.92)" }}>
+            {room.name}
+          </h1>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <div
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: isConnected ? "#4ade80" : "#f87171", animation: "pulse-dot 2s ease-in-out infinite" }}
+            />
+            <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.28)" }}>
+              {members?.length || 0} {members?.length === 1 ? "person" : "people"}
+            </span>
+          </div>
+        </div>
+        <div className="flex -space-x-1.5 flex-shrink-0">
+          {members?.slice(0, 3).map((m) => (
+            <Avatar key={m.profileId} className="w-7 h-7 border" style={{ borderColor: "#0b0910" }}>
+              <AvatarImage src={m.avatarUrl || undefined} />
+              <AvatarFallback className="text-[9px]" style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}>
+                {m.displayName?.charAt(0) || "?"}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+        </div>
+      </header>
+
+      {/* Tab bar */}
+      <div
+        className="flex-shrink-0 flex items-center px-4 gap-1 h-11"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setMobileTab(t.id)}
+            className="flex-1 h-8 rounded-full text-[12px] font-medium transition-all"
+            style={
+              mobileTab === t.id
+                ? { background: "rgba(212,163,65,0.14)", color: "#d4a341", border: "1px solid rgba(212,163,65,0.28)" }
+                : { background: "transparent", color: "rgba(255,255,255,0.35)", border: "1px solid transparent" }
+            }
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 flex flex-col min-h-0">
+
+        {/* CHAT TAB */}
+        {mobileTab === "chat" && (
+          <>
+            <ScrollArea className="flex-1">
+              <div className="px-4 py-4 space-y-5">
+                {messages?.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.22)" }}>No messages yet. Say something.</p>
+                  </div>
+                )}
+                {messages?.map((msg) => (
+                  <div key={msg.id} className="flex gap-3">
+                    <Avatar className="w-9 h-9 shrink-0 mt-0.5">
+                      <AvatarFallback className="text-[10px]" style={{ background: `hsl(${((msg.profileId || 0) * 47) % 360},32%,26%)` }}>
+                        {msg.senderName?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{msg.senderName}</span>
+                        <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.22)" }}>{format(new Date(msg.createdAt), "HH:mm")}</span>
+                      </div>
+                      <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>{msg.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {typingUsers.size > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.28)" }}>
+                      {Array.from(typingUsers.values()).join(", ")} typing
+                    </span>
+                    <TypingDots />
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            <form
+              onSubmit={handleSend}
+              className="flex-shrink-0 px-4 pb-3 pt-2"
+              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              <div
+                className="flex items-center gap-3 h-12 px-4 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
+              >
+                <input
+                  type="text"
+                  placeholder={isMember ? "Type a message…" : !isSignedIn ? "Sign up to join" : "Join room to chat"}
+                  value={messageInput}
+                  onChange={handleInputChange}
+                  disabled={!isMember}
+                  readOnly={!isSignedIn}
+                  onClick={!isSignedIn ? () => setGuestPromptReason("write in chat") : undefined}
+                  className="flex-1 bg-transparent outline-none text-[14px] disabled:opacity-40"
+                  style={{ color: "rgba(255,255,255,0.85)", cursor: !isSignedIn ? "pointer" : "text" }}
+                />
+                <button
+                  type="submit"
+                  disabled={!messageInput.trim() || !isMember}
+                  className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-25 shrink-0"
+                  style={{ background: "rgba(212,163,65,0.2)", color: "#d4a341" }}
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+
+        {/* STUDIO TAB */}
+        {mobileTab === "studio" && (
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {isMember ? (
+              <button
+                type="button"
+                onClick={() => browseRef.current?.click()}
+                className="w-full rounded-3xl flex flex-col items-center justify-center py-10 gap-4 transition-all active:scale-[0.98]"
+                style={{
+                  background: `linear-gradient(160deg,rgba(${rgb},0.08) 0%,rgba(10,8,14,0.85) 100%)`,
+                  border: `1px dashed rgba(${rgb},0.28)`,
+                }}
+              >
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                  style={{ background: `rgba(${rgb},0.12)`, border: `1px solid rgba(${rgb},0.22)` }}
+                >
+                  <CloudUpload className="w-7 h-7" style={{ color: `rgb(${rgb})` }} />
+                </div>
+                <div className="text-center">
+                  <p className="text-[15px] font-medium" style={{ color: "rgba(255,255,255,0.78)" }}>Tap to upload audio</p>
+                  <p className="text-[12px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>MP3 · WAV · M4A up to 50MB</p>
+                </div>
+              </button>
+            ) : !isSignedIn ? (
+              <div className="flex flex-col items-center justify-center py-14 rounded-3xl text-center" style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
+                <p className="text-[14px] mb-4" style={{ color: "rgba(255,255,255,0.38)" }}>Sign up to share your music here.</p>
+                <button type="button" onClick={() => setGuestPromptReason("share demos")} className="h-11 px-7 rounded-full text-[14px] font-semibold" style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}>
+                  Sign up free
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-14 rounded-3xl text-center" style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
+                <p className="text-[14px] mb-4" style={{ color: "rgba(255,255,255,0.38)" }}>Join the room to share demos.</p>
+                <button type="button" onClick={handleJoin} disabled={joinRoom.isPending} className="h-11 px-7 rounded-full text-[14px] font-medium disabled:opacity-50" style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}>
+                  {joinRoom.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Join Room"}
+                </button>
+              </div>
+            )}
+            {demos && demos.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold tracking-widest uppercase px-1" style={{ color: "rgba(255,255,255,0.28)" }}>
+                  Room Demos · {demos.length}
+                </p>
+                {demos.map((demo) => (
+                  <DemoRow key={demo.id} demo={demo} isPlaying={playingId === demo.id} onPlayToggle={() => handlePlayToggle(demo.id)} />
+                ))}
+              </div>
+            )}
+            {(!demos || demos.length === 0) && isMember && (
+              <p className="text-center text-[13px] py-4" style={{ color: "rgba(255,255,255,0.2)" }}>No demos yet — be the first to drop a riff.</p>
+            )}
+          </div>
+        )}
+
+        {/* PEOPLE TAB */}
+        {mobileTab === "people" && (
+          <ScrollArea className="flex-1">
+            <div className="px-4 py-4 space-y-2">
+              {members?.map((m) => {
+                const isOnline   = onlineIds.has(m.profileId);
+                const voiceMember = voiceMembers.find((v) => v.profileId === m.profileId);
+                const isInV      = !!voiceMember;
+                const isSpeaking = voiceMember?.speaking ?? false;
+                const isMe       = m.profileId === profile?.id;
+                return (
+                  <div
+                    key={m.profileId}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
+                    style={{
+                      background: isMe ? "rgba(212,163,65,0.05)" : "rgba(255,255,255,0.025)",
+                      border: `1px solid ${isMe ? "rgba(212,163,65,0.12)" : "rgba(255,255,255,0.05)"}`,
+                    }}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={m.avatarUrl || undefined} />
+                        <AvatarFallback className="text-[12px]" style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}>
+                          {m.displayName?.charAt(0) || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2" style={{ borderColor: "#0b0910", background: isOnline ? "#4ade80" : "rgba(255,255,255,0.2)" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-medium truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
+                        {m.displayName}
+                        {isMe && <span className="ml-2 text-[11px] font-normal" style={{ color: "rgba(212,163,65,0.6)" }}>you</span>}
+                      </p>
+                      <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.28)" }}>
+                        {isSpeaking ? "Talking" : isInV ? "In voice" : isOnline ? "Online" : "Away"}
+                      </p>
+                    </div>
+                    <MiniWave color={isSpeaking ? "#4ade80" : isInV ? "#f59e0b" : "rgba(255,255,255,0.1)"} active={isSpeaking || isInV} bars={5} />
+                  </div>
+                );
+              })}
+              {!isMember && (
+                <div className="pt-4 text-center">
+                  {!isSignedIn ? (
+                    <button type="button" onClick={() => setGuestPromptReason("join the room")} className="h-11 px-7 rounded-full text-[14px] font-semibold" style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}>
+                      Sign up to join
+                    </button>
+                  ) : (
+                    <button type="button" onClick={handleJoin} disabled={joinRoom.isPending} className="h-11 px-7 rounded-full text-[14px] font-medium disabled:opacity-50" style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}>
+                      {joinRoom.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Join Room"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+
+      {/* Mobile action bar */}
+      <div
+        className="flex-shrink-0 flex items-center justify-around px-6 py-3"
+        style={{
+          background: "rgba(9,7,14,0.96)",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          backdropFilter: "blur(16px)",
+          paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
+        <button
+          type="button"
+          onClick={isSignedIn ? (isInVoice ? toggleMute : joinVoice) : () => setGuestPromptReason("join voice")}
+          className="flex flex-col items-center gap-1.5"
+        >
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{
+              background: isInVoice && !isMuted ? "rgba(74,222,128,0.12)" : "rgba(255,255,255,0.06)",
+              border: `1px solid ${isInVoice && !isMuted ? "rgba(74,222,128,0.35)" : "rgba(255,255,255,0.1)"}`,
+              color: isInVoice && !isMuted ? "#4ade80" : "rgba(255,255,255,0.45)",
+            }}
+          >
+            {isInVoice && isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </div>
+          <span className="text-[10px] font-medium" style={{ color: isInVoice && !isMuted ? "#4ade80" : "rgba(255,255,255,0.28)" }}>
+            {isInVoice ? (isMuted ? "Unmute" : "Voice") : "Voice"}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={!isSignedIn ? () => setGuestPromptReason("record audio") : undefined}
+          className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(239,68,68,0.12)", border: "2px solid rgba(239,68,68,0.5)", boxShadow: "0 0 28px rgba(239,68,68,0.2)" }}
+          >
+            <Circle className="w-7 h-7 fill-current" style={{ color: "#ef4444" }} />
+          </div>
+          <span className="text-[10px] font-medium" style={{ color: "rgba(239,68,68,0.6)" }}>Record</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={isMember ? handleLeave : () => setLocation("/discover")}
+          className="flex flex-col items-center gap-1.5"
+        >
+          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>
+            <LogOut className="w-5 h-5" />
+          </div>
+          <span className="text-[10px] font-medium" style={{ color: "rgba(239,68,68,0.5)" }}>Leave</span>
+        </button>
+      </div>
+
+      <GuestSignupPrompt open={!!guestPromptReason} reason={guestPromptReason ?? ""} onClose={() => setGuestPromptReason(null)} />
+    </div>
+
+    {/* ══════════════════════════════════════════
+        DESKTOP LAYOUT  (hidden below md)
+    ══════════════════════════════════════════ */}
+    <div className="hidden md:flex h-[100dvh] overflow-hidden" style={{ background: "#0b0910" }}>
 
       {/* ═══════ LEFT SIDEBAR ═══════ */}
       <aside
@@ -470,7 +802,7 @@ export function RoomPage() {
         <div className="px-5 pt-5 pb-4">
           <Link href="/discover">
             <img
-              src={wordmarkImg}
+              src={logoImg}
               alt="Creative Rooms"
               style={{ height: 28, width: "auto", objectFit: "contain" }}
             />
@@ -1039,5 +1371,6 @@ export function RoomPage() {
         }
       `}</style>
     </div>
+    </>
   );
 }
