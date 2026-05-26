@@ -74,10 +74,6 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
     }
   };
 
-  const handleClick = () => {
-    onClick?.();
-  };
-
   const handleJoinClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isSignedIn) {
@@ -90,60 +86,61 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
   return (
     <>
       <div
-        onClick={handleClick}
-        className="group relative w-full cursor-pointer transition-all duration-200"
+        onClick={onClick}
+        className="group relative w-full cursor-pointer transition-all duration-200 active:scale-[0.99]"
         style={{
-          background: selected
-            ? "rgba(212,163,65,0.06)"
-            : "rgba(255,255,255,0.02)",
+          background: selected ? "rgba(212,163,65,0.07)" : "rgba(255,255,255,0.025)",
           border: selected
-            ? "1px solid rgba(212,163,65,0.25)"
-            : "1px solid rgba(255,255,255,0.055)",
-          borderRadius: 12,
-          boxShadow: selected ? "0 0 0 1px rgba(212,163,65,0.12)" : "none",
+            ? "1px solid rgba(212,163,65,0.28)"
+            : "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 14,
+          boxShadow: selected ? "0 0 0 1px rgba(212,163,65,0.12), 0 4px 16px rgba(0,0,0,0.2)" : "none",
         }}
         onMouseEnter={(e) => {
           if (!selected) {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.1)";
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.12)";
           }
         }}
         onMouseLeave={(e) => {
           if (!selected) {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
-            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.055)";
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.07)";
           }
         }}
       >
         {/* Selected accent bar */}
         {selected && (
           <div
-            className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full"
-            style={{ background: accent }}
+            className="absolute left-0 top-4 bottom-4 w-[3px] rounded-full"
+            style={{ background: accent, boxShadow: `0 0 8px ${accent}88` }}
           />
         )}
 
-        <div className="px-4 py-4">
-          {/* Top row: waveform + creator */}
-          <div className="flex items-center gap-3 mb-3">
-            {/* Play button */}
+        <div className="px-4 py-5 sm:py-4">
+          {/* Top row: play + waveform + meta */}
+          <div className="flex items-center gap-3 mb-3.5">
+            {/* Play button — larger on mobile */}
             <button
               onClick={handlePlay}
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+              className="flex-shrink-0 rounded-full flex items-center justify-center transition-all active:scale-95"
               style={{
-                background: playing ? `${accent}22` : "rgba(255,255,255,0.07)",
-                border: playing ? `1px solid ${accent}55` : "1px solid rgba(255,255,255,0.12)",
+                width: 40,
+                height: 40,
+                background: playing ? `${accent}22` : "rgba(255,255,255,0.08)",
+                border: playing ? `1.5px solid ${accent}66` : "1.5px solid rgba(255,255,255,0.14)",
+                boxShadow: playing ? `0 0 12px ${accent}44` : "none",
               }}
             >
               {playing ? (
-                <Pause className="w-3 h-3" style={{ color: accent }} />
+                <Pause className="w-4 h-4" style={{ color: accent }} />
               ) : (
-                <Play className="w-3 h-3 ml-0.5" style={{ color: "rgba(255,255,255,0.6)" }} />
+                <Play className="w-4 h-4 ml-0.5" style={{ color: "rgba(255,255,255,0.7)" }} />
               )}
             </button>
 
             {/* Waveform */}
-            <div className="flex-1 flex items-center gap-px h-8 overflow-hidden">
+            <div className="flex-1 flex items-center gap-px h-9 overflow-hidden">
               {bars.map((h, i) => (
                 <div
                   key={i}
@@ -153,7 +150,7 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
                     height: `${h}%`,
                     background: playing
                       ? `${accent}${i % 3 === 0 ? "bb" : i % 3 === 1 ? "77" : "44"}`
-                      : `rgba(255,255,255,${i % 2 === 0 ? "0.15" : "0.08"})`,
+                      : `rgba(255,255,255,${i % 2 === 0 ? "0.18" : "0.09"})`,
                     animation: playing
                       ? `breathe ${1.1 + (i % 6) * 0.2}s ease-in-out infinite`
                       : undefined,
@@ -166,28 +163,28 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
 
             {/* Duration */}
             <span
-              className="flex-shrink-0 text-[11px] tabular-nums"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+              className="flex-shrink-0 text-[12px] tabular-nums"
+              style={{ color: "rgba(255,255,255,0.35)" }}
             >
               {duration}
             </span>
 
-            {/* Creator avatar + time */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <Avatar className="h-6 w-6">
+            {/* Creator */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Avatar className="h-7 w-7">
                 <AvatarImage src={hook.creatorAvatarUrl ?? undefined} />
                 <AvatarFallback
-                  className="text-[9px]"
+                  className="text-[10px]"
                   style={{ background: `${accent}22`, color: accent }}
                 >
                   {hook.creatorName?.charAt(0).toUpperCase() ?? "?"}
                 </AvatarFallback>
               </Avatar>
               <div className="text-right hidden sm:block">
-                <p className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>
+                <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
                   {hook.creatorName ?? "Anonymous"}
                 </p>
-                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.28)" }}>
                   {timeAgo(hook.createdAt)} ago
                 </p>
               </div>
@@ -195,17 +192,26 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
           </div>
 
           {/* Title + description */}
-          <div className="mb-2.5">
-            <h3
-              className="font-medium text-[14px] leading-snug mb-0.5"
-              style={{ color: "rgba(255,255,255,0.9)" }}
-            >
-              {hook.title}
-            </h3>
+          <div className="mb-3.5">
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <h3
+                className="font-semibold text-[15px] leading-snug"
+                style={{ color: "rgba(255,255,255,0.92)" }}
+              >
+                {hook.title}
+              </h3>
+              {/* Creator name on mobile (hidden on desktop where it's in the top row) */}
+              <span
+                className="sm:hidden flex-shrink-0 text-[11px] mt-0.5"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
+                {timeAgo(hook.createdAt)} ago
+              </span>
+            </div>
             {hook.description && (
               <p
-                className="text-[12px] leading-relaxed line-clamp-1"
-                style={{ color: "rgba(255,255,255,0.38)" }}
+                className="text-[13px] leading-relaxed line-clamp-2"
+                style={{ color: "rgba(255,255,255,0.42)" }}
               >
                 {hook.description}
               </p>
@@ -218,11 +224,11 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
             <div className="flex flex-wrap gap-1.5 min-w-0">
               {hook.vibe && (
                 <span
-                  className="text-[10px] px-2 py-0.5 rounded-full"
+                  className="text-[11px] px-2.5 py-1 rounded-full"
                   style={{
                     background: `${accent}15`,
                     color: accent,
-                    border: `1px solid ${accent}30`,
+                    border: `1px solid ${accent}35`,
                   }}
                 >
                   {hook.vibe.toLowerCase()}
@@ -231,11 +237,11 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
               {(hook.lookingFor ?? []).slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[10px] px-2 py-0.5 rounded-full"
+                  className="text-[11px] px-2.5 py-1 rounded-full"
                   style={{
-                    background: "rgba(255,255,255,0.05)",
-                    color: "rgba(255,255,255,0.35)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(255,255,255,0.055)",
+                    color: "rgba(255,255,255,0.42)",
+                    border: "1px solid rgba(255,255,255,0.09)",
                   }}
                 >
                   {tag.toLowerCase()}
@@ -244,14 +250,14 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
             </div>
 
             {/* Spots + join */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="flex items-center gap-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              <div className="flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
                 {isFull ? (
-                  <Lock className="w-3 h-3" />
+                  <Lock className="w-3.5 h-3.5" />
                 ) : (
-                  <Users className="w-3 h-3" />
+                  <Users className="w-3.5 h-3.5" />
                 )}
-                <span className="text-[11px]">
+                <span className="text-[12px]">
                   {isFull ? "full" : `${hook.seatsLeft}/${hook.maxSeats}`}
                 </span>
               </div>
@@ -259,10 +265,13 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
               {!isFull && (
                 <button
                   onClick={handleJoinClick}
-                  className="text-[11px] font-semibold px-3 py-1 rounded-full transition-all hover:brightness-110 active:scale-95"
+                  className="font-semibold rounded-full transition-all hover:brightness-110 active:scale-95"
                   style={{
+                    fontSize: 12,
+                    padding: "6px 14px",
                     background: "linear-gradient(135deg,#e0b050,#c89030)",
                     color: "#1a0f00",
+                    minHeight: 32,
                   }}
                 >
                   Join

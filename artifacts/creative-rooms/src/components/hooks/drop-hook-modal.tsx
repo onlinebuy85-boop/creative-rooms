@@ -19,11 +19,10 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="flex flex-col items-center justify-center py-10 px-6 gap-7 text-center"
+      className="flex flex-col items-center justify-center py-14 px-6 gap-8 text-center"
       style={{ animation: "pageIn 0.5s ease both" }}
     >
-      {/* Animated waveform */}
-      <div className="flex items-end justify-center gap-[3px] h-14 w-full">
+      <div className="flex items-end justify-center gap-[3px] h-16 w-full">
         {bars.map((h, i) => (
           <div
             key={i}
@@ -39,19 +38,18 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div>
-        <p className="font-serif text-[1.6rem] mb-2" style={{ color: "#d4a341" }}>
+        <p className="font-serif text-[1.8rem] mb-2.5" style={{ color: "#d4a341" }}>
           Your hook is live.
         </p>
-        <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+        <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
           Your signal is out there.<br />Listening for someone who hears it.
         </p>
       </div>
-      {/* Breathing dots */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="w-1.5 h-1.5 rounded-full"
+            className="w-2 h-2 rounded-full"
             style={{
               background: "#d4a341",
               animation: "breathe 1.4s ease-in-out infinite",
@@ -63,14 +61,12 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Loader2, Upload, Music, X, CheckSquare, Square } from "lucide-react";
+import { Loader2, Upload, Music, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const VIBES = ["Melancholic", "Euphoric", "Raw", "Dreamy", "Intense", "Nostalgic", "Experimental"];
@@ -178,170 +174,356 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="sm:max-w-[520px] bg-card border-border/60 p-0 overflow-hidden">
-        <div className="h-[2px] w-full" style={{ background: "linear-gradient(90deg,#e0b050,#c89030)" }} />
+      {/* Bottom sheet on mobile, centered modal on sm+ */}
+      <DialogContent className="drop-hook-sheet sm:max-w-[520px] bg-card border-border/60 p-0 overflow-hidden">
+        {/* Gold top accent bar */}
+        <div className="h-[2.5px] w-full flex-shrink-0" style={{ background: "linear-gradient(90deg,#e0b050,#c89030)" }} />
+
+        {/* Mobile drag handle */}
+        <div className="flex justify-center pt-3 pb-0 sm:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
+        </div>
 
         {succeeded ? (
           <SuccessPanel onClose={handleClose} />
         ) : (
-        <div className="p-6">
-          <DialogHeader className="mb-5">
-            <DialogTitle className="font-serif text-xl text-foreground">Drop a Hook</DialogTitle>
-            <DialogDescription className="text-muted-foreground text-sm">
-              A short signal — a riff, a melody, a feeling. Drop it and see who shows up.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Audio upload */}
-            <div className="space-y-2">
-              <Label className="text-sm text-foreground/80">Audio snippet <span className="text-destructive">*</span></Label>
-              {audioFile ? (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-primary/30 bg-primary/5">
-                  <Music className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="text-sm text-foreground flex-1 truncate">{audioFile.name}</span>
-                  <button type="button" onClick={() => setAudioFile(null)} className="text-muted-foreground hover:text-foreground">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`relative flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${
-                    dragOver ? "border-primary/60 bg-primary/5" : "border-border/40 hover:border-border/60 hover:bg-muted/30"
-                  }`}
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
+          <div className="overflow-y-auto" style={{ maxHeight: "calc(94vh - 40px)" }}>
+            <div className="px-5 pt-5 pb-2 sm:px-6 sm:pt-6">
+              <DialogHeader>
+                <DialogTitle className="font-serif text-[1.45rem] sm:text-xl text-foreground">
+                  Drop a Hook
+                </DialogTitle>
+                <DialogDescription
+                  className="text-[14px] sm:text-sm leading-relaxed mt-1"
+                  style={{ color: "rgba(255,255,255,0.45)" }}
                 >
-                  <Upload className="w-5 h-5 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground text-center">
-                    Drop an audio file or <span className="text-primary">click to browse</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground/60">MP3, WAV, M4A · max 20MB</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="audio/*"
-                    className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
-                  />
-                </div>
-              )}
+                  A short signal — a riff, a melody, a feeling. Drop it and see who shows up.
+                </DialogDescription>
+              </DialogHeader>
             </div>
 
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="hook-title" className="text-sm text-foreground/80">
-                Title <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="hook-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Late night guitar idea..."
-                className="bg-input border-border/60 focus:border-primary/50"
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="px-5 pb-6 sm:px-6 sm:pb-7 space-y-7 sm:space-y-5">
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="hook-desc" className="text-sm text-foreground/80">What's the vibe? <span className="text-muted-foreground/50 text-xs font-normal">(optional)</span></Label>
-              <Textarea
-                id="hook-desc"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="A loop I can't shake. Sounds like 3am and cathedral reverb..."
-                className="bg-input border-border/60 focus:border-primary/50 resize-none h-20 text-sm"
-              />
-            </div>
-
-            {/* Vibe */}
-            <div className="space-y-2">
-              <Label className="text-sm text-foreground/80">Emotional vibe <span className="text-muted-foreground/50 text-xs font-normal">(optional)</span></Label>
-              <div className="flex flex-wrap gap-2">
-                {VIBES.map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setVibe(vibe === v ? "" : v)}
-                    className="text-xs px-3 py-1.5 rounded-full transition-all"
-                    style={
-                      vibe === v
-                        ? { background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00", fontWeight: 600 }
-                        : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "hsl(30 15% 70%)" }
-                    }
+              {/* ── Audio upload ── */}
+              <div className="space-y-3">
+                <label className="block text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  Audio snippet <span style={{ color: "#d45a5a" }}>*</span>
+                </label>
+                {audioFile ? (
+                  <div
+                    className="flex items-center gap-4 px-4 py-4 rounded-xl"
+                    style={{
+                      background: "rgba(212,163,65,0.08)",
+                      border: "1px solid rgba(212,163,65,0.35)",
+                      boxShadow: "0 0 16px rgba(212,163,65,0.08)",
+                    }}
                   >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Looking for */}
-            <div className="space-y-2">
-              <Label className="text-sm text-foreground/80">Looking for <span className="text-muted-foreground/50 text-xs font-normal">(optional)</span></Label>
-              <div className="flex flex-wrap gap-2">
-                {LOOKING_FOR_OPTIONS.map((tag) => {
-                  const sel = lookingFor.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleLookingFor(tag)}
-                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all"
-                      style={
-                        sel
-                          ? { background: "rgba(212,163,65,0.15)", border: "1px solid rgba(212,163,65,0.4)", color: "#d4a341" }
-                          : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "hsl(30 10% 55%)" }
-                      }
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(212,163,65,0.15)", border: "1px solid rgba(212,163,65,0.3)" }}
                     >
-                      {sel ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
-                      {tag}
+                      <Music className="w-5 h-5" style={{ color: "#d4a341" }} />
+                    </div>
+                    <span
+                      className="text-[14px] font-medium flex-1 truncate"
+                      style={{ color: "rgba(255,255,255,0.85)" }}
+                    >
+                      {audioFile.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setAudioFile(null)}
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{
+                        background: "rgba(255,255,255,0.07)",
+                        color: "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      <X className="w-4 h-4" />
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Max seats */}
-            <div className="space-y-2">
-              <Label className="text-sm text-foreground/80">Room size</Label>
-              <div className="flex gap-2">
-                {[2, 3, 4].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setMaxSeats(n)}
-                    className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
-                    style={
-                      maxSeats === n
-                        ? { background: "rgba(212,163,65,0.15)", border: "1px solid rgba(212,163,65,0.4)", color: "#d4a341" }
-                        : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "hsl(30 10% 55%)" }
-                    }
+                  </div>
+                ) : (
+                  <div
+                    className="relative flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200"
+                    style={{
+                      padding: "2rem 1.25rem",
+                      borderRadius: 16,
+                      border: `2px dashed ${dragOver ? "rgba(212,163,65,0.7)" : "rgba(255,255,255,0.22)"}`,
+                      background: dragOver ? "rgba(212,163,65,0.06)" : "rgba(255,255,255,0.025)",
+                      boxShadow: dragOver ? "0 0 24px rgba(212,163,65,0.12)" : "none",
+                    }}
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    {n} people
-                  </button>
-                ))}
+                    <div
+                      className="w-14 h-14 rounded-full flex items-center justify-center"
+                      style={{
+                        background: "rgba(212,163,65,0.1)",
+                        border: "1px solid rgba(212,163,65,0.25)",
+                      }}
+                    >
+                      <Upload className="w-6 h-6" style={{ color: "rgba(212,163,65,0.75)" }} />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[15px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
+                        Tap to choose a file
+                      </p>
+                      <p className="text-[13px] mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        or drag &amp; drop here
+                      </p>
+                    </div>
+                    <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+                      MP3 · WAV · M4A &nbsp;·&nbsp; max 20 MB
+                    </p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="audio/*"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
+                    />
+                  </div>
+                )}
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-1">
-              <Button type="button" variant="ghost" onClick={handleClose} className="flex-1">
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!canSubmit}
-                className="flex-1 font-semibold rounded-full transition-all hover:brightness-110"
-                style={{ background: canSubmit ? "linear-gradient(135deg,#e0b050,#c89030)" : undefined, color: canSubmit ? "#1a0f00" : undefined, border: "none" }}
-              >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Drop it"}
-              </Button>
-            </div>
-          </form>
-        </div>
+              {/* ── Title ── */}
+              <div className="space-y-2.5">
+                <label
+                  htmlFor="hook-title"
+                  className="block text-[15px] sm:text-sm font-semibold sm:font-medium"
+                  style={{ color: "rgba(255,255,255,0.85)" }}
+                >
+                  Title <span style={{ color: "#d45a5a" }}>*</span>
+                </label>
+                <input
+                  id="hook-title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Late night guitar idea..."
+                  autoComplete="off"
+                  className="w-full rounded-xl outline-none transition-all duration-200 placeholder:text-[rgba(255,255,255,0.25)]"
+                  style={{
+                    height: 52,
+                    padding: "0 16px",
+                    fontSize: 16,
+                    background: "rgba(255,255,255,0.05)",
+                    border: title
+                      ? "1.5px solid rgba(212,163,65,0.45)"
+                      : "1.5px solid rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.9)",
+                    boxShadow: title ? "0 0 0 3px rgba(212,163,65,0.06)" : "none",
+                  }}
+                />
+              </div>
+
+              {/* ── Description ── */}
+              <div className="space-y-2.5">
+                <label
+                  htmlFor="hook-desc"
+                  className="block text-[15px] sm:text-sm font-semibold sm:font-medium"
+                  style={{ color: "rgba(255,255,255,0.85)" }}
+                >
+                  What&rsquo;s the vibe?{" "}
+                  <span className="text-[13px] font-normal" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    optional
+                  </span>
+                </label>
+                <textarea
+                  id="hook-desc"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="A loop I can't shake. Sounds like 3am and cathedral reverb..."
+                  className="w-full rounded-xl outline-none resize-none transition-all duration-200 placeholder:text-[rgba(255,255,255,0.25)] leading-relaxed"
+                  rows={3}
+                  style={{
+                    padding: "14px 16px",
+                    fontSize: 16,
+                    background: "rgba(255,255,255,0.05)",
+                    border: description
+                      ? "1.5px solid rgba(212,163,65,0.45)"
+                      : "1.5px solid rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.9)",
+                    boxShadow: description ? "0 0 0 3px rgba(212,163,65,0.06)" : "none",
+                  }}
+                />
+              </div>
+
+              {/* ── Emotional vibe ── */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
+                    Emotional vibe{" "}
+                    <span className="text-[13px] font-normal" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      optional
+                    </span>
+                  </p>
+                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    Pick one that best describes the feeling
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {VIBES.map((v) => {
+                    const sel = vibe === v;
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setVibe(sel ? "" : v)}
+                        className="rounded-full transition-all duration-200 active:scale-95"
+                        style={{
+                          padding: "9px 18px",
+                          fontSize: 14,
+                          fontWeight: sel ? 600 : 400,
+                          ...(sel
+                            ? {
+                                background: "linear-gradient(135deg,#e0b050,#c89030)",
+                                color: "#1a0f00",
+                                boxShadow: "0 0 16px rgba(212,163,65,0.35)",
+                                border: "1.5px solid transparent",
+                              }
+                            : {
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1.5px solid rgba(255,255,255,0.13)",
+                                color: "rgba(255,255,255,0.65)",
+                              }),
+                        }}
+                      >
+                        {v}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Looking for ── */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
+                    Looking for{" "}
+                    <span className="text-[13px] font-normal" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      optional
+                    </span>
+                  </p>
+                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    What skills do you want to collaborate with?
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {LOOKING_FOR_OPTIONS.map((tag) => {
+                    const sel = lookingFor.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleLookingFor(tag)}
+                        className="rounded-full transition-all duration-200 active:scale-95"
+                        style={{
+                          padding: "9px 18px",
+                          fontSize: 14,
+                          fontWeight: sel ? 600 : 400,
+                          ...(sel
+                            ? {
+                                background: "rgba(212,163,65,0.14)",
+                                border: "1.5px solid rgba(212,163,65,0.5)",
+                                color: "#d4a341",
+                                boxShadow: "0 0 14px rgba(212,163,65,0.2)",
+                              }
+                            : {
+                                background: "rgba(255,255,255,0.04)",
+                                border: "1.5px solid rgba(255,255,255,0.11)",
+                                color: "rgba(255,255,255,0.55)",
+                              }),
+                        }}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Room size ── */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
+                    Room size
+                  </p>
+                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    How many creators can join?
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[2, 3, 4].map((n) => {
+                    const sel = maxSeats === n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setMaxSeats(n)}
+                        className="rounded-xl transition-all duration-200 active:scale-95 text-center"
+                        style={{
+                          padding: "14px 8px",
+                          ...(sel
+                            ? {
+                                background: "rgba(212,163,65,0.12)",
+                                border: "1.5px solid rgba(212,163,65,0.45)",
+                                color: "#d4a341",
+                                boxShadow: "0 0 16px rgba(212,163,65,0.18)",
+                              }
+                            : {
+                                background: "rgba(255,255,255,0.04)",
+                                border: "1.5px solid rgba(255,255,255,0.1)",
+                                color: "rgba(255,255,255,0.5)",
+                              }),
+                        }}
+                      >
+                        <span className="block text-[18px] font-bold">{n}</span>
+                        <span className="block text-[11px] mt-0.5" style={{ opacity: 0.7 }}>
+                          {n === 1 ? "person" : "people"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Actions ── */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleClose}
+                  className="flex-1 rounded-full h-12 text-[15px]"
+                  style={{ color: "rgba(255,255,255,0.45)" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="flex-1 h-12 rounded-full text-[15px] font-semibold transition-all"
+                  style={
+                    canSubmit
+                      ? {
+                          background: "linear-gradient(135deg,#e0b050,#c89030)",
+                          color: "#1a0f00",
+                          border: "none",
+                          boxShadow: "0 4px 20px rgba(212,163,65,0.3)",
+                        }
+                      : { border: "none" }
+                  }
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Drop it"}
+                </Button>
+              </div>
+
+              {/* Safe area spacing for mobile home indicator */}
+              <div className="sm:hidden h-4" />
+            </form>
+          </div>
         )}
       </DialogContent>
     </Dialog>

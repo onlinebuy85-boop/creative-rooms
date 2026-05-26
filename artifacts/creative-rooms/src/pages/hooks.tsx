@@ -33,96 +33,79 @@ function filterHooks(hooks: Hook[], tab: string) {
 // ── How Hooks Work section ────────────────────────────────────────────────────
 
 const HOW_STEPS = [
-  {
-    num: "1",
-    icon: Upload,
-    title: "Drop a Hook",
-    desc: "Share a short idea with the world.",
-  },
-  {
-    num: "2",
-    icon: Radio,
-    title: "People Discover",
-    desc: "Others listen and feel something in it.",
-  },
-  {
-    num: "3",
-    icon: Users,
-    title: "Join the Hook",
-    desc: "They join if they want to create together.",
-  },
-  {
-    num: "4",
-    icon: Music,
-    title: "Room Forms",
-    desc: "A room is created automatically.",
-  },
-  {
-    num: "5",
-    icon: Sparkles,
-    title: "Create Together",
-    desc: "Ideas turn into demos, songs and something real.",
-  },
+  { num: "1", icon: Upload,   title: "Drop a Hook",      desc: "Share a short idea with the world." },
+  { num: "2", icon: Radio,    title: "People Discover",  desc: "Others listen and feel something in it." },
+  { num: "3", icon: Users,    title: "Join the Hook",    desc: "They join if they want to create together." },
+  { num: "4", icon: Music,    title: "Room Forms",       desc: "A room is created automatically." },
+  { num: "5", icon: Sparkles, title: "Create Together",  desc: "Ideas turn into demos, songs and something real." },
 ];
 
 function HowHooksWork() {
   return (
     <div
-      className="rounded-2xl px-6 py-8 mt-10"
+      className="rounded-2xl px-5 py-7 mt-10"
       style={{
-        background: "rgba(255,255,255,0.02)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(255,255,255,0.022)",
+        border: "1px solid rgba(255,255,255,0.07)",
       }}
     >
-      <div className="flex items-center gap-3 mb-6">
-        <Layers className="w-4 h-4" style={{ color: "rgba(212,163,65,0.6)" }} />
+      <div className="flex items-center gap-2.5 mb-6">
+        <Layers className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(212,163,65,0.6)" }} />
         <p
-          className="text-[10px] font-semibold tracking-[0.2em] uppercase"
-          style={{ color: "rgba(255,255,255,0.3)" }}
+          className="text-[11px] font-bold tracking-[0.2em] uppercase"
+          style={{ color: "rgba(255,255,255,0.35)" }}
         >
           How Hooks Work
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {HOW_STEPS.map((step, i) => (
-          <div key={step.num} className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                style={{
-                  background: "rgba(212,163,65,0.12)",
-                  color: "#d4a341",
-                  border: "1px solid rgba(212,163,65,0.25)",
-                }}
-              >
-                {step.num}
-              </div>
-              {i < HOW_STEPS.length - 1 && (
+      {/* Mobile: single-column stacked; sm+: 2-col; lg+: 5-col */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 sm:gap-4">
+        {HOW_STEPS.map((step, i) => {
+          const Icon = step.icon;
+          return (
+            <div key={step.num} className="flex items-start gap-4 sm:flex-col sm:gap-2">
+              {/* Number badge + connector */}
+              <div className="flex items-center gap-2 sm:gap-2 flex-shrink-0">
                 <div
-                  className="hidden lg:block flex-1 h-px"
-                  style={{ background: "rgba(255,255,255,0.07)" }}
-                />
-              )}
+                  className="w-8 h-8 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: "rgba(212,163,65,0.12)",
+                    color: "#d4a341",
+                    border: "1px solid rgba(212,163,65,0.28)",
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {step.num}
+                </div>
+                {i < HOW_STEPS.length - 1 && (
+                  <div
+                    className="hidden lg:block flex-1 h-px"
+                    style={{ background: "rgba(255,255,255,0.07)", width: 20 }}
+                  />
+                )}
+              </div>
+              {/* Text */}
+              <div className="min-w-0 flex-1 sm:flex-initial">
+                <div className="flex items-center gap-2 mb-1.5 sm:mb-1">
+                  <Icon className="w-3.5 h-3.5 sm:hidden" style={{ color: "rgba(212,163,65,0.5)" }} />
+                  <p className="text-[14px] sm:text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>
+                    {step.title}
+                  </p>
+                </div>
+                <p className="text-[13px] sm:text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+                  {step.desc}
+                </p>
+              </div>
             </div>
-            <div>
-              <p
-                className="text-[12px] font-semibold mb-0.5"
-                style={{ color: "rgba(255,255,255,0.75)" }}
-              >
-                {step.title}
-              </p>
-              <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
-                {step.desc}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div
-        className="mt-6 pt-5 border-t grid grid-cols-1 sm:grid-cols-3 gap-4 text-[11px]"
-        style={{ borderColor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}
+        className="mt-7 pt-5 border-t grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 text-[12px] sm:text-[11px]"
+        style={{ borderColor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.32)" }}
       >
         <span>· Small rooms (2–4 people)</span>
         <span>· First come, first served</span>
@@ -130,7 +113,7 @@ function HowHooksWork() {
       </div>
 
       <p
-        className="mt-3 text-[12px] italic"
+        className="mt-3 text-[13px] sm:text-[12px] italic"
         style={{ color: "rgba(212,163,65,0.5)" }}
       >
         This is a human creative space.
@@ -176,24 +159,30 @@ export function HooksPage() {
     >
       {/* ── Page header ── */}
       <div
-        className="flex-shrink-0 flex items-start justify-between gap-3 px-4 sm:px-6 pt-5 sm:pt-8 pb-4 sm:pb-5 border-b w-full min-w-0"
-        style={{ borderColor: "rgba(255,255,255,0.05)" }}
+        className="flex-shrink-0 flex items-start justify-between gap-3 px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-5 border-b w-full min-w-0"
+        style={{ borderColor: "rgba(255,255,255,0.06)" }}
       >
         <div className="min-w-0 flex-1">
           <h1
-            className="font-serif tracking-tight mb-1"
-            style={{ fontSize: "clamp(1.6rem, 5.5vw, 2rem)", color: "rgba(255,255,255,0.92)" }}
+            className="font-serif tracking-tight mb-1.5"
+            style={{ fontSize: "clamp(1.75rem, 5.5vw, 2rem)", color: "rgba(255,255,255,0.95)" }}
           >
             Hooks
           </h1>
-          <p className="text-[13px] leading-snug" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="text-[14px] leading-snug" style={{ color: "rgba(255,255,255,0.42)" }}>
             Creative signals from around the world.
           </p>
         </div>
         <button
           onClick={handleDropClick}
-          className="flex-shrink-0 h-9 px-4 sm:px-5 rounded-full text-[12px] sm:text-[13px] font-semibold transition-all hover:brightness-110 active:scale-95 whitespace-nowrap"
-          style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+          className="flex-shrink-0 px-5 rounded-full font-semibold transition-all hover:brightness-110 active:scale-95 whitespace-nowrap"
+          style={{
+            height: 44,
+            fontSize: 13,
+            background: "linear-gradient(135deg,#e0b050,#c89030)",
+            color: "#1a0f00",
+            boxShadow: "0 2px 12px rgba(212,163,65,0.25)",
+          }}
         >
           Drop a Hook
         </button>
@@ -203,29 +192,33 @@ export function HooksPage() {
       <div
         className="flex-shrink-0 w-full max-w-full overflow-x-auto no-scrollbar border-b"
         style={{
-          borderColor: "rgba(255,255,255,0.05)",
+          borderColor: "rgba(255,255,255,0.06)",
           WebkitOverflowScrolling: "touch",
           scrollSnapType: "x proximity",
         }}
       >
-        <div className="flex gap-1.5 px-4 sm:px-5 py-3 w-max">
+        <div className="flex gap-2 px-4 sm:px-5 py-3 w-max">
           {FILTER_TABS.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveFilter(tab.value)}
-              className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-[12px] transition-all whitespace-nowrap"
+              className="flex-shrink-0 rounded-full transition-all whitespace-nowrap active:scale-95"
               style={{
+                height: 36,
+                padding: "0 14px",
+                fontSize: 13,
                 scrollSnapAlign: "start",
                 ...(activeFilter === tab.value
                   ? {
                       background: "rgba(212,163,65,0.15)",
                       color: "#d4a341",
-                      border: "1px solid rgba(212,163,65,0.3)",
+                      border: "1.5px solid rgba(212,163,65,0.35)",
+                      fontWeight: 600,
                     }
                   : {
-                      background: "rgba(255,255,255,0.04)",
-                      color: "rgba(255,255,255,0.4)",
-                      border: "1px solid rgba(255,255,255,0.07)",
+                      background: "rgba(255,255,255,0.05)",
+                      color: "rgba(255,255,255,0.5)",
+                      border: "1.5px solid rgba(255,255,255,0.09)",
                     }),
               }}
             >
@@ -241,40 +234,46 @@ export function HooksPage() {
         <div
           className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden transition-all duration-300 ${hasPanel ? "hidden lg:block lg:max-w-[55%]" : ""}`}
         >
-          <div className="p-4 sm:p-5 space-y-2.5 w-full max-w-full">
+          <div className="p-4 sm:p-5 space-y-3 w-full max-w-full">
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <Loader2 className="w-5 h-5 animate-spin" style={{ color: "rgba(255,255,255,0.3)" }} />
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+              <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
                 <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
+                  className="w-16 h-16 rounded-full flex items-center justify-center"
                   style={{
                     background: "rgba(212,163,65,0.07)",
-                    border: "1px solid rgba(212,163,65,0.13)",
+                    border: "1px solid rgba(212,163,65,0.15)",
                   }}
                 >
-                  <Radio className="w-6 h-6" style={{ color: "rgba(212,163,65,0.35)" }} />
+                  <Radio className="w-7 h-7" style={{ color: "rgba(212,163,65,0.4)" }} />
                 </div>
                 {activeFilter === "all" ? (
                   <>
-                    <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-                      No hooks dropped yet.
-                    </p>
-                    <p className="text-[13px] max-w-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-                      Be the first to send a signal into the world.
-                    </p>
+                    <div>
+                      <p className="text-[16px] font-medium mb-2" style={{ color: "rgba(255,255,255,0.6)" }}>
+                        No hooks dropped yet.
+                      </p>
+                      <p className="text-[14px] max-w-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
+                        Be the first to send a signal into the world.
+                      </p>
+                    </div>
                     <button
                       onClick={handleDropClick}
-                      className="mt-2 h-9 px-6 rounded-full text-[12px] font-semibold transition-all hover:brightness-110"
-                      style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+                      className="h-11 px-7 rounded-full text-[13px] font-semibold transition-all hover:brightness-110 active:scale-95"
+                      style={{
+                        background: "linear-gradient(135deg,#e0b050,#c89030)",
+                        color: "#1a0f00",
+                        boxShadow: "0 2px 12px rgba(212,163,65,0.25)",
+                      }}
                     >
                       Drop the first hook
                     </button>
                   </>
                 ) : (
-                  <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.4)" }}>
                     No hooks match this filter.
                   </p>
                 )}
