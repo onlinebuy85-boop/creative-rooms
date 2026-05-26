@@ -100,8 +100,8 @@ function SidebarContent() {
               className="absolute pointer-events-none transition-opacity duration-700"
               style={{
                 left: -8, top: "50%", transform: "translateY(-50%)",
-                width: 90, height: 80,
-                background: "radial-gradient(ellipse at 38% 50%, rgba(200,130,30,0.32) 0%, rgba(212,163,65,0.10) 45%, transparent 70%)",
+                width: 180, height: 80,
+                background: "radial-gradient(ellipse at 28% 50%, rgba(200,120,15,0.42) 0%, rgba(212,163,65,0.12) 48%, transparent 70%)",
                 animation: "warm-glow 3.5s ease-in-out infinite",
               }}
             />
@@ -114,15 +114,16 @@ function SidebarContent() {
               alt="Creative Rooms"
               style={{
                 width: "100%", height: "auto", objectFit: "contain", position: "relative",
-                filter: "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))",
+                maxWidth: 200,
+                filter: "brightness(1.42) drop-shadow(0 0 18px rgba(212,163,65,0.65)) drop-shadow(0 0 6px rgba(212,163,65,0.38))",
                 transition: "filter 0.4s ease, transform 0.3s ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.35) drop-shadow(0 0 20px rgba(212,163,65,0.65))";
+                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.6) drop-shadow(0 0 28px rgba(212,163,65,0.85)) drop-shadow(0 0 10px rgba(212,163,65,0.52))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1.02)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))";
+                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.42) drop-shadow(0 0 18px rgba(212,163,65,0.65)) drop-shadow(0 0 6px rgba(212,163,65,0.38))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
               }}
             />
@@ -282,25 +283,35 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <Link href="/">
           <div className="relative">
-            {/* Ambient pulse behind logo */}
+            {/* Wide ambient pulse behind logo — scaled for new horizontal logo */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -10, top: "50%", transform: "translateY(-50%)",
-                width: 80, height: 60,
-                background: "radial-gradient(ellipse at 40% 50%, rgba(212,163,65,0.22) 0%, transparent 70%)",
+                left: -16, top: "50%", transform: "translateY(-50%)",
+                width: 160, height: 70,
+                background: "radial-gradient(ellipse at 28% 50%, rgba(200,120,15,0.38) 0%, rgba(212,163,65,0.10) 50%, transparent 72%)",
                 animation: "warm-glow 3.2s ease-in-out infinite",
+              }}
+            />
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: -6, top: "50%", transform: "translateY(-50%)",
+                width: 60, height: 48,
+                background: "radial-gradient(ellipse at 35% 50%, rgba(212,163,65,0.2) 0%, transparent 65%)",
+                animation: "breathe 2.2s ease-in-out infinite",
+                animationDelay: "0.6s",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Rooms"
               style={{
-                height: 40,
-                width: "auto",
+                width: "min(230px, 59vw)",
+                height: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.2) drop-shadow(0 0 12px rgba(212,163,65,0.50))",
+                filter: "brightness(1.48) drop-shadow(0 0 22px rgba(212,163,65,0.72)) drop-shadow(0 0 8px rgba(212,163,65,0.44))",
               }}
             />
           </div>

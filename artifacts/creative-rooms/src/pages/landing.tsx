@@ -120,23 +120,23 @@ export function LandingPage() {
         {/* Brand */}
         <Link href="/">
           <div className="relative group cursor-pointer">
-            {/* Atmospheric warm glow — now pulses with waveform rhythm */}
+            {/* Primary warm glow — wide, breathes slowly */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -16, top: "50%", transform: "translateY(-50%)",
-                width: 140, height: 120,
-                background: "radial-gradient(ellipse at 38% 50%, rgba(200,130,20,0.32) 0%, rgba(212,163,65,0.08) 50%, transparent 72%)",
+                left: -20, top: "50%", transform: "translateY(-50%)",
+                width: 220, height: 130,
+                background: "radial-gradient(ellipse at 30% 50%, rgba(200,120,15,0.42) 0%, rgba(212,163,65,0.12) 45%, transparent 70%)",
                 animation: "warm-glow 3.5s ease-in-out infinite",
               }}
             />
-            {/* Second glow layer — offset phase for waveform pulse feel */}
+            {/* Tight inner pulse — waveform-icon hotspot */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -8, top: "50%", transform: "translateY(-50%)",
-                width: 80, height: 60,
-                background: "radial-gradient(ellipse at 40% 50%, rgba(212,163,65,0.14) 0%, transparent 65%)",
+                left: -4, top: "50%", transform: "translateY(-50%)",
+                width: 90, height: 70,
+                background: "radial-gradient(ellipse at 35% 50%, rgba(212,163,65,0.22) 0%, transparent 65%)",
                 animation: "breathe 2.2s ease-in-out infinite",
                 animationDelay: "0.8s",
               }}
@@ -145,21 +145,21 @@ export function LandingPage() {
               src={logoImg}
               alt="Creative Rooms"
               style={{
-                height: "clamp(72px, 9vw, 104px)",
-                width: "auto",
+                width: "clamp(200px, 26vw, 310px)",
+                height: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.22) drop-shadow(0 0 20px rgba(212,163,65,0.48))",
+                filter: "brightness(1.5) drop-shadow(0 0 30px rgba(212,163,65,0.75)) drop-shadow(0 0 10px rgba(212,163,65,0.45))",
                 transition: "filter 0.4s ease, transform 0.3s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.42) drop-shadow(0 0 32px rgba(212,163,65,0.78))";
+                  "brightness(1.7) drop-shadow(0 0 44px rgba(212,163,65,0.92)) drop-shadow(0 0 14px rgba(212,163,65,0.6))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1.025)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.22) drop-shadow(0 0 20px rgba(212,163,65,0.48))";
+                  "brightness(1.5) drop-shadow(0 0 30px rgba(212,163,65,0.75)) drop-shadow(0 0 10px rgba(212,163,65,0.45))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
               }}
             />
