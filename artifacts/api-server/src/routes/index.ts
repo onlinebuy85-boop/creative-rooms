@@ -5,6 +5,7 @@ import roomsRouter from "./rooms";
 import messagesRouter from "./messages";
 import demosRouter from "./demos";
 import uploadsRouter from "./uploads";
+import hooksRouter from "./hooks";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(roomsRouter);
 router.use(messagesRouter);
 router.use(demosRouter);
 router.use(uploadsRouter);
+router.use(hooksRouter);
 
 export default router;

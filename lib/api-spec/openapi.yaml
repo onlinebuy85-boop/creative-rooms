@@ -18,6 +18,8 @@ tags:
     description: Room message operations
   - name: demos
     description: Demo upload operations
+  - name: hooks
+    description: Creative hook operations
 
 paths:
   /healthz:
@@ -427,6 +429,83 @@ paths:
         "204":
           description: Deleted
 
+  # ── Hooks ─────────────────────────────────────────────────────────────────
+  /hooks:
+    get:
+      operationId: listHooks
+      tags: [hooks]
+      summary: List active hooks
+      responses:
+        "200":
+          description: List of hooks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hook"
+    post:
+      operationId: createHook
+      tags: [hooks]
+      summary: Drop a new hook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HookInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hook"
+
+  /hooks/{id}:
+    get:
+      operationId: getHook
+      tags: [hooks]
+      summary: Get a hook by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Hook found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hook"
+        "404":
+          description: Not found
+
+  /hooks/{id}/join:
+    post:
+      operationId: joinHook
+      tags: [hooks]
+      summary: Join a hook — creates or joins the associated room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Joined successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hook"
+        "400":
+          description: Hook is full or inactive
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -699,3 +778,70 @@ components:
           type: string
         duration:
           type: integer
+
+    # ── Hook ─────────────────────────────────────────────────────────────────
+    Hook:
+      type: object
+      required: [id, creatorId, title, audioUrl, lookingFor, maxSeats, seatsLeft, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        creatorId:
+          type: integer
+        creatorName:
+          type: ["string", "null"]
+        creatorAvatarUrl:
+          type: ["string", "null"]
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        audioUrl:
+          type: string
+        vibe:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        lookingFor:
+          type: array
+          items:
+            type: string
+        maxSeats:
+          type: integer
+        seatsLeft:
+          type: integer
+        roomId:
+          type: ["integer", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    HookInput:
+      type: object
+      required: [title, audioUrl]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        audioUrl:
+          type: string
+        vibe:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        lookingFor:
+          type: array
+          items:
+            type: string
+        maxSeats:
+          type: integer
+          minimum: 2
+          maximum: 4

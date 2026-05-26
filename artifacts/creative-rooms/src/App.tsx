@@ -19,6 +19,7 @@ import { NewRoomPage } from "@/pages/room-new";
 import { RoomPage } from "@/pages/room-view";
 import { ProfilePage } from "@/pages/profile-view";
 import { EditProfilePage } from "@/pages/profile-edit";
+import { HooksPage } from "@/pages/hooks";
 import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/layout/app-layout";
 import { useGetMyProfile } from "@workspace/api-client-react";
@@ -196,6 +197,15 @@ function App() {
               </Show>
               <Show when="signed-out">
                 <GuestRoute component={DiscoverPage} />
+              </Show>
+            </Route>
+
+            <Route path="/hooks">
+              <Show when="signed-in">
+                <ProtectedRoute component={HooksPage} />
+              </Show>
+              <Show when="signed-out">
+                <GuestRoute component={HooksPage} />
               </Show>
             </Route>
             

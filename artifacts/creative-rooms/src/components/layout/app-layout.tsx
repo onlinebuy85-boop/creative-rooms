@@ -4,7 +4,7 @@ import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-
 import logoImg from "@assets/creative-rooms-wordmark.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LayoutDashboard, Compass, Plus, LogOut, User as UserIcon, Settings, Menu } from "lucide-react";
+import { LayoutDashboard, Compass, Plus, LogOut, User as UserIcon, Settings, Menu, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -35,6 +35,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       <Link href="/discover" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
         <Compass className="w-4 h-4" />
         <span>Discover</span>
+      </Link>
+      <Link href="/hooks" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
+        <Radio className="w-4 h-4" />
+        <span>Hooks</span>
       </Link>
       {user && (
         <Link href="/rooms/new" className="flex items-center gap-3 px-3 py-2 text-sm text-primary hover:text-primary/80 transition-colors hover-elevate rounded-md font-medium">

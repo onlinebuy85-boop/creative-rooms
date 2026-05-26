@@ -23,6 +23,8 @@ import type {
   Demo,
   DemoInput,
   HealthStatus,
+  Hook,
+  HookInput,
   ListRoomsParams,
   Message,
   MessageInput,
@@ -1612,5 +1614,300 @@ export const useDeleteDemo = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteDemoMutationOptions(options));
+    }
+
+export const getListHooksUrl = () => {
+
+
+
+
+  return `/api/hooks`
+}
+
+/**
+ * @summary List active hooks
+ */
+export const listHooks = async ( options?: RequestInit): Promise<Hook[]> => {
+
+  return customFetch<Hook[]>(getListHooksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListHooksQueryKey = () => {
+    return [
+    `/api/hooks`
+    ] as const;
+    }
+
+
+export const getListHooksQueryOptions = <TData = Awaited<ReturnType<typeof listHooks>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listHooks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListHooksQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listHooks>>> = ({ signal }) => listHooks({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listHooks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListHooksQueryResult = NonNullable<Awaited<ReturnType<typeof listHooks>>>
+export type ListHooksQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List active hooks
+ */
+
+export function useListHooks<TData = Awaited<ReturnType<typeof listHooks>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listHooks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListHooksQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateHookUrl = () => {
+
+
+
+
+  return `/api/hooks`
+}
+
+/**
+ * @summary Drop a new hook
+ */
+export const createHook = async (hookInput: HookInput, options?: RequestInit): Promise<Hook> => {
+
+  return customFetch<Hook>(getCreateHookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      hookInput,)
+  }
+);}
+
+
+
+
+export const getCreateHookMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createHook>>, TError,{data: BodyType<HookInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createHook>>, TError,{data: BodyType<HookInput>}, TContext> => {
+
+const mutationKey = ['createHook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createHook>>, {data: BodyType<HookInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createHook(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateHookMutationResult = NonNullable<Awaited<ReturnType<typeof createHook>>>
+    export type CreateHookMutationBody = BodyType<HookInput>
+    export type CreateHookMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Drop a new hook
+ */
+export const useCreateHook = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createHook>>, TError,{data: BodyType<HookInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createHook>>,
+        TError,
+        {data: BodyType<HookInput>},
+        TContext
+      > => {
+      return useMutation(getCreateHookMutationOptions(options));
+    }
+
+export const getGetHookUrl = (id: number,) => {
+
+
+
+
+  return `/api/hooks/${id}`
+}
+
+/**
+ * @summary Get a hook by ID
+ */
+export const getHook = async (id: number, options?: RequestInit): Promise<Hook> => {
+
+  return customFetch<Hook>(getGetHookUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetHookQueryKey = (id: number,) => {
+    return [
+    `/api/hooks/${id}`
+    ] as const;
+    }
+
+
+export const getGetHookQueryOptions = <TData = Awaited<ReturnType<typeof getHook>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHook>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHookQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHook>>> = ({ signal }) => getHook(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHook>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetHookQueryResult = NonNullable<Awaited<ReturnType<typeof getHook>>>
+export type GetHookQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a hook by ID
+ */
+
+export function useGetHook<TData = Awaited<ReturnType<typeof getHook>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHook>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetHookQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getJoinHookUrl = (id: number,) => {
+
+
+
+
+  return `/api/hooks/${id}/join`
+}
+
+/**
+ * @summary Join a hook — creates or joins the associated room
+ */
+export const joinHook = async (id: number, options?: RequestInit): Promise<Hook> => {
+
+  return customFetch<Hook>(getJoinHookUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getJoinHookMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinHook>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof joinHook>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['joinHook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinHook>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  joinHook(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type JoinHookMutationResult = NonNullable<Awaited<ReturnType<typeof joinHook>>>
+
+    export type JoinHookMutationError = ErrorType<void>
+
+    /**
+ * @summary Join a hook — creates or joins the associated room
+ */
+export const useJoinHook = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinHook>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof joinHook>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getJoinHookMutationOptions(options));
     }
 

@@ -165,6 +165,44 @@ export interface DemoInput {
   duration?: number;
 }
 
+export interface Hook {
+  id: number;
+  creatorId: number;
+  /** @nullable */
+  creatorName?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  audioUrl: string;
+  /** @nullable */
+  vibe?: string | null;
+  tags?: string[];
+  lookingFor: string[];
+  maxSeats: number;
+  seatsLeft: number;
+  /** @nullable */
+  roomId?: number | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface HookInput {
+  /** @minLength 1 */
+  title: string;
+  description?: string;
+  audioUrl: string;
+  vibe?: string;
+  tags?: string[];
+  lookingFor?: string[];
+  /**
+     * @minimum 2
+     * @maximum 4
+     */
+  maxSeats?: number;
+}
+
 export type ListRoomsParams = {
 genre?: string;
 vibe?: string;

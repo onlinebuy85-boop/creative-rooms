@@ -1,0 +1,160 @@
+New Product Direction: “Hooks” should become a core part of the Creative Rooms ecosystem.
+
+Important:
+Hooks are NOT just file uploads.
+
+Hooks are:
+
+* creative signals
+* unfinished ideas
+* emotional invitations
+* spontaneous collaboration starters
+
+This is a major conceptual difference.
+
+NEW STRUCTURE:
+
+1. HOOKS = ENTRY POINTS
+   Hooks should become their own section/category inside the platform.
+
+Hooks are small creative ideas people throw out into the world:
+
+* guitar riffs
+* melodies
+* chorus ideas
+* piano loops
+* lyric concepts
+* textures
+* unfinished emotional moments
+
+The feeling should be:
+“Does anyone hear something in this?”
+
+2. HOOK FLOW
+   Users should be able to:
+
+* click “Drop a Hook”
+* upload a short audio snippet
+* add a short emotional description
+* choose vibe tags
+* select what they are looking for
+
+Examples:
+
+* vocals needed
+* drums wanted
+* lyrics needed
+* looking for collaborators
+
+Hooks should feel:
+
+* immediate
+* low pressure
+* spontaneous
+* emotional
+* human
+
+NOT:
+
+* polished content uploads
+* social media posts
+* finished songs
+
+3. HOOKS CREATE ROOMS
+   This is important:
+
+When people join a hook,
+a real Creative Room should naturally form around it.
+
+Flow:
+Drop Hook
+→ people join
+→ room forms
+→ collaboration begins
+
+Hooks are the beginning of the creative journey.
+
+Creative Rooms are the deeper collaboration space.
+
+4. SMALL INTIMATE SESSIONS
+   Hooks should create:
+
+* small rooms
+* intimate collaboration
+* emotional creative energy
+
+Recommended:
+2–4 people max per hook room.
+
+When full:
+the room locks automatically.
+
+This creates:
+
+* focus
+* intimacy
+* creative chemistry
+* emotional connection
+
+5. HOOK FEED
+   Build a dedicated Hooks discovery section.
+
+Each hook should display:
+
+* waveform preview
+* creator name
+* emotional description
+* vibe tags
+* open seats remaining
+
+Examples:
+
+🎸 “Late night guitar idea”
+Looking for vocals
+2 spots left
+
+🎹 “Dreamy piano atmosphere”
+Need drums + textures
+
+The feed should feel:
+
+* cinematic
+* alive
+* emotional
+* like creative signals floating through the night
+
+NOT:
+
+* content feed
+* TikTok
+* SoundCloud clone
+
+6. UX DIRECTION
+   Hooks must remain extremely simple.
+
+The user experience should feel:
+
+* effortless
+* inviting
+* emotionally creative
+* immediate
+
+A user should be able to:
+record or upload a hook
+in under 20 seconds.
+
+Avoid:
+
+* complicated upload flows
+* too many settings
+* technical friction
+
+7. OVERALL VISION
+   Creative Rooms is becoming:
+   a human creative signal network.
+
+People are not just uploading music.
+They are sending creative signals into the world
+hoping someone resonates with them.
+
+Protect that feeling throughout the UX and design.

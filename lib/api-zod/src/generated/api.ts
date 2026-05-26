@@ -422,3 +422,98 @@ export const DeleteDemoParams = zod.object({
 })
 
 
+/**
+ * @summary List active hooks
+ */
+export const ListHooksResponseItem = zod.object({
+  "id": zod.number(),
+  "creatorId": zod.number(),
+  "creatorName": zod.string().nullish(),
+  "creatorAvatarUrl": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "audioUrl": zod.string(),
+  "vibe": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "lookingFor": zod.array(zod.string()),
+  "maxSeats": zod.number(),
+  "seatsLeft": zod.number(),
+  "roomId": zod.number().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListHooksResponse = zod.array(ListHooksResponseItem)
+
+
+/**
+ * @summary Drop a new hook
+ */
+
+export const createHookBodyMaxSeatsMin = 2;
+export const createHookBodyMaxSeatsMax = 4;
+
+
+
+export const CreateHookBody = zod.object({
+  "title": zod.string().min(1),
+  "description": zod.string().optional(),
+  "audioUrl": zod.string(),
+  "vibe": zod.string().optional(),
+  "tags": zod.array(zod.string()).optional(),
+  "lookingFor": zod.array(zod.string()).optional(),
+  "maxSeats": zod.number().min(createHookBodyMaxSeatsMin).max(createHookBodyMaxSeatsMax).optional()
+})
+
+
+/**
+ * @summary Get a hook by ID
+ */
+export const GetHookParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetHookResponse = zod.object({
+  "id": zod.number(),
+  "creatorId": zod.number(),
+  "creatorName": zod.string().nullish(),
+  "creatorAvatarUrl": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "audioUrl": zod.string(),
+  "vibe": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "lookingFor": zod.array(zod.string()),
+  "maxSeats": zod.number(),
+  "seatsLeft": zod.number(),
+  "roomId": zod.number().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Join a hook — creates or joins the associated room
+ */
+export const JoinHookParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const JoinHookResponse = zod.object({
+  "id": zod.number(),
+  "creatorId": zod.number(),
+  "creatorName": zod.string().nullish(),
+  "creatorAvatarUrl": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "audioUrl": zod.string(),
+  "vibe": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "lookingFor": zod.array(zod.string()),
+  "maxSeats": zod.number(),
+  "seatsLeft": zod.number(),
+  "roomId": zod.number().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
