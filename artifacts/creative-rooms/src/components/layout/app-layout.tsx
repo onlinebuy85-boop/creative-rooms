@@ -248,7 +248,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   });
 
   return (
-    <div className="min-h-[100dvh] flex bg-background relative">
+    <div className="min-h-[100dvh] flex bg-background relative overflow-x-hidden w-full max-w-[100vw]">
       <div className="bg-noise" />
 
       {/* ── Desktop sidebar ── */}
@@ -296,7 +296,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* ── Main content ── */}
-      <main className="flex-1 md:ml-[240px] min-h-screen pt-[64px] md:pt-0 pb-[72px] md:pb-0 relative z-10">
+      <main className="flex-1 min-w-0 md:ml-[240px] min-h-screen pt-[64px] md:pt-0 pb-[72px] md:pb-0 relative z-10 overflow-x-hidden">
         {children}
       </main>
 
