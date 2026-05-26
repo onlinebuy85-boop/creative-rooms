@@ -340,27 +340,19 @@ export function LandingPage() {
                 Enter the room
               </button>
             </Link>
-            <Link href="/sign-up">
-              <span
-                className="cursor-pointer inline-block text-[13px] tracking-[0.04em] transition-colors hover:text-white/65 text-center sm:text-left py-3 px-2 -my-3"
-                style={{ color: "rgba(255,255,255,0.35)" }}
-              >
-                or listen first
-              </span>
-            </Link>
           </div>
 
-          {/* Guest note */}
+          {/* Cinematic whisper */}
           <p
-            className="text-[11.5px] font-light tracking-[0.06em] mt-8"
+            className="text-[11px] font-light tracking-[0.1em] mt-12"
             style={{
-              color: "rgba(255,255,255,0.24)",
+              color: "rgba(255,255,255,0.18)",
               animation: "pageIn 0.6s ease both",
-              animationDelay: "360ms",
+              animationDelay: "420ms",
               fontStyle: "italic",
             }}
           >
-            No account needed to listen.
+            Quiet rooms are already forming.
           </p>
         </div>
       </section>
