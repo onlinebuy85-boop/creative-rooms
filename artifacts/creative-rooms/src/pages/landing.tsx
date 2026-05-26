@@ -25,8 +25,15 @@ export function LandingPage() {
         <img
           src={heroImg}
           alt=""
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
           className="hero-photo w-full h-full object-cover"
-          style={{ imageRendering: "auto" }}
+          style={{
+            imageRendering: "auto",
+            filter: "saturate(1.05) contrast(1.04)",
+            willChange: "transform",
+          }}
         />
         {/* Desktop vignette — left-heavy for landscape composition */}
         <div
@@ -76,15 +83,15 @@ export function LandingPage() {
       </div>
 
       {/* ── NAV ── */}
-      <header className="relative z-10 flex items-center justify-between px-5 md:px-10 pt-9 md:pt-8 max-w-[1280px] mx-auto">
+      <header className="relative z-10 flex items-center justify-between gap-4 px-5 md:px-10 pt-6 md:pt-8 max-w-[1280px] mx-auto">
         <Link href="/">
-          <div className="relative cursor-pointer">
+          <div className="relative cursor-pointer flex items-center">
             {/* Subtle ambient warmth behind the logo */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -20, top: "50%", transform: "translateY(-50%)",
-                width: "110%", height: 110,
+                left: -16, top: "50%", transform: "translateY(-50%)",
+                width: "108%", height: 80,
                 background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.16) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
               }}
@@ -93,11 +100,11 @@ export function LandingPage() {
               src={logoImg}
               alt="Creative Room"
               style={{
-                width: "clamp(260px, 70vw, 360px)",
-                height: "auto",
+                height: "clamp(32px, 7vw, 44px)",
+                width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.1) drop-shadow(0 0 14px rgba(212,163,65,0.35))",
+                filter: "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))",
               }}
             />
           </div>
@@ -141,14 +148,14 @@ export function LandingPage() {
       </header>
 
       {/* ── HERO ── */}
-      <section className="relative z-10 px-5 md:px-10 pt-16 md:pt-24 pb-14 md:pb-24 max-w-[1280px] mx-auto">
+      <section className="relative z-10 px-5 md:px-10 pt-20 md:pt-28 pb-16 md:pb-28 max-w-[1280px] mx-auto">
         <div className="max-w-[560px]">
 
           {/* Headline */}
           <h1
-            className="font-serif font-normal leading-[1.06] tracking-tight mb-5 md:mb-6 text-white"
+            className="font-serif font-normal leading-[1.08] tracking-tight mb-7 md:mb-8 text-white"
             style={{
-              fontSize: "clamp(2.6rem, 5.5vw, 4.6rem)",
+              fontSize: "clamp(2.4rem, 5.4vw, 4.6rem)",
               animation: "pageIn 0.7s ease both",
             }}
           >
@@ -159,11 +166,11 @@ export function LandingPage() {
 
           {/* Sub */}
           <p
-            className="text-[14px] md:text-[15px] font-light leading-relaxed mb-8 max-w-[420px]"
+            className="text-[14.5px] md:text-[15.5px] font-light leading-[1.75] mb-10 md:mb-11 max-w-[440px]"
             style={{
-              color: "rgba(255,255,255,0.5)",
+              color: "rgba(255,255,255,0.52)",
               animation: "pageIn 0.7s ease both",
-              animationDelay: "120ms",
+              animationDelay: "140ms",
             }}
           >
             Intimate creative rooms for musicians, producers, singers and songwriters.
@@ -204,7 +211,7 @@ export function LandingPage() {
 
           {/* Guest access — single calm line, directly under primary action */}
           <p
-            className="text-[12.5px] font-light tracking-wide mt-5"
+            className="text-[12.5px] font-light tracking-wide mt-7 md:mt-8"
             style={{
               color: "rgba(255,255,255,0.42)",
               animation: "pageIn 0.6s ease both",

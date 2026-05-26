@@ -109,9 +109,9 @@ function SidebarContent() {
               src={logoImg}
               alt="Creative Room"
               style={{
-                width: "100%", height: "auto", objectFit: "contain", position: "relative",
-                maxWidth: 200,
-                filter: "brightness(1.15) drop-shadow(0 0 12px rgba(212,163,65,0.32))",
+                height: 32, width: "auto", objectFit: "contain", position: "relative",
+                maxWidth: 184,
+                filter: "brightness(1.12) drop-shadow(0 0 10px rgba(212,163,65,0.32))",
               }}
             />
           </div>
@@ -261,22 +261,24 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* ── Mobile top bar — logo only ── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-4 border-b border-white/[0.05]"
+        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-5 border-b border-white/[0.05]"
         style={{
-          background: "rgba(10,7,16,0.94)",
-          backdropFilter: "blur(14px)",
-          height: "64px",
+          background: "rgba(10,7,16,0.92)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          height: "calc(60px + env(safe-area-inset-top, 0px))",
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
         <Link href="/">
-          <div className="relative">
-            {/* Subtle ambient warmth */}
+          <div className="relative flex items-center">
+            {/* Subtle ambient warmth — softer, tighter */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -18, top: "50%", transform: "translateY(-50%)",
-                width: "110%", height: 80,
-                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.18) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
+                left: -14, top: "50%", transform: "translateY(-50%)",
+                width: "108%", height: 56,
+                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.14) 0%, rgba(212,163,65,0.025) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
               }}
             />
@@ -284,11 +286,11 @@ export function AppLayout({ children }: AppLayoutProps) {
               src={logoImg}
               alt="Creative Room"
               style={{
-                width: "min(280px, 72vw)",
-                height: "auto",
+                height: 28,
+                width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))",
+                filter: "brightness(1.1) drop-shadow(0 0 10px rgba(212,163,65,0.32))",
               }}
             />
           </div>
@@ -296,7 +298,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* ── Main content ── */}
-      <main className="flex-1 min-w-0 md:ml-[240px] min-h-screen pt-[64px] md:pt-0 pb-[72px] md:pb-0 relative z-10 overflow-x-hidden">
+      <main
+        className="flex-1 min-w-0 md:ml-[240px] min-h-screen md:pt-0 pb-[72px] md:pb-0 relative z-10 overflow-x-hidden"
+        style={{ paddingTop: "calc(60px + env(safe-area-inset-top, 0px))" }}
+      >
         {children}
       </main>
 

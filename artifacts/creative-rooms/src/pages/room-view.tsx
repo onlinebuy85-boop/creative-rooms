@@ -804,7 +804,12 @@ export function RoomPage() {
             <img
               src={logoImg}
               alt="Creative Room"
-              style={{ height: 28, width: "auto", objectFit: "contain" }}
+              style={{
+                height: 28,
+                width: "auto",
+                objectFit: "contain",
+                filter: "brightness(1.12) drop-shadow(0 0 10px rgba(212,163,65,0.32))",
+              }}
             />
           </Link>
         </div>

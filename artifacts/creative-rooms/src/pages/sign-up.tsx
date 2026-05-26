@@ -26,19 +26,19 @@ export function SignUpPage() {
             src={logoImg}
             alt="Creative Room"
             style={{
-              height: 80,
+              height: "clamp(36px, 8vw, 52px)",
               width: "auto",
               objectFit: "contain",
-              filter: "brightness(1.15) drop-shadow(0 0 14px rgba(212,163,65,0.4))",
+              filter: "brightness(1.12) drop-shadow(0 0 12px rgba(212,163,65,0.4))",
               transition: "filter 0.3s ease",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLImageElement).style.filter =
-                "brightness(1.3) drop-shadow(0 0 24px rgba(212,163,65,0.65))";
+                "brightness(1.22) drop-shadow(0 0 18px rgba(212,163,65,0.55))";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLImageElement).style.filter =
-                "brightness(1.15) drop-shadow(0 0 14px rgba(212,163,65,0.4))";
+                "brightness(1.12) drop-shadow(0 0 12px rgba(212,163,65,0.4))";
             }}
           />
         </Link>

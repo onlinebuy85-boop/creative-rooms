@@ -178,19 +178,19 @@ export function AboutPage() {
             src={logoImg}
             alt="Creative Room"
             style={{
-              width: "min(220px, 56vw)",
-              height: "auto",
+              height: "clamp(32px, 7vw, 44px)",
+              width: "auto",
               objectFit: "contain",
-              filter: "brightness(1.42) drop-shadow(0 0 22px rgba(212,163,65,0.68)) drop-shadow(0 0 7px rgba(212,163,65,0.4))",
+              filter: "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))",
               transition: "filter 0.3s ease",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLImageElement).style.filter =
-                "brightness(1.5) drop-shadow(0 0 34px rgba(212,163,65,0.85)) drop-shadow(0 0 10px rgba(212,163,65,0.52))";
+                "brightness(1.2) drop-shadow(0 0 18px rgba(212,163,65,0.5))";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLImageElement).style.filter =
-                "brightness(1.32) drop-shadow(0 0 22px rgba(212,163,65,0.62)) drop-shadow(0 0 7px rgba(212,163,65,0.38))";
+                "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))";
             }}
           />
         </Link>
