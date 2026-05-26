@@ -1,7 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCreateHook, getListHooksQueryKey } from "@workspace/api-client-react";
+import { Loader2, Upload, Music, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
+/* ── seeded waveform helper ─────────────────────────────────────────────────── */
 function seededWave(id: number, bars = 48): number[] {
   let s = ((id * 1664525) + 1013904223) >>> 0;
   return Array.from({ length: bars }, () => {
@@ -10,6 +14,7 @@ function seededWave(id: number, bars = 48): number[] {
   });
 }
 
+/* ── Success panel ──────────────────────────────────────────────────────────── */
 function SuccessPanel({ onClose }: { onClose: () => void }) {
   const bars = seededWave((Date.now() % 10000) | 0);
   useEffect(() => {
@@ -18,11 +23,8 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div
-      className="flex flex-col items-center justify-center py-14 px-6 gap-8 text-center"
-      style={{ animation: "pageIn 0.5s ease both" }}
-    >
-      <div className="flex items-end justify-center gap-[3px] h-16 w-full">
+    <div className="flex flex-col items-center justify-center flex-1 gap-8 text-center px-8 py-16">
+      <div className="flex items-end justify-center gap-[3px] h-16 w-full max-w-[240px]">
         {bars.map((h, i) => (
           <div
             key={i}
@@ -41,11 +43,11 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
         <p className="font-serif text-[1.8rem] mb-2.5" style={{ color: "#d4a341" }}>
           Your hook is live.
         </p>
-        <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <p className="text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
           Your signal is out there.<br />Listening for someone who hears it.
         </p>
       </div>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-3">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
@@ -62,24 +64,19 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2, Upload, Music, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
+/* ── Constants ───────────────────────────────────────────────────────────────── */
 const VIBES = ["Melancholic", "Euphoric", "Raw", "Dreamy", "Intense", "Nostalgic", "Experimental"];
-
 const LOOKING_FOR_OPTIONS = [
   "Vocals", "Lyrics", "Drums", "Bass", "Guitar", "Keys", "Production", "Strings", "Collaborator",
 ];
 
+/* ── Props ─────────────────────────────────────────────────────────────────── */
 interface DropHookModalProps {
   open: boolean;
   onClose: () => void;
 }
 
+/* ── Main component ─────────────────────────────────────────────────────────── */
 export function DropHookModal({ open, onClose }: DropHookModalProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -93,7 +90,26 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [succeeded, setSucceeded] = useState(false);
+  const [visible, setVisible] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /* Lock body scroll when open; animate in/out */
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      /* Slight delay so the DOM mounts before the animation starts */
+      const t = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(t);
+    } else {
+      setVisible(false);
+      const t = setTimeout(() => {
+        document.body.style.overflow = "";
+        document.body.style.touchAction = "";
+      }, 300);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
 
   const createMutation = useCreateHook({
     mutation: {
@@ -102,12 +118,16 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
         setSucceeded(true);
       },
       onError: () => {
-        toast({ title: "Something went wrong", description: "Couldn't drop the hook. Try again.", variant: "destructive" });
+        toast({
+          title: "Something went wrong",
+          description: "Couldn't drop the hook. Try again.",
+          variant: "destructive",
+        });
       },
     },
   });
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setTitle("");
     setDescription("");
     setVibe("");
@@ -116,7 +136,7 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
     setAudioFile(null);
     setSucceeded(false);
     onClose();
-  };
+  }, [onClose]);
 
   const toggleLookingFor = (tag: string) => {
     setLookingFor((prev) =>
@@ -125,9 +145,7 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
   };
 
   const handleFileSelect = (file: File) => {
-    if (file.type.startsWith("audio/")) {
-      setAudioFile(file);
-    }
+    if (file.type.startsWith("audio/")) setAudioFile(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -172,128 +190,237 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
   const isLoading = uploading || createMutation.isPending;
   const canSubmit = title.trim().length > 0 && audioFile !== null && !isLoading;
 
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      {/* Bottom sheet on mobile, centered modal on sm+ */}
-      <DialogContent className="drop-hook-sheet sm:max-w-[520px] bg-card border-border/60 p-0 overflow-hidden">
-        {/* Gold top accent bar */}
-        <div className="h-[2.5px] w-full flex-shrink-0" style={{ background: "linear-gradient(90deg,#e0b050,#c89030)" }} />
+  /* Don't mount at all until first open */
+  if (!open && !visible) return null;
 
-        {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 pb-0 sm:hidden flex-shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
+  return createPortal(
+    <div
+      aria-modal="true"
+      role="dialog"
+      style={{
+        /* Full viewport lock — NO width/height constraints, no transforms */
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        width: "100vw",
+        height: "100dvh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        /* Transition opacity of the whole overlay */
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.25s ease",
+        pointerEvents: open ? "auto" : "none",
+      }}
+    >
+      {/* ── Backdrop ── */}
+      <div
+        onClick={handleClose}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.72)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+        }}
+      />
+
+      {/* ── Sheet panel — true mobile-native bottom sheet ── */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          /* Mobile: full-width, max 94dvh tall, rounded top corners */
+          width: "100%",
+          maxHeight: "94dvh",
+          /* Desktop: centered modal */
+          maxWidth: "min(520px, 100vw)",
+          display: "flex",
+          flexDirection: "column",
+          background: "hsl(270 16% 8%)",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "20px 20px 0 0",
+          overflow: "hidden",
+          /* Slide in from bottom */
+          transform: visible ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.32s cubic-bezier(0.32,0.72,0,1)",
+          /* Ensure no horizontal overflow bleeds out */
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Gold accent line */}
+        <div style={{ height: 2.5, background: "linear-gradient(90deg,#e0b050,#c89030)", flexShrink: 0 }} />
+
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", flexShrink: 0 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.18)" }} />
         </div>
 
-        {succeeded ? (
-          <SuccessPanel onClose={handleClose} />
-        ) : (
-          <div className="overflow-y-auto" style={{ maxHeight: "calc(94vh - 40px)" }}>
-            <div className="px-5 pt-5 pb-2 sm:px-6 sm:pt-6">
-              <DialogHeader>
-                <DialogTitle className="font-serif text-[1.45rem] sm:text-xl text-foreground">
-                  Drop a Hook
-                </DialogTitle>
-                <DialogDescription
-                  className="text-[14px] sm:text-sm leading-relaxed mt-1"
-                  style={{ color: "rgba(255,255,255,0.45)" }}
-                >
-                  A short signal — a riff, a melody, a feeling. Drop it and see who shows up.
-                </DialogDescription>
-              </DialogHeader>
-            </div>
+        {/* ── Header bar (sticky) ── */}
+        <div style={{
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          padding: "4px 20px 0",
+        }}>
+          <div style={{ paddingBottom: 8 }}>
+            <h2 style={{ fontFamily: "var(--font-serif, Georgia, serif)", fontSize: "1.45rem", color: "rgba(255,255,255,0.96)", margin: 0, lineHeight: 1.2 }}>
+              Drop a Hook
+            </h2>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", margin: "6px 0 0", lineHeight: 1.5 }}>
+              A short signal — a riff, a melody, a feeling.
+            </p>
+          </div>
+          <button
+            onClick={handleClose}
+            aria-label="Close"
+            style={{
+              flexShrink: 0,
+              marginTop: 2,
+              width: 36,
+              height: 36,
+              borderRadius: 99,
+              background: "rgba(255,255,255,0.07)",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "rgba(255,255,255,0.5)",
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-            <form onSubmit={handleSubmit} className="px-5 pb-6 sm:px-6 sm:pb-7 space-y-7 sm:space-y-5">
-
+        {/* ── Scrollable content ── */}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          WebkitOverflowScrolling: "touch",
+          /* Prevent content from ever being wider than viewport */
+          width: "100%",
+          boxSizing: "border-box",
+        }}>
+          {succeeded ? (
+            <SuccessPanel onClose={handleClose} />
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 24,
+                padding: "16px 20px",
+                paddingBottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
+                width: "100%",
+                boxSizing: "border-box",
+              }}
+            >
               {/* ── Audio upload ── */}
-              <div className="space-y-3">
-                <label className="block text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <section>
+                <label style={{ display: "block", fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.88)", marginBottom: 10 }}>
                   Audio snippet <span style={{ color: "#d45a5a" }}>*</span>
                 </label>
+
                 {audioFile ? (
-                  <div
-                    className="flex items-center gap-4 px-4 py-4 rounded-xl"
-                    style={{
-                      background: "rgba(212,163,65,0.08)",
-                      border: "1px solid rgba(212,163,65,0.35)",
-                      boxShadow: "0 0 16px rgba(212,163,65,0.08)",
-                    }}
-                  >
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(212,163,65,0.15)", border: "1px solid rgba(212,163,65,0.3)" }}
-                    >
-                      <Music className="w-5 h-5" style={{ color: "#d4a341" }} />
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "14px 16px",
+                    borderRadius: 14,
+                    background: "rgba(212,163,65,0.08)",
+                    border: "1.5px solid rgba(212,163,65,0.35)",
+                    boxShadow: "0 0 20px rgba(212,163,65,0.08)",
+                    boxSizing: "border-box",
+                    width: "100%",
+                  }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 99, flexShrink: 0,
+                      background: "rgba(212,163,65,0.14)", border: "1.5px solid rgba(212,163,65,0.3)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <Music size={20} color="#d4a341" />
                     </div>
-                    <span
-                      className="text-[14px] font-medium flex-1 truncate"
-                      style={{ color: "rgba(255,255,255,0.85)" }}
-                    >
+                    <span style={{ flex: 1, fontSize: 14, color: "rgba(255,255,255,0.88)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {audioFile.name}
                     </span>
                     <button
                       type="button"
                       onClick={() => setAudioFile(null)}
-                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                       style={{
-                        background: "rgba(255,255,255,0.07)",
-                        color: "rgba(255,255,255,0.5)",
+                        flexShrink: 0, width: 32, height: 32, borderRadius: 99,
+                        background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "rgba(255,255,255,0.45)",
                       }}
                     >
-                      <X className="w-4 h-4" />
+                      <X size={16} />
                     </button>
                   </div>
                 ) : (
                   <div
-                    className="relative flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200"
-                    style={{
-                      padding: "2rem 1.25rem",
-                      borderRadius: 16,
-                      border: `2px dashed ${dragOver ? "rgba(212,163,65,0.7)" : "rgba(255,255,255,0.22)"}`,
-                      background: dragOver ? "rgba(212,163,65,0.06)" : "rgba(255,255,255,0.025)",
-                      boxShadow: dragOver ? "0 0 24px rgba(212,163,65,0.12)" : "none",
-                    }}
                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 14,
+                      padding: "36px 20px",
+                      borderRadius: 16,
+                      border: `2px dashed ${dragOver ? "rgba(212,163,65,0.8)" : "rgba(255,255,255,0.2)"}`,
+                      background: dragOver ? "rgba(212,163,65,0.06)" : "rgba(255,255,255,0.03)",
+                      boxShadow: dragOver ? "0 0 28px rgba(212,163,65,0.15)" : "none",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      textAlign: "center",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
                   >
-                    <div
-                      className="w-14 h-14 rounded-full flex items-center justify-center"
-                      style={{
-                        background: "rgba(212,163,65,0.1)",
-                        border: "1px solid rgba(212,163,65,0.25)",
-                      }}
-                    >
-                      <Upload className="w-6 h-6" style={{ color: "rgba(212,163,65,0.75)" }} />
+                    <div style={{
+                      width: 64, height: 64, borderRadius: 99,
+                      background: "rgba(212,163,65,0.1)", border: "1.5px solid rgba(212,163,65,0.25)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <Upload size={28} color="rgba(212,163,65,0.8)" />
                     </div>
-                    <div className="text-center">
-                      <p className="text-[15px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
+                    <div>
+                      <p style={{ fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,0.75)", margin: 0 }}>
                         Tap to choose a file
                       </p>
-                      <p className="text-[13px] mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: "4px 0 0" }}>
                         or drag &amp; drop here
                       </p>
                     </div>
-                    <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0 }}>
                       MP3 · WAV · M4A &nbsp;·&nbsp; max 20 MB
                     </p>
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="audio/*"
-                      className="hidden"
+                      style={{ display: "none" }}
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
                     />
                   </div>
                 )}
-              </div>
+              </section>
 
               {/* ── Title ── */}
-              <div className="space-y-2.5">
+              <section>
                 <label
                   htmlFor="hook-title"
-                  className="block text-[15px] sm:text-sm font-semibold sm:font-medium"
-                  style={{ color: "rgba(255,255,255,0.85)" }}
+                  style={{ display: "block", fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.88)", marginBottom: 10 }}
                 >
                   Title <span style={{ color: "#d45a5a" }}>*</span>
                 </label>
@@ -304,67 +431,71 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Late night guitar idea..."
                   autoComplete="off"
-                  className="w-full rounded-xl outline-none transition-all duration-200 placeholder:text-[rgba(255,255,255,0.25)]"
                   style={{
+                    display: "block",
+                    width: "100%",
                     height: 52,
                     padding: "0 16px",
                     fontSize: 16,
-                    background: "rgba(255,255,255,0.05)",
-                    border: title
-                      ? "1.5px solid rgba(212,163,65,0.45)"
-                      : "1.5px solid rgba(255,255,255,0.12)",
+                    borderRadius: 12,
+                    background: "rgba(255,255,255,0.06)",
+                    border: title ? "1.5px solid rgba(212,163,65,0.5)" : "1.5px solid rgba(255,255,255,0.14)",
                     color: "rgba(255,255,255,0.9)",
-                    boxShadow: title ? "0 0 0 3px rgba(212,163,65,0.06)" : "none",
+                    outline: "none",
+                    boxShadow: title ? "0 0 0 3px rgba(212,163,65,0.08)" : "none",
+                    boxSizing: "border-box",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 />
-              </div>
+              </section>
 
               {/* ── Description ── */}
-              <div className="space-y-2.5">
+              <section>
                 <label
                   htmlFor="hook-desc"
-                  className="block text-[15px] sm:text-sm font-semibold sm:font-medium"
-                  style={{ color: "rgba(255,255,255,0.85)" }}
+                  style={{ display: "block", fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.88)", marginBottom: 4 }}
                 >
-                  What&rsquo;s the vibe?{" "}
-                  <span className="text-[13px] font-normal" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    optional
-                  </span>
+                  What's the vibe?{" "}
+                  <span style={{ fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.3)" }}>optional</span>
                 </label>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: "0 0 10px" }}>
+                  Describe the feeling, context, or mood.
+                </p>
                 <textarea
                   id="hook-desc"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="A loop I can't shake. Sounds like 3am and cathedral reverb..."
-                  className="w-full rounded-xl outline-none resize-none transition-all duration-200 placeholder:text-[rgba(255,255,255,0.25)] leading-relaxed"
                   rows={3}
                   style={{
+                    display: "block",
+                    width: "100%",
                     padding: "14px 16px",
                     fontSize: 16,
-                    background: "rgba(255,255,255,0.05)",
-                    border: description
-                      ? "1.5px solid rgba(212,163,65,0.45)"
-                      : "1.5px solid rgba(255,255,255,0.12)",
+                    lineHeight: 1.55,
+                    borderRadius: 12,
+                    background: "rgba(255,255,255,0.06)",
+                    border: description ? "1.5px solid rgba(212,163,65,0.5)" : "1.5px solid rgba(255,255,255,0.14)",
                     color: "rgba(255,255,255,0.9)",
-                    boxShadow: description ? "0 0 0 3px rgba(212,163,65,0.06)" : "none",
+                    outline: "none",
+                    resize: "none",
+                    boxShadow: description ? "0 0 0 3px rgba(212,163,65,0.08)" : "none",
+                    boxSizing: "border-box",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 />
-              </div>
+              </section>
 
               {/* ── Emotional vibe ── */}
-              <div className="space-y-3">
-                <div>
-                  <p className="text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
-                    Emotional vibe{" "}
-                    <span className="text-[13px] font-normal" style={{ color: "rgba(255,255,255,0.3)" }}>
-                      optional
-                    </span>
-                  </p>
-                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    Pick one that best describes the feeling
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2.5">
+              <section>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.88)", margin: "0 0 4px" }}>
+                  Emotional vibe{" "}
+                  <span style={{ fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.3)" }}>optional</span>
+                </p>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: "0 0 12px" }}>
+                  Pick one that best describes the feeling
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                   {VIBES.map((v) => {
                     const sel = vibe === v;
                     return (
@@ -372,23 +503,23 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
                         key={v}
                         type="button"
                         onClick={() => setVibe(sel ? "" : v)}
-                        className="rounded-full transition-all duration-200 active:scale-95"
                         style={{
-                          padding: "9px 18px",
+                          padding: "10px 18px",
                           fontSize: 14,
                           fontWeight: sel ? 600 : 400,
-                          ...(sel
-                            ? {
-                                background: "linear-gradient(135deg,#e0b050,#c89030)",
-                                color: "#1a0f00",
-                                boxShadow: "0 0 16px rgba(212,163,65,0.35)",
-                                border: "1.5px solid transparent",
-                              }
-                            : {
-                                background: "rgba(255,255,255,0.05)",
-                                border: "1.5px solid rgba(255,255,255,0.13)",
-                                color: "rgba(255,255,255,0.65)",
-                              }),
+                          borderRadius: 99,
+                          cursor: "pointer",
+                          transition: "all 0.18s",
+                          ...(sel ? {
+                            background: "linear-gradient(135deg,#e0b050,#c89030)",
+                            color: "#1a0f00",
+                            border: "1.5px solid transparent",
+                            boxShadow: "0 0 18px rgba(212,163,65,0.4)",
+                          } : {
+                            background: "rgba(255,255,255,0.055)",
+                            border: "1.5px solid rgba(255,255,255,0.14)",
+                            color: "rgba(255,255,255,0.65)",
+                          }),
                         }}
                       >
                         {v}
@@ -396,22 +527,18 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
                     );
                   })}
                 </div>
-              </div>
+              </section>
 
               {/* ── Looking for ── */}
-              <div className="space-y-3">
-                <div>
-                  <p className="text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
-                    Looking for{" "}
-                    <span className="text-[13px] font-normal" style={{ color: "rgba(255,255,255,0.3)" }}>
-                      optional
-                    </span>
-                  </p>
-                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    What skills do you want to collaborate with?
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2.5">
+              <section>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.88)", margin: "0 0 4px" }}>
+                  Looking for{" "}
+                  <span style={{ fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.3)" }}>optional</span>
+                </p>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: "0 0 12px" }}>
+                  What skills do you want to collaborate with?
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                   {LOOKING_FOR_OPTIONS.map((tag) => {
                     const sel = lookingFor.includes(tag);
                     return (
@@ -419,23 +546,23 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
                         key={tag}
                         type="button"
                         onClick={() => toggleLookingFor(tag)}
-                        className="rounded-full transition-all duration-200 active:scale-95"
                         style={{
-                          padding: "9px 18px",
+                          padding: "10px 18px",
                           fontSize: 14,
                           fontWeight: sel ? 600 : 400,
-                          ...(sel
-                            ? {
-                                background: "rgba(212,163,65,0.14)",
-                                border: "1.5px solid rgba(212,163,65,0.5)",
-                                color: "#d4a341",
-                                boxShadow: "0 0 14px rgba(212,163,65,0.2)",
-                              }
-                            : {
-                                background: "rgba(255,255,255,0.04)",
-                                border: "1.5px solid rgba(255,255,255,0.11)",
-                                color: "rgba(255,255,255,0.55)",
-                              }),
+                          borderRadius: 99,
+                          cursor: "pointer",
+                          transition: "all 0.18s",
+                          ...(sel ? {
+                            background: "rgba(212,163,65,0.14)",
+                            border: "1.5px solid rgba(212,163,65,0.55)",
+                            color: "#d4a341",
+                            boxShadow: "0 0 16px rgba(212,163,65,0.22)",
+                          } : {
+                            background: "rgba(255,255,255,0.045)",
+                            border: "1.5px solid rgba(255,255,255,0.12)",
+                            color: "rgba(255,255,255,0.58)",
+                          }),
                         }}
                       >
                         {tag}
@@ -443,19 +570,17 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
                     );
                   })}
                 </div>
-              </div>
+              </section>
 
               {/* ── Room size ── */}
-              <div className="space-y-3">
-                <div>
-                  <p className="text-[15px] sm:text-sm font-semibold sm:font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
-                    Room size
-                  </p>
-                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    How many creators can join?
-                  </p>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
+              <section>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.88)", margin: "0 0 4px" }}>
+                  Room size
+                </p>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: "0 0 12px" }}>
+                  How many creators can join?
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
                   {[2, 3, 4].map((n) => {
                     const sel = maxSeats === n;
                     return (
@@ -463,69 +588,88 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
                         key={n}
                         type="button"
                         onClick={() => setMaxSeats(n)}
-                        className="rounded-xl transition-all duration-200 active:scale-95 text-center"
                         style={{
                           padding: "14px 8px",
-                          ...(sel
-                            ? {
-                                background: "rgba(212,163,65,0.12)",
-                                border: "1.5px solid rgba(212,163,65,0.45)",
-                                color: "#d4a341",
-                                boxShadow: "0 0 16px rgba(212,163,65,0.18)",
-                              }
-                            : {
-                                background: "rgba(255,255,255,0.04)",
-                                border: "1.5px solid rgba(255,255,255,0.1)",
-                                color: "rgba(255,255,255,0.5)",
-                              }),
+                          borderRadius: 14,
+                          cursor: "pointer",
+                          textAlign: "center",
+                          transition: "all 0.18s",
+                          ...(sel ? {
+                            background: "rgba(212,163,65,0.12)",
+                            border: "1.5px solid rgba(212,163,65,0.5)",
+                            boxShadow: "0 0 18px rgba(212,163,65,0.18)",
+                          } : {
+                            background: "rgba(255,255,255,0.045)",
+                            border: "1.5px solid rgba(255,255,255,0.11)",
+                          }),
                         }}
                       >
-                        <span className="block text-[18px] font-bold">{n}</span>
-                        <span className="block text-[11px] mt-0.5" style={{ opacity: 0.7 }}>
-                          {n === 1 ? "person" : "people"}
+                        <span style={{ display: "block", fontSize: 22, fontWeight: 700, color: sel ? "#d4a341" : "rgba(255,255,255,0.7)" }}>
+                          {n}
+                        </span>
+                        <span style={{ display: "block", fontSize: 11, marginTop: 3, color: sel ? "rgba(212,163,65,0.75)" : "rgba(255,255,255,0.35)" }}>
+                          {n === 2 ? "duo" : n === 3 ? "trio" : "quartet"}
                         </span>
                       </button>
                     );
                   })}
                 </div>
-              </div>
+              </section>
 
               {/* ── Actions ── */}
-              <div className="flex gap-3 pt-2">
-                <Button
+              <div style={{ display: "flex", gap: 12, paddingTop: 4 }}>
+                <button
                   type="button"
-                  variant="ghost"
                   onClick={handleClose}
-                  className="flex-1 rounded-full h-12 text-[15px]"
-                  style={{ color: "rgba(255,255,255,0.45)" }}
+                  style={{
+                    flex: 1,
+                    height: 52,
+                    borderRadius: 99,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1.5px solid rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.5)",
+                    fontSize: 15,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="flex-1 h-12 rounded-full text-[15px] font-semibold transition-all"
-                  style={
-                    canSubmit
-                      ? {
-                          background: "linear-gradient(135deg,#e0b050,#c89030)",
-                          color: "#1a0f00",
-                          border: "none",
-                          boxShadow: "0 4px 20px rgba(212,163,65,0.3)",
-                        }
-                      : { border: "none" }
-                  }
+                  style={{
+                    flex: 2,
+                    height: 52,
+                    borderRadius: 99,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    cursor: canSubmit ? "pointer" : "default",
+                    border: "none",
+                    transition: "all 0.15s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    ...(canSubmit ? {
+                      background: "linear-gradient(135deg,#e0b050,#c89030)",
+                      color: "#1a0f00",
+                      boxShadow: "0 4px 24px rgba(212,163,65,0.35)",
+                    } : {
+                      background: "rgba(255,255,255,0.06)",
+                      color: "rgba(255,255,255,0.3)",
+                    }),
+                  }}
                 >
-                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Drop it"}
-                </Button>
+                  {isLoading ? <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} /> : "Drop it"}
+                </button>
               </div>
-
-              {/* Safe area spacing for mobile home indicator */}
-              <div className="sm:hidden h-4" />
             </form>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
