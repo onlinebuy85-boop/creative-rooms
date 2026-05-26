@@ -49,7 +49,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <img
                 src={logoImg}
                 alt="Creative Rooms"
-                style={{ height: 24, width: "auto", objectFit: "contain" }}
+                style={{ height: 34, width: "auto", objectFit: "contain" }}
               />
             </Link>
             <nav className="hidden md:flex items-center gap-2">

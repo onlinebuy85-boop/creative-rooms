@@ -4,13 +4,6 @@ import { Play } from "lucide-react";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
 import logoImg from "@assets/creative-rooms-wordmark.png";
 
-const SOCIAL_AVATARS = [
-  { initials: "LV", bg: "#7c4a1e" },
-  { initials: "MD", bg: "#1e3a5f" },
-  { initials: "RH", bg: "#4a1d6e" },
-  { initials: "SK", bg: "#7f1d1d" },
-  { initials: "AM", bg: "#14532d" },
-];
 
 export function LandingPage() {
   return (
@@ -48,7 +41,7 @@ export function LandingPage() {
           <img
             src={logoImg}
             alt="Creative Rooms"
-            style={{ height: 30, width: "auto", objectFit: "contain" }}
+            style={{ height: 44, width: "auto", objectFit: "contain" }}
           />
         </Link>
 
@@ -136,42 +129,6 @@ export function LandingPage() {
             </Button>
           </div>
 
-          {/* ── SOCIAL PROOF ── */}
-          <div className="flex items-center gap-3 pt-2">
-            {/* Overlapping avatars */}
-            <div className="flex -space-x-2">
-              {SOCIAL_AVATARS.map((a, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full border-[1.5px] flex items-center justify-center text-white text-[11px] font-semibold"
-                  style={{
-                    background: a.bg,
-                    borderColor: "rgba(10,8,14,0.9)",
-                    zIndex: SOCIAL_AVATARS.length - i,
-                    position: "relative",
-                    boxShadow: "0 1px 6px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  {a.initials}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Live green dot */}
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{
-                  background: "#4ade80",
-                  boxShadow: "0 0 7px 2px rgba(74,222,128,0.55)",
-                  animation: "pulse 2.4s ease-in-out infinite",
-                }}
-              />
-              <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.48)" }}>
-                <span style={{ color: "rgba(255,255,255,0.72)" }}>2,847</span> creatives online now
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -179,10 +136,6 @@ export function LandingPage() {
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(18px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.65; transform: scale(1.25); }
         }
       `}</style>
     </div>

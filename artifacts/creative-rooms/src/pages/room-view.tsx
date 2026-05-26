@@ -22,9 +22,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import {
   Send, Music2, Users, Loader2, ArrowLeft, Headphones,
-  UploadCloud, LogOut, Mic, MicOff, PhoneCall, PhoneOff, X,
+  LogOut, Mic, MicOff, PhoneCall, PhoneOff,
 } from "lucide-react";
 import wordmarkImg from "@assets/creative-rooms-wordmark.png";
+import { DemoDropzone } from "@/components/demo-dropzone";
 
 /* ── Mood color from room vibe / genres ── */
 function moodColor(vibe = "", genres: string[] = []): string {
@@ -185,10 +186,6 @@ export function RoomPage() {
   const [messageInput, setMessageInput] = useState("");
   const [typingUsers, setTypingUsers] = useState<Map<number, string>>(new Map());
   const [onlineIds, setOnlineIds] = useState<Set<number>>(new Set());
-  const [showUploadForm, setShowUploadForm] = useState(false);
-  const [demoTitle, setDemoTitle] = useState("");
-  const [demoUrl, setDemoUrl] = useState("");
-  const [demoDesc, setDemoDesc] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -319,20 +316,19 @@ export function RoomPage() {
     );
   };
 
-  const handleDemoUpload = () => {
-    if (!demoTitle.trim() || !demoUrl.trim()) return;
-    uploadDemo.mutate(
-      {
-        id: roomId,
-        data: { title: demoTitle.trim(), fileUrl: demoUrl.trim(), description: demoDesc.trim() || undefined },
-      },
-      {
-        onSuccess: () => {
-          setDemoTitle(""); setDemoUrl(""); setDemoDesc(""); setShowUploadForm(false);
-          queryClient.invalidateQueries({ queryKey: ["getRoomDemos", roomId] });
+  const handleDemoUploaded = async (fileUrl: string, title: string, description: string) => {
+    await new Promise<void>((resolve, reject) => {
+      uploadDemo.mutate(
+        { id: roomId, data: { title, fileUrl, description: description || undefined } },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["getRoomDemos", roomId] });
+            resolve();
+          },
+          onError: reject,
         },
-      },
-    );
+      );
+    });
   };
 
   if (roomLoading || !room) {
@@ -505,7 +501,11 @@ export function RoomPage() {
       </header>
 
       {/* ── BODY ── */}
-      <div className="flex flex-1 overflow-hidden relative z-10">
+      <DemoDropzone
+        enabled={!!isMember}
+        onUpload={handleDemoUploaded}
+        className="flex flex-1 overflow-hidden z-10"
+      >
 
         {/* ── Sidebar ── */}
         <aside
@@ -816,69 +816,6 @@ export function RoomPage() {
             <TabsContent value="demos" className="flex-1 flex flex-col m-0 outline-none data-[state=inactive]:hidden overflow-y-auto px-5 py-5">
               <div className="max-w-3xl mx-auto w-full space-y-4">
 
-                {/* Upload toggle */}
-                {isMember && (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setShowUploadForm((p) => !p)}
-                      className="flex items-center gap-2 h-10 px-5 rounded-full text-[13px] font-medium transition-all hover:brightness-110"
-                      style={{
-                        background: showUploadForm ? "rgba(255,255,255,0.07)" : "rgba(212,163,65,0.12)",
-                        border: `1px solid ${showUploadForm ? "rgba(255,255,255,0.12)" : "rgba(212,163,65,0.3)"}`,
-                        color: showUploadForm ? "rgba(255,255,255,0.55)" : "#d4a341",
-                      }}
-                    >
-                      {showUploadForm ? <><X className="w-4 h-4" /> Cancel</> : <><UploadCloud className="w-4 h-4" /> Share a demo</>}
-                    </button>
-
-                    {/* Upload form */}
-                    {showUploadForm && (
-                      <div
-                        className="mt-3 p-5 rounded-2xl space-y-3"
-                        style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          animation: "stepIn 0.3s ease both",
-                        }}
-                      >
-                        <input
-                          type="text"
-                          placeholder="What's this called?"
-                          value={demoTitle}
-                          onChange={(e) => setDemoTitle(e.target.value)}
-                          className="w-full h-10 px-4 rounded-xl text-[13px] outline-none"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.82)" }}
-                        />
-                        <input
-                          type="url"
-                          placeholder="Link to your audio (SoundCloud, Dropbox, etc.)"
-                          value={demoUrl}
-                          onChange={(e) => setDemoUrl(e.target.value)}
-                          className="w-full h-10 px-4 rounded-xl text-[13px] outline-none"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.82)" }}
-                        />
-                        <input
-                          type="text"
-                          placeholder="What's the feeling? (optional)"
-                          value={demoDesc}
-                          onChange={(e) => setDemoDesc(e.target.value)}
-                          className="w-full h-10 px-4 rounded-xl text-[13px] outline-none"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.82)" }}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleDemoUpload}
-                          disabled={!demoTitle.trim() || !demoUrl.trim() || uploadDemo.isPending}
-                          className="h-10 px-6 rounded-full text-[13px] font-medium transition-all hover:brightness-110 disabled:opacity-40"
-                          style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
-                        >
-                          {uploadDemo.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Share demo"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* Demo list */}
                 {!demos?.length ? (
@@ -886,7 +823,12 @@ export function RoomPage() {
                     <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ background: "rgba(255,255,255,0.04)" }}>
                       <Music2 className="w-5 h-5 text-white/20" />
                     </div>
-                    <p className="text-[13px] text-white/28 font-light">No demos shared yet. Drop a riff, a melody, an idea.</p>
+                    <p className="text-[13px] text-white/28 font-light">No demos yet.</p>
+                    {isMember && (
+                      <p className="text-[12px] text-white/18 font-light mt-1.5">
+                        Drag an audio file into the room to share one.
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -899,7 +841,7 @@ export function RoomPage() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </DemoDropzone>
 
       <style>{`
         @keyframes miniWave {
