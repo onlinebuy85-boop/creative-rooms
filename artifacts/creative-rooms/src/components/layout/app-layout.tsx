@@ -95,36 +95,23 @@ function SidebarContent() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}
       >
         <Link href="/">
-          <div className="relative group cursor-pointer" title="Return to home">
+          <div className="relative cursor-pointer" title="Return to home">
             <div
-              className="absolute pointer-events-none transition-opacity duration-700"
+              className="absolute pointer-events-none"
               style={{
-                left: -8, top: "50%", transform: "translateY(-50%)",
-                width: 180, height: 80,
-                background: "radial-gradient(ellipse at 28% 50%, rgba(200,120,15,0.42) 0%, rgba(212,163,65,0.12) 48%, transparent 70%)",
-                animation: "warm-glow 3.5s ease-in-out infinite",
+                left: -10, top: "50%", transform: "translateY(-50%)",
+                width: 170, height: 70,
+                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.20) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
+                animation: "warm-glow 5s ease-in-out infinite",
               }}
-            />
-            <div
-              className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{ background: "radial-gradient(ellipse at 25% 50%, rgba(212,163,65,0.18) 0%, transparent 65%)" }}
             />
             <img
               src={logoImg}
-              alt="Creative Rooms"
+              alt="Creative Room"
               style={{
                 width: "100%", height: "auto", objectFit: "contain", position: "relative",
                 maxWidth: 200,
-                filter: "brightness(1.42) drop-shadow(0 0 18px rgba(212,163,65,0.65)) drop-shadow(0 0 6px rgba(212,163,65,0.38))",
-                transition: "filter 0.4s ease, transform 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.6) drop-shadow(0 0 28px rgba(212,163,65,0.85)) drop-shadow(0 0 10px rgba(212,163,65,0.52))";
-                (e.currentTarget as HTMLImageElement).style.transform = "scale(1.02)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLImageElement).style.filter = "brightness(1.42) drop-shadow(0 0 18px rgba(212,163,65,0.65)) drop-shadow(0 0 6px rgba(212,163,65,0.38))";
-                (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
+                filter: "brightness(1.15) drop-shadow(0 0 12px rgba(212,163,65,0.32))",
               }}
             />
           </div>
@@ -276,42 +263,32 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div
         className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-4 border-b border-white/[0.05]"
         style={{
-          background: "rgba(10,7,16,0.93)",
+          background: "rgba(10,7,16,0.94)",
           backdropFilter: "blur(14px)",
-          height: "52px",
+          height: "60px",
         }}
       >
         <Link href="/">
           <div className="relative">
-            {/* Wide ambient pulse behind logo — scaled for new horizontal logo */}
+            {/* Subtle ambient warmth — cinematic, not aggressive */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -16, top: "50%", transform: "translateY(-50%)",
-                width: 160, height: 70,
-                background: "radial-gradient(ellipse at 28% 50%, rgba(200,120,15,0.38) 0%, rgba(212,163,65,0.10) 50%, transparent 72%)",
-                animation: "warm-glow 3.2s ease-in-out infinite",
-              }}
-            />
-            <div
-              className="absolute pointer-events-none"
-              style={{
-                left: -6, top: "50%", transform: "translateY(-50%)",
-                width: 60, height: 48,
-                background: "radial-gradient(ellipse at 35% 50%, rgba(212,163,65,0.2) 0%, transparent 65%)",
-                animation: "breathe 2.2s ease-in-out infinite",
-                animationDelay: "0.6s",
+                left: -14, top: "50%", transform: "translateY(-50%)",
+                width: 180, height: 70,
+                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.20) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
+                animation: "warm-glow 5s ease-in-out infinite",
               }}
             />
             <img
               src={logoImg}
-              alt="Creative Rooms"
+              alt="Creative Room"
               style={{
-                width: "min(230px, 59vw)",
+                width: "min(260px, 68vw)",
                 height: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.48) drop-shadow(0 0 22px rgba(212,163,65,0.72)) drop-shadow(0 0 8px rgba(212,163,65,0.44))",
+                filter: "brightness(1.15) drop-shadow(0 0 12px rgba(212,163,65,0.32))",
               }}
             />
           </div>
@@ -319,7 +296,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* ── Main content ── */}
-      <main className="flex-1 md:ml-[240px] min-h-screen pt-[52px] md:pt-0 pb-[72px] md:pb-0 relative z-10">
+      <main className="flex-1 md:ml-[240px] min-h-screen pt-[60px] md:pt-0 pb-[72px] md:pb-0 relative z-10">
         {children}
       </main>
 

@@ -24,7 +24,7 @@ export function SignUpPage() {
         <Link href="/">
           <img
             src={logoImg}
-            alt="Creative Rooms"
+            alt="Creative Room"
             style={{
               height: 80,
               width: "auto",

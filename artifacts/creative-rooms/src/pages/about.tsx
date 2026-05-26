@@ -176,7 +176,7 @@ export function AboutPage() {
         <Link href="/">
           <img
             src={logoImg}
-            alt="Creative Rooms"
+            alt="Creative Room"
             style={{
               width: "min(220px, 56vw)",
               height: "auto",
@@ -227,7 +227,7 @@ export function AboutPage() {
             className="text-[11px] tracking-[0.25em] uppercase mb-8 font-light"
             style={{ color: "rgba(212,163,65,0.55)" }}
           >
-            Creative Rooms
+            Creative Room
           </p>
 
           {/* Big serif headline */}
@@ -236,7 +236,7 @@ export function AboutPage() {
             style={{ fontSize: "clamp(2.4rem, 6vw, 4rem)" }}
           >
             About<br />
-            <em className="not-italic" style={{ color: "rgba(212,163,65,0.82)" }}>Creative Rooms</em>
+            <em className="not-italic" style={{ color: "rgba(212,163,65,0.82)" }}>Creative Room</em>
           </h1>
 
           {/* Waveform ornament */}
@@ -249,7 +249,7 @@ export function AboutPage() {
           <FadeBlock>
             <div className="space-y-4">
               <p className="text-[16px] md:text-[18px] font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Creative Rooms is not a social media platform.
+                Creative Room is not a social media platform.
               </p>
               <p className="text-[16px] md:text-[18px] font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
                 It's not an algorithm.
@@ -278,7 +278,7 @@ export function AboutPage() {
                 color: "rgba(255,255,255,0.88)",
               }}
             >
-              Creative Rooms is a space for real people to create real music together.
+              Creative Room is a space for real people to create real music together.
             </p>
           </FadeBlock>
 
@@ -328,7 +328,7 @@ export function AboutPage() {
                 color: "rgba(255,255,255,0.72)",
               }}
             >
-              That's what Creative Rooms is built for.
+              That's what Creative Room is built for.
             </p>
           </FadeBlock>
 
@@ -425,7 +425,7 @@ export function AboutPage() {
           {/* ── Before the release ── */}
           <FadeBlock delay={70}>
             <p className="text-[15px] md:text-[17px] font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
-              Creative Rooms exists for the moments that happen before the release.
+              Creative Room exists for the moments that happen before the release.
               Before the mastering.
               Before the world hears the song.
             </p>

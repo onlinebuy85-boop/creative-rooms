@@ -205,16 +205,6 @@ export function RoomCard({ room, index = 0 }: RoomCardProps) {
                 {room.memberCount || 0} creating
               </span>
 
-              {/* "Listening" indicator for active rooms */}
-              {room.isActive && (
-                <span
-                  className="text-[10px] flex items-center gap-1"
-                  style={{ color: "rgba(74,222,128,0.55)" }}
-                >
-                  <span className="w-1 h-1 rounded-full inline-block" style={{ background: "#4ade80", animation: "pulse-dot 2.4s ease-in-out infinite" }} />
-                  listening
-                </span>
-              )}
             </div>
 
             {/* Waveform — appears on hover, accent coloured */}

@@ -187,7 +187,7 @@ export function ProfileSetupPage() {
       <div className="w-full flex justify-center pt-8 relative z-10">
         <img
           src={logoImg}
-          alt="Creative Rooms"
+          alt="Creative Room"
           style={{ height: 26, width: "auto", objectFit: "contain", opacity: 0.82 }}
         />
       </div>
@@ -296,7 +296,7 @@ export function ProfileSetupPage() {
             </>
           ) : screen === 2 ? (
             <>
-              Enter Creative Rooms
+              Enter Creative Room
               <ArrowRight className="w-4 h-4" />
             </>
           ) : (

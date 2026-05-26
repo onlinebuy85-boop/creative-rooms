@@ -803,7 +803,7 @@ export function RoomPage() {
           <Link href="/discover">
             <img
               src={logoImg}
-              alt="Creative Rooms"
+              alt="Creative Room"
               style={{ height: 28, width: "auto", objectFit: "contain" }}
             />
           </Link>
