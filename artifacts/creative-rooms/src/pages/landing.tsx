@@ -38,28 +38,6 @@ function useFadeIn(threshold = 0.1) {
   return { ref, visible };
 }
 
-/* ── Ambient waveform ornament ── */
-function WaveOrnament({ color = "rgba(212,163,65,0.28)" }: { color?: string }) {
-  const heights = [8, 14, 10, 18, 12, 22, 9, 16, 11, 20, 8, 15, 10, 18, 12, 20, 9, 14, 11, 16];
-  return (
-    <div className="flex items-center justify-center gap-[3px]" style={{ height: 28 }}>
-      {heights.map((h, i) => (
-        <div
-          key={i}
-          className="rounded-full"
-          style={{
-            width: 2,
-            height: h,
-            background: color,
-            animation: `breathe ${1.4 + (i % 5) * 0.22}s ease-in-out infinite`,
-            animationDelay: `${i * 0.065}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function LandingPage() {
   const manifestoRef = useFadeIn(0.06);
   const featRef      = useFadeIn(0.08);
@@ -546,7 +524,7 @@ export function LandingPage() {
         </section>
       </div>
 
-      {/* ── ATMOSPHERIC QUOTE ── */}
+      {/* ── PAYOFF ── real, grounded, story-driven ── */}
       <div ref={quoteRef.ref}>
         <section
           className="relative z-10 px-5 md:px-10 py-24 md:py-36 text-center overflow-hidden"
@@ -556,39 +534,65 @@ export function LandingPage() {
             transition: "opacity 1.1s ease, transform 1.1s ease",
           }}
         >
-          {/* Ambient glow */}
+          {/* Ambient glow — subtle, warm */}
           <div
             className="absolute pointer-events-none"
             style={{
               left: "50%", top: "50%",
-              width: 700, height: 500,
+              width: 600, height: 440,
               transform: "translate(-50%, -50%)",
-              background: "radial-gradient(ellipse, rgba(212,163,65,0.045) 0%, transparent 68%)",
+              background: "radial-gradient(ellipse, rgba(212,163,65,0.04) 0%, transparent 68%)",
               animation: "warm-glow 12s ease-in-out infinite",
             }}
           />
 
-          <div className="relative max-w-[640px] mx-auto">
-            <WaveOrnament />
+          <div className="relative max-w-[520px] mx-auto">
 
-            <h2
-              className="font-serif font-normal leading-[1.1] tracking-tight mt-10 mb-8"
-              style={{ fontSize: "clamp(1.9rem, 4.4vw, 3.8rem)", color: "rgba(255,255,255,0.87)" }}
-            >
-              A place musicians come<br />
-              when they want to feel<br />
-              <em className="not-italic" style={{ color: "rgba(212,163,65,0.82)" }}>understood.</em>
-            </h2>
-
+            {/* Two-line story — large serif, staggered */}
             <p
-              className="text-[14px] md:text-[15px] font-light leading-[1.9] max-w-[380px] mx-auto mb-12"
-              style={{ color: "rgba(255,255,255,0.30)" }}
+              className="font-serif font-normal leading-[1.15] tracking-tight"
+              style={{
+                fontSize: "clamp(2rem, 4.6vw, 3.9rem)",
+                color: "rgba(255,255,255,0.88)",
+                opacity: quoteRef.visible ? 1 : 0,
+                transition: "opacity 1.0s ease 80ms",
+              }}
             >
-              Not another music app. A late-night creative space
-              where the only thing that matters is what you make together.
+              Some rooms last one night.
+            </p>
+            <p
+              className="font-serif font-normal leading-[1.15] tracking-tight mt-1"
+              style={{
+                fontSize: "clamp(2rem, 4.6vw, 3.9rem)",
+                color: "rgba(212,163,65,0.82)",
+                opacity: quoteRef.visible ? 1 : 0,
+                transition: "opacity 1.0s ease 260ms",
+              }}
+            >
+              Some become bands.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* Grounded supporting line */}
+            <p
+              className="text-[13.5px] md:text-[15px] font-light leading-[1.9] mt-10 max-w-[340px] mx-auto"
+              style={{
+                color: "rgba(255,255,255,0.26)",
+                opacity: quoteRef.visible ? 1 : 0,
+                transition: "opacity 1.0s ease 420ms",
+              }}
+            >
+              The best ideas usually arrive unfinished.
+              This is where they find each other.
+            </p>
+
+            {/* CTAs */}
+            <div
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12"
+              style={{
+                opacity: quoteRef.visible ? 1 : 0,
+                transition: "opacity 1.0s ease 580ms",
+              }}
+            >
               <Link href="/sign-up">
                 <button className="cr-ghost-btn">Find your people</button>
               </Link>
