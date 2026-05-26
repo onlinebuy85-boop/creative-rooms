@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "t_dsB9-NjO3Kc-oY_2A-B"
+uri = "file://artifacts/creative-rooms/src/assets/images/hero-bg.png"
+type = "image"
+title = "Cinematic late-night studio session"
+
+[[generated]]
+id = "Xghavoc8_NwWZNz8uuUT7"
+uri = "file://artifacts/creative-rooms/src/assets/images/room-cover-1.png"
+type = "image"
+title = "Room cover art abstract warmth"
+
+[[generated]]
+id = "_iIEcPf3ZfkVAOdLsR46-"
+uri = "file://artifacts/creative-rooms/src/assets/images/room-cover-2.png"
+type = "image"
+title = "Room cover art acoustic guitar"

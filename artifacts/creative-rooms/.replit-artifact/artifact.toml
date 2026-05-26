@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Creative Rooms"
+version = "1.0.0"
+id = "artifacts/creative-rooms"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23592
+
+[services.development]
+run = "pnpm --filter @workspace/creative-rooms run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/creative-rooms", "run", "build" ]
+publicDir = "artifacts/creative-rooms/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23592"
+BASE_PATH = "/"

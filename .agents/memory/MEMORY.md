@@ -1,0 +1,2 @@
+- [Clerk version compatibility](clerk-version-compat.md) — @clerk/react and @clerk/express must stay on aligned major versions; v6/v2 uses @clerk/shared@4.x.
+- [pnpm Clerk release age](clerk-release-age.md) — @clerk/react and @clerk/shared added to minimumReleaseAgeExclude so they can stay in sync.

@@ -1,6 +1,6 @@
-# [Project name]
+# Creative Rooms
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A warm, cinematic web platform where musicians, songwriters, singers, producers, poets and emotional creators meet in intimate digital studio rooms to create together live.
 
 ## Run & Operate
 
@@ -10,11 +10,14 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY` — auto-provisioned by Replit Clerk
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
+- Frontend: React + Vite, Tailwind v4, shadcn/ui, Wouter routing, @tanstack/react-query
+- Auth: Clerk (Replit-managed) — `@clerk/react` on frontend, `@clerk/express` on backend
+- API: Express 5 + WebSockets (ws)
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
@@ -22,15 +25,23 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/api-spec/openapi.yaml` — API contract (source of truth)
+- `lib/db/src/schema/` — DB tables: profiles, rooms, roomMembers, messages, demos
+- `artifacts/api-server/src/routes/` — Express route handlers
+- `artifacts/api-server/src/lib/websocket.ts` — WebSocket server for live chat
+- `artifacts/creative-rooms/src/` — React + Vite frontend
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Contract-first: OpenAPI spec → codegen → React Query hooks + Zod schemas
+- Clerk for auth: cookie-based on web (no Bearer tokens), proxy middleware at `/api/__clerk`
+- WebSocket at `/ws?roomId=N` for live room messaging (broadcast on new message)
+- User profiles are separate from Clerk users — linked by `clerkId`
+- Rooms limited to 2–8 members; owner auto-joined on creation
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+A platform for 2–4 creators to collaborate in intimate "Creative Rooms". Users create profiles describing their musical style, emotional vibe, and inspirations, then discover or create rooms to collaborate through text chat, voice, and demo uploads. No social media mechanics — just human creative connection.
 
 ## User preferences
 
@@ -38,7 +49,10 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After OpenAPI spec changes, always run `pnpm --filter @workspace/api-spec run codegen` before using types
+- Operations with BOTH path AND query params cause Orval TS2308 collision — remove query params or use separate operationIds
+- WebSocket path `/ws` must be in `artifact.toml` `paths` array alongside `/api`
+- Clerk: use `publishableKeyFromHost` not the raw env var; `proxyUrl` is always set (empty in dev)
 
 ## Pointers
 

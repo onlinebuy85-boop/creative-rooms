@@ -33,6 +33,10 @@ minimumReleaseAgeExclude:
   # this setting guards against does not apply to our own packages.
   - '@replit/*'
   - stripe-replit-sync
+  # Clerk packages are published frequently and need to stay in lockstep.
+  # @clerk/react and @clerk/shared must always be compatible with each other.
+  - '@clerk/react'
+  - '@clerk/shared'
 
 packages:
   - artifacts/*

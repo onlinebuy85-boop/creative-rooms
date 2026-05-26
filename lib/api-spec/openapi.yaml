@@ -3,20 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Creative Rooms API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profiles
+    description: User profile operations
+  - name: rooms
+    description: Creative room operations
+  - name: messages
+    description: Room message operations
+  - name: demos
+    description: Demo upload operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +32,670 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Profiles ──────────────────────────────────────────────────────────────
+  /profiles/me:
+    get:
+      operationId: getMyProfile
+      tags: [profiles]
+      summary: Get current user's profile
+      responses:
+        "200":
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          description: Profile not found
+
+  /profiles:
+    post:
+      operationId: createProfile
+      tags: [profiles]
+      summary: Create or upsert current user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /profiles/{id}:
+    get:
+      operationId: getProfile
+      tags: [profiles]
+      summary: Get a profile by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProfile
+      tags: [profiles]
+      summary: Update current user's profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  # ── Rooms ──────────────────────────────────────────────────────────────────
+  /rooms:
+    get:
+      operationId: listRooms
+      tags: [rooms]
+      summary: List all open rooms
+      parameters:
+        - name: genre
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: vibe
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create a new creative room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+
+  /rooms/discover:
+    get:
+      operationId: discoverRooms
+      tags: [rooms]
+      summary: Get rooms matched to current user's vibe and genres
+      responses:
+        "200":
+          description: Matched rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+
+  /rooms/my:
+    get:
+      operationId: getMyRooms
+      tags: [rooms]
+      summary: Get rooms the current user owns or is a member of
+      responses:
+        "200":
+          description: User's rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+
+  /rooms/{id}:
+    get:
+      operationId: getRoom
+      tags: [rooms]
+      summary: Get a room by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Room found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateRoom
+      tags: [rooms]
+      summary: Update a room (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+    delete:
+      operationId: deleteRoom
+      tags: [rooms]
+      summary: Delete a room (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /rooms/{id}/join:
+    post:
+      operationId: joinRoom
+      tags: [rooms]
+      summary: Join a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomMember"
+
+  /rooms/{id}/leave:
+    post:
+      operationId: leaveRoom
+      tags: [rooms]
+      summary: Leave a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Left
+
+  /rooms/{id}/members:
+    get:
+      operationId: getRoomMembers
+      tags: [rooms]
+      summary: Get members of a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Members list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomMember"
+
+  /rooms/{id}/activity:
+    get:
+      operationId: getRoomActivity
+      tags: [rooms]
+      summary: Get recent activity summary for a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Activity summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomActivity"
+
+  # ── Messages ───────────────────────────────────────────────────────────────
+  /rooms/{id}/messages:
+    get:
+      operationId: getRoomMessages
+      tags: [messages]
+      summary: Get messages for a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message in a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  # ── Demos ──────────────────────────────────────────────────────────────────
+  /rooms/{id}/demos:
+    get:
+      operationId: getRoomDemos
+      tags: [demos]
+      summary: Get demos uploaded to a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Demos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Demo"
+    post:
+      operationId: uploadDemo
+      tags: [demos]
+      summary: Upload a demo to a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoInput"
+      responses:
+        "201":
+          description: Demo uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Demo"
+
+  /rooms/{roomId}/demos/{demoId}:
+    delete:
+      operationId: deleteDemo
+      tags: [demos]
+      summary: Delete a demo
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: demoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ── Profile ──────────────────────────────────────────────────────────────
+    Profile:
+      type: object
+      required: [id, clerkId, displayName, createdAt]
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        displayName:
+          type: string
+        bio:
+          type: ["string", "null"]
+        musicalStyle:
+          type: ["string", "null"]
+        emotionalVibe:
+          type: ["string", "null"]
+        inspirations:
+          type: ["string", "null"]
+        genres:
+          type: array
+          items:
+            type: string
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProfileInput:
+      type: object
+      required: [displayName]
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+        bio:
+          type: string
+        musicalStyle:
+          type: string
+        emotionalVibe:
+          type: string
+        inspirations:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        avatarUrl:
+          type: string
+
+    ProfileUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+        bio:
+          type: string
+        musicalStyle:
+          type: string
+        emotionalVibe:
+          type: string
+        inspirations:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        avatarUrl:
+          type: string
+
+    # ── Room ──────────────────────────────────────────────────────────────────
+    Room:
+      type: object
+      required: [id, name, ownerId, maxMembers, isActive, memberCount, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        vibe:
+          type: ["string", "null"]
+        genres:
+          type: array
+          items:
+            type: string
+        maxMembers:
+          type: integer
+        ownerId:
+          type: integer
+        ownerName:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        memberCount:
+          type: integer
+        coverImageUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    RoomInput:
+      type: object
+      required: [name, maxMembers]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        vibe:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        maxMembers:
+          type: integer
+          minimum: 2
+          maximum: 8
+        coverImageUrl:
+          type: string
+
+    RoomUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        vibe:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        maxMembers:
+          type: integer
+        isActive:
+          type: boolean
+        coverImageUrl:
+          type: string
+
+    RoomMember:
+      type: object
+      required: [id, roomId, profileId, role, joinedAt]
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        profileId:
+          type: integer
+        displayName:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [owner, member]
+        joinedAt:
+          type: string
+          format: date-time
+
+    RoomActivity:
+      type: object
+      required: [roomId, messageCount, demoCount, memberCount, lastActivityAt]
+      properties:
+        roomId:
+          type: integer
+        messageCount:
+          type: integer
+        demoCount:
+          type: integer
+        memberCount:
+          type: integer
+        lastActivityAt:
+          type: ["string", "null"]
+          format: date-time
+        recentMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        recentDemos:
+          type: array
+          items:
+            $ref: "#/components/schemas/Demo"
+
+    # ── Message ───────────────────────────────────────────────────────────────
+    Message:
+      type: object
+      required: [id, roomId, profileId, content, createdAt]
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        profileId:
+          type: integer
+        senderName:
+          type: ["string", "null"]
+        senderAvatarUrl:
+          type: ["string", "null"]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+
+    # ── Demo ─────────────────────────────────────────────────────────────────
+    Demo:
+      type: object
+      required: [id, roomId, uploaderId, title, fileUrl, createdAt]
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        uploaderId:
+          type: integer
+        uploaderName:
+          type: ["string", "null"]
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        fileUrl:
+          type: string
+        duration:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    DemoInput:
+      type: object
+      required: [title, fileUrl]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        fileUrl:
+          type: string
+        duration:
+          type: integer
