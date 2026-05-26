@@ -1,177 +1,333 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useGetMyProfile, useCreateProfile } from "@workspace/api-client-react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@clerk/react";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Check } from "lucide-react";
+import logoImg from "@assets/creative-rooms-logo-transparent.png";
 
-const profileSchema = z.object({
-  displayName: z.string().min(2, {
-    message: "Display name must be at least 2 characters.",
-  }),
-  bio: z.string().optional(),
-  musicalStyle: z.string().optional(),
-  emotionalVibe: z.string().optional(),
-  inspirations: z.string().optional(),
-  genres: z.string().transform((val) => val.split(',').map(s => s.trim()).filter(Boolean)).optional(),
-});
+/* ── Step definitions ──────────────────────────────────────── */
+const STEPS = [
+  {
+    question: "What do you create?",
+    sub: "Select everything that feels like you.",
+    options: [
+      "Songwriting", "Production", "Guitar", "Piano", "Vocals",
+      "Poetry", "Lyrics", "Live instruments", "Ambient soundscapes",
+      "Storytelling", "Experimental music", "Mixing & mastering",
+    ],
+  },
+  {
+    question: "What inspires you?",
+    sub: "Artists, sounds, moods — whatever moves you.",
+    options: [
+      "Pink Floyd", "Bon Iver", "Radiohead", "Nick Drake", "Portishead",
+      "Cinematic", "Analog", "Dreamy", "Emotional", "Acoustic",
+      "Ambient", "Soulful", "Nostalgic", "Lo-fi", "Orchestral",
+    ],
+  },
+  {
+    question: "What kind of creative\nenergy are you looking for?",
+    sub: "How do you want to work with others?",
+    options: [
+      "Late night writing", "Calm collaboration", "Live jam sessions",
+      "Emotional songwriting", "Experimental creativity",
+      "Deep conversations", "Organic music making", "Focused production",
+    ],
+  },
+];
 
+/* ── Tag chip ────────────────────────────────────────────────── */
+function Tag({
+  label,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="group relative px-4 py-2 rounded-full text-[13px] font-medium border transition-all duration-200 text-left"
+      style={{
+        background: selected ? "rgba(212,163,65,0.14)" : "rgba(255,255,255,0.04)",
+        borderColor: selected ? "rgba(212,163,65,0.55)" : "rgba(255,255,255,0.10)",
+        color: selected ? "rgba(212,163,65,0.95)" : "rgba(255,255,255,0.52)",
+        boxShadow: selected ? "0 0 14px -4px rgba(212,163,65,0.25)" : "none",
+      }}
+    >
+      {selected && (
+        <Check
+          className="inline-block w-3 h-3 mr-1.5 opacity-80"
+          style={{ color: "rgba(212,163,65,0.9)" }}
+        />
+      )}
+      {label}
+    </button>
+  );
+}
+
+/* ── Step dots ─────────────────────────────────────────────── */
+function StepDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-full transition-all duration-400"
+          style={{
+            width: i === current ? 20 : 6,
+            height: 6,
+            background: i === current
+              ? "rgba(212,163,65,0.85)"
+              : i < current
+              ? "rgba(212,163,65,0.35)"
+              : "rgba(255,255,255,0.15)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Main component ─────────────────────────────────────────── */
 export function ProfileSetupPage() {
   const [, setLocation] = useLocation();
   const { user } = useUser();
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile();
   const createProfile = useCreateProfile();
 
+  /* Onboarding state */
+  const [screen, setScreen] = useState<"intro" | 0 | 1 | 2>("intro");
+  const [displayName, setDisplayName] = useState("");
+  const [selections, setSelections] = useState<string[][]>([[], [], []]);
+
+  /* Pre-fill name from Clerk */
+  useEffect(() => {
+    if (user?.fullName && !displayName) {
+      setDisplayName(user.fullName);
+    }
+  }, [user]);
+
+  /* If profile already exists, skip to discover */
   useEffect(() => {
     if (profile && !isProfileLoading) {
-      setLocation("/dashboard");
+      setLocation("/discover");
     }
   }, [profile, isProfileLoading, setLocation]);
 
-  const form = useForm<z.infer<typeof profileSchema>>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      displayName: user?.fullName || "",
-      bio: "",
-      musicalStyle: "",
-      emotionalVibe: "",
-      inspirations: "",
-      genres: [],
-    },
-  });
+  if (isProfileLoading) return null;
 
-  function onSubmit(values: z.infer<typeof profileSchema>) {
+  /* ── Helpers ── */
+  function toggle(stepIdx: number, option: string) {
+    setSelections((prev) => {
+      const next = [...prev];
+      const arr = next[stepIdx];
+      next[stepIdx] = arr.includes(option)
+        ? arr.filter((x) => x !== option)
+        : [...arr, option];
+      return next;
+    });
+  }
+
+  function advance() {
+    if (screen === "intro") { setScreen(0); return; }
+    if (screen === 0) { setScreen(1); return; }
+    if (screen === 1) { setScreen(2); return; }
+    if (screen === 2) { finish(); }
+  }
+
+  function finish() {
+    const roles = selections[0];
+    const insps = selections[1];
+    const energy = selections[2];
     createProfile.mutate(
       {
         data: {
-          displayName: values.displayName,
-          bio: values.bio,
-          musicalStyle: values.musicalStyle,
-          emotionalVibe: values.emotionalVibe,
-          inspirations: values.inspirations,
-          genres: values.genres,
+          displayName: displayName.trim() || user?.fullName || "Creator",
+          musicalStyle: roles.join(", "),
+          inspirations: insps.join(", "),
+          emotionalVibe: energy.join(", "),
+          genres: roles,
         },
       },
       {
-        onSuccess: () => {
-          setLocation("/dashboard");
-        },
+        onSuccess: () => setLocation("/discover"),
       }
     );
   }
 
-  if (isProfileLoading) return null;
-
+  /* ── Layout wrapper ── */
   return (
-    <div className="min-h-[100dvh] bg-background relative flex items-center justify-center p-4">
-      <div className="bg-noise" />
-      
-      <Card className="w-full max-w-lg bg-card/40 backdrop-blur border-border/50 relative z-10">
-        <CardHeader>
-          <CardTitle className="font-serif text-3xl">Set the tone.</CardTitle>
-          <CardDescription>
-            Tell others about your style and what you bring to the studio.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="displayName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Display Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="How should we call you?" className="bg-background/50 border-border/50" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="A few words about yourself..." className="resize-none bg-background/50 border-border/50" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-between overflow-hidden"
+      style={{ background: "#0a080c" }}
+    >
+      {/* Subtle grain */}
+      <div className="bg-noise pointer-events-none" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="musicalStyle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Musical Style</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Ambient electronic" className="bg-background/50 border-border/50" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
+      {/* Ambient glow — top left */}
+      <div
+        className="pointer-events-none absolute top-0 left-0 w-[600px] h-[400px] opacity-25"
+        style={{
+          background: "radial-gradient(ellipse at 20% 10%, rgba(212,163,65,0.18) 0%, transparent 65%)",
+        }}
+      />
+      {/* Ambient glow — bottom right */}
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[400px] opacity-20"
+        style={{
+          background: "radial-gradient(ellipse at 80% 90%, rgba(124,92,191,0.2) 0%, transparent 65%)",
+        }}
+      />
+
+      {/* ── BRAND ── */}
+      <div className="w-full flex justify-center pt-8 relative z-10">
+        <div className="flex items-center gap-2.5">
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              backgroundImage: `url(${logoImg})`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "95px auto",
+              backgroundPosition: "center -2px",
+              filter: "drop-shadow(0 0 7px rgba(212,163,65,0.4))",
+            }}
+          />
+          <span
+            className="font-serif text-[16px] tracking-wide"
+            style={{ color: "rgba(255,255,255,0.7)" }}
+          >
+            Creative Rooms
+          </span>
+        </div>
+      </div>
+
+      {/* ── STEP CONTENT ── */}
+      <div
+        key={String(screen)}
+        className="relative z-10 flex flex-col items-center px-6 w-full max-w-2xl"
+        style={{ animation: "stepIn 0.45s ease both" }}
+      >
+        {screen === "intro" ? (
+          /* ── INTRO SCREEN ── */
+          <div className="text-center space-y-6 w-full max-w-md">
+            <div className="space-y-2">
+              <h1 className="font-serif text-white" style={{ fontSize: "clamp(2.4rem, 5vw, 3.4rem)" }}>
+                Let's set the tone.
+              </h1>
+              <p className="text-[15px] font-light" style={{ color: "rgba(255,255,255,0.45)" }}>
+                Three quick questions to find you the right rooms.
+              </p>
+            </div>
+
+            <div className="space-y-1 text-left">
+              <label
+                className="text-[11px] tracking-widest uppercase"
+                style={{ color: "rgba(255,255,255,0.35)" }}
+              >
+                What should we call you?
+              </label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your name or alias"
+                className="w-full rounded-xl px-5 py-3.5 text-[15px] outline-none transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "rgba(255,255,255,0.88)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "rgba(212,163,65,0.45)";
+                  e.target.style.boxShadow = "0 0 20px -6px rgba(212,163,65,0.25)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "rgba(255,255,255,0.12)";
+                  e.target.style.boxShadow = "none";
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          /* ── CREATIVE QUESTION STEPS ── */
+          <div className="space-y-8 w-full">
+            <div className="space-y-2 text-center">
+              <h2
+                className="font-serif text-white leading-tight whitespace-pre-line"
+                style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)" }}
+              >
+                {STEPS[screen as number].question}
+              </h2>
+              <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                {STEPS[screen as number].sub}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2.5 justify-center">
+              {STEPS[screen as number].options.map((opt) => (
+                <Tag
+                  key={opt}
+                  label={opt}
+                  selected={selections[screen as number].includes(opt)}
+                  onToggle={() => toggle(screen as number, opt)}
                 />
-                <FormField
-                  control={form.control}
-                  name="emotionalVibe"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Emotional Vibe</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Melancholic, uplifting" className="bg-background/50 border-border/50" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
-              <FormField
-                control={form.control}
-                name="genres"
-                render={({ field: { value, onChange, ...rest } }) => (
-                  <FormItem>
-                    <FormLabel>Genres (comma separated)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="indie, folk, electronic" 
-                        className="bg-background/50 border-border/50" 
-                        onChange={(e) => onChange(e.target.value)}
-                        {...rest} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+      {/* ── BOTTOM BAR ── */}
+      <div className="relative z-10 w-full max-w-2xl flex items-center justify-between px-6 pb-10">
+        {/* Step dots (hidden on intro) */}
+        {screen !== "intro" ? (
+          <StepDots current={screen as number} total={3} />
+        ) : (
+          <div />
+        )}
 
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={createProfile.isPending}>
-                {createProfile.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Enter Studio
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+        {/* CTA */}
+        <button
+          type="button"
+          onClick={advance}
+          disabled={createProfile.isPending}
+          className="flex items-center gap-2 font-medium rounded-full px-7 py-3 text-[14px] transition-all hover:scale-[1.04] disabled:opacity-50 active:scale-[0.97]"
+          style={{
+            background: "linear-gradient(135deg, #e0b050, #c89030)",
+            color: "#1a0f00",
+            boxShadow: "0 0 28px -6px rgba(212,163,65,0.5)",
+          }}
+        >
+          {createProfile.isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Setting up…
+            </>
+          ) : screen === 2 ? (
+            <>
+              Enter Creative Rooms
+              <ArrowRight className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              Continue
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes stepIn {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

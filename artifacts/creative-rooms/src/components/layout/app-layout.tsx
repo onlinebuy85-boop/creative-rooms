@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile } from "@workspace/api-client-react";
+import logoImg from "@assets/creative-rooms-logo-transparent.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LayoutDashboard, Compass, Plus, LogOut, User as UserIcon, Settings, Menu } from "lucide-react";
@@ -44,8 +45,18 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <img src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/logo.svg`} alt="Creative Rooms" className="w-6 h-6" />
+            <Link href="/discover" className="flex items-center gap-2.5">
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  backgroundImage: `url(${logoImg})`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "88px auto",
+                  backgroundPosition: "center -2px",
+                  filter: "drop-shadow(0 0 6px rgba(212,163,65,0.45))",
+                }}
+              />
               <span className="font-serif text-lg tracking-tight font-medium">Creative Rooms</span>
             </Link>
             <nav className="hidden md:flex items-center gap-2">

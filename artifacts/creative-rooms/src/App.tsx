@@ -91,7 +91,7 @@ function HomeRedirect() {
   return (
     <>
       <Show when="signed-in">
-        <Redirect to="/dashboard" />
+        <Redirect to="/discover" />
       </Show>
       <Show when="signed-out">
         <LandingPage />
