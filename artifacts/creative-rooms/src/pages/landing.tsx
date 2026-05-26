@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
+import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779820980322.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
 /* ── Floating dust particles ── */
@@ -38,11 +38,12 @@ export function LandingPage() {
             willChange: "transform",
           }}
         />
-        {/* Desktop vignette — left-heavy for landscape composition */}
+        {/* Desktop vignette — softer left gradient so the warm photo stays visible.
+            Pulled back from 0.96/0.80/0.42 to 0.78/0.52/0.22 to match the reference look. */}
         <div
           className="absolute inset-0 hidden md:block"
           style={{
-            background: "linear-gradient(100deg, rgba(5,3,10,0.96) 0%, rgba(5,3,10,0.80) 38%, rgba(5,3,10,0.42) 65%, rgba(5,3,10,0.1) 100%)",
+            background: "linear-gradient(100deg, rgba(5,3,10,0.78) 0%, rgba(5,3,10,0.52) 38%, rgba(5,3,10,0.22) 65%, rgba(5,3,10,0.05) 100%)",
           }}
         />
         {/* Mobile vignette — softer so the cinematic warmth and detail show through */}
@@ -100,9 +101,10 @@ export function LandingPage() {
         .hero-photo { object-position: 60% 30%; }
         @media (min-width: 768px) {
           .hero-photo {
-            object-position: center 20%;
-            /* Richer cinematic grade on desktop — deeper blacks, warmer mids, more contrast */
-            filter: saturate(1.18) contrast(1.14) brightness(1.04) !important;
+            /* Show the whole scene horizontally — keep elderly guitarist visible on the left */
+            object-position: 50% 35%;
+            /* Warm natural cinematic grade — no over-crush, just rich warm lamp light */
+            filter: saturate(1.1) contrast(1.06) brightness(1.08) !important;
           }
         }
       `}</style>
@@ -166,8 +168,9 @@ export function LandingPage() {
                 width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                /* Crisp logo: lighter drop-shadow so edges stay sharp, no soft halo */
-                filter: "brightness(1.08) contrast(1.05) drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(212,163,65,0.28))",
+                /* Bare crisp logo — no halo on the wordmark itself.
+                   The breathing glow divs behind provide all the warm atmosphere. */
+                filter: "brightness(1.05) contrast(1.08)",
                 imageRendering: "auto",
                 WebkitBackfaceVisibility: "hidden",
                 backfaceVisibility: "hidden",
