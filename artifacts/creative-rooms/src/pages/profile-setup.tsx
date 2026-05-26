@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useGetMyProfile, useCreateProfile } from "@workspace/api-client-react";
 import { useUser } from "@clerk/react";
 import { ArrowRight, Loader2, Check } from "lucide-react";
-import logoImg from "@assets/creative-rooms-wordmark.png";
+import logoImg from "../assets/images/creative-room-logo.png";
 
 /* ── Step definitions ──────────────────────────────────────── */
 const STEPS = [

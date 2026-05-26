@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
-import logoImg from "../assets/images/creative-rooms-logo-v3.png";
+import logoImg from "../assets/images/creative-room-logo.png";
 
 /* ── Atmospheric signals — evocative, never fake-numeric ── */
 const SIGNALS_TOP = [
@@ -69,35 +69,35 @@ export function LandingPage() {
           className="w-full h-full object-cover"
           style={{ objectPosition: "center 20%" }}
         />
-        {/* Heavy left vignette */}
+        {/* Heavy left vignette — keeps text readable */}
         <div
           className="absolute inset-0"
           style={{
             background: "linear-gradient(100deg, rgba(5,3,10,0.96) 0%, rgba(5,3,10,0.80) 35%, rgba(5,3,10,0.40) 62%, rgba(5,3,10,0.12) 100%)",
           }}
         />
-        {/* Top fade — very soft so logo floats in the atmosphere, not in a dark box */}
+        {/* Top fade — very soft so logo floats in the atmosphere */}
         <div
           className="absolute inset-0"
           style={{
             background: "linear-gradient(180deg, rgba(5,3,10,0.18) 0%, rgba(5,3,10,0.0) 18%, rgba(5,3,10,0.0) 55%, rgba(5,3,10,0.72) 100%)",
           }}
         />
-        {/* Warm ambient bloom — large pool behind logo area, no hard edges */}
+        {/* Warm ambient bloom behind logo area */}
         <div
           className="absolute pointer-events-none"
           style={{
             left: "-8%", top: "-8%", width: "60%", height: "75%",
-            background: "radial-gradient(ellipse at 28% 28%, rgba(190,120,18,0.18) 0%, rgba(160,95,10,0.08) 35%, rgba(100,55,5,0.02) 60%, transparent 75%)",
+            background: "radial-gradient(ellipse at 28% 28%, rgba(190,120,18,0.15) 0%, rgba(160,95,10,0.06) 35%, rgba(100,55,5,0.01) 60%, transparent 75%)",
             animation: "warm-glow 5.5s ease-in-out infinite",
           }}
         />
-        {/* Tighter cinematic light bloom directly around logo position */}
+        {/* Tighter light bloom around logo */}
         <div
           className="absolute pointer-events-none"
           style={{
             left: "-2%", top: "-4%", width: "32%", height: "38%",
-            background: "radial-gradient(ellipse at 35% 35%, rgba(212,163,65,0.12) 0%, rgba(180,120,20,0.05) 45%, transparent 70%)",
+            background: "radial-gradient(ellipse at 35% 35%, rgba(212,163,65,0.09) 0%, rgba(180,120,20,0.03) 45%, transparent 70%)",
             animation: "breathe 3.8s ease-in-out infinite",
             animationDelay: "0.6s",
           }}
@@ -136,53 +136,51 @@ export function LandingPage() {
         {/* Brand */}
         <Link href="/">
           <div className="relative group cursor-pointer">
-            {/* Atmospheric warm glow — now pulses with waveform rhythm */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -16, top: "50%", transform: "translateY(-50%)",
-                width: 140, height: 120,
-                background: "radial-gradient(ellipse at 38% 50%, rgba(200,130,20,0.32) 0%, rgba(212,163,65,0.08) 50%, transparent 72%)",
+                left: -14, top: "50%", transform: "translateY(-50%)",
+                width: 130, height: 110,
+                background: "radial-gradient(ellipse at 38% 50%, rgba(200,130,20,0.26) 0%, rgba(212,163,65,0.06) 50%, transparent 72%)",
                 animation: "warm-glow 3.5s ease-in-out infinite",
               }}
             />
-            {/* Second glow layer — offset phase for waveform pulse feel */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -8, top: "50%", transform: "translateY(-50%)",
-                width: 80, height: 60,
-                background: "radial-gradient(ellipse at 40% 50%, rgba(212,163,65,0.14) 0%, transparent 65%)",
+                left: -6, top: "50%", transform: "translateY(-50%)",
+                width: 72, height: 54,
+                background: "radial-gradient(ellipse at 40% 50%, rgba(212,163,65,0.11) 0%, transparent 65%)",
                 animation: "breathe 2.2s ease-in-out infinite",
                 animationDelay: "0.8s",
               }}
             />
             <img
               src={logoImg}
-              alt="Creative Rooms"
+              alt="Creative Room"
               style={{
-                height: "clamp(72px, 9vw, 104px)",
+                height: "clamp(60px, 8vw, 96px)",
                 width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.22) drop-shadow(0 0 20px rgba(212,163,65,0.48))",
+                filter: "brightness(1.18) drop-shadow(0 0 16px rgba(212,163,65,0.42))",
                 transition: "filter 0.4s ease, transform 0.3s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.42) drop-shadow(0 0 32px rgba(212,163,65,0.78))";
+                  "brightness(1.38) drop-shadow(0 0 28px rgba(212,163,65,0.70))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1.025)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.22) drop-shadow(0 0 20px rgba(212,163,65,0.48))";
+                  "brightness(1.18) drop-shadow(0 0 16px rgba(212,163,65,0.42))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
               }}
             />
           </div>
         </Link>
 
-        {/* Desktop nav links */}
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-9">
           {[
             { label: "Rooms", href: "/discover" },
@@ -204,7 +202,7 @@ export function LandingPage() {
           ))}
         </nav>
 
-        {/* Auth CTAs */}
+        {/* Auth — keep quiet on right */}
         <div className="flex items-center gap-3 md:gap-4">
           <Link href="/sign-in">
             <span
@@ -216,10 +214,11 @@ export function LandingPage() {
           </Link>
           <Link href="/sign-up">
             <button
-              className="px-4 md:px-5 py-2 rounded-full text-[12px] md:text-[13px] font-semibold transition-all hover:brightness-110 hover:scale-[1.03]"
+              className="px-4 md:px-5 py-2 rounded-full text-[12px] md:text-[13px] font-medium transition-all hover:brightness-110 hover:scale-[1.03]"
               style={{
-                background: "linear-gradient(135deg,#e0b050,#c89030)",
-                color: "#1a0f00",
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                color: "rgba(255,255,255,0.65)",
               }}
             >
               Join free
@@ -229,11 +228,10 @@ export function LandingPage() {
       </header>
 
       {/* ── HERO COPY ── */}
-      {/* Mobile: reduced top padding so content is visible faster */}
       <section className="relative z-10 px-5 md:px-10 pt-10 md:pt-20 pb-20 md:pb-36 max-w-[1280px] mx-auto">
         <div className="max-w-[580px]">
 
-          {/* Atmospheric signals — top row */}
+          {/* Atmospheric signals */}
           <div className="flex flex-wrap gap-2 mb-7 md:mb-8">
             {SIGNALS_TOP.map((s, i) => (
               <LiveChip key={i} text={s.text} delay={i * 100} />
@@ -242,7 +240,7 @@ export function LandingPage() {
 
           {/* Headline */}
           <h1
-            className="font-serif font-normal leading-[1.06] tracking-tight mb-6 md:mb-7 text-white"
+            className="font-serif font-normal leading-[1.06] tracking-tight mb-5 md:mb-6 text-white"
             style={{
               fontSize: "clamp(2.4rem, 5.5vw, 4.4rem)",
               animation: "pageIn 0.8s ease both",
@@ -258,50 +256,61 @@ export function LandingPage() {
           <p
             className="text-[14px] md:text-[15px] font-light leading-relaxed mb-7 md:mb-8 max-w-[430px]"
             style={{
-              color: "rgba(255,255,255,0.4)",
+              color: "rgba(255,255,255,0.38)",
               animation: "pageIn 0.8s ease both",
               animationDelay: "350ms",
             }}
           >
-            Intimate creative rooms for musicians, producers, singers and songwriters.
-            Drop a hook. Find a collaborator. Make something that matters.
+            Intimate rooms for musicians, producers, singers and songwriters.
+            Listen freely. Join when it feels right.
           </p>
 
-          {/* CTAs — clear hierarchy */}
+          {/* ── CTAs — guest-first hierarchy ── */}
           <div
-            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
+            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
             style={{ animation: "pageIn 0.8s ease both", animationDelay: "500ms" }}
           >
-            {/* PRIMARY — dominant, glowing */}
-            <Link href="/sign-up">
+            {/* PRIMARY — explore without signup */}
+            <Link href="/discover">
               <button
-                className="w-full sm:w-auto h-13 px-8 rounded-full font-semibold text-[14px] tracking-wide transition-all hover:scale-[1.04] hover:brightness-110 active:scale-[0.98]"
+                className="w-full sm:w-auto h-[52px] px-8 rounded-full font-semibold text-[14px] tracking-wide transition-all hover:scale-[1.04] hover:brightness-110 active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg,#e0b050,#c89030)",
                   color: "#1a0f00",
-                  height: "52px",
-                  boxShadow: "0 0 32px rgba(212,163,65,0.32), 0 4px 20px rgba(0,0,0,0.4)",
+                  boxShadow: "0 0 28px rgba(212,163,65,0.28), 0 4px 18px rgba(0,0,0,0.4)",
                 }}
               >
-                Find your room
+                Explore rooms
               </button>
             </Link>
 
-            {/* SECONDARY — quiet, text-only */}
-            <Link href="/about">
-              <span
-                className="inline-flex items-center gap-1.5 text-[13px] font-light tracking-wide cursor-pointer transition-colors hover:text-white/60"
-                style={{ color: "rgba(255,255,255,0.3)" }}
+            {/* SECONDARY — join (quieter, doesn't dominate) */}
+            <Link href="/sign-up">
+              <button
+                className="w-full sm:w-auto h-[52px] px-6 rounded-full text-[13px] font-light tracking-wide transition-all hover:bg-white/[0.07] active:scale-95"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "rgba(255,255,255,0.48)",
+                }}
               >
-                Watch the vibe
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.5 }}>
-                  <path d="M2.5 6h7M6.5 3.5L9 6l-2.5 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
+                Join free
+              </button>
             </Link>
           </div>
 
-          {/* Atmospheric signals — bottom row, quieter */}
+          {/* Guest permission note — makes it emotionally safe to explore */}
+          <p
+            className="mt-3 text-[12px] font-light"
+            style={{
+              color: "rgba(255,255,255,0.22)",
+              animation: "pageIn 0.8s ease both",
+              animationDelay: "640ms",
+            }}
+          >
+            No signup needed to explore · Listen before joining
+          </p>
+
+          {/* More atmospheric signals */}
           <div
             className="flex flex-wrap gap-2 mt-6 md:mt-7"
             style={{ animation: "pageIn 0.8s ease both", animationDelay: "700ms" }}
@@ -309,19 +318,18 @@ export function LandingPage() {
             {SIGNALS_BOTTOM.map((s, i) => (
               <LiveChip key={i} text={s.text} delay={800 + i * 100} />
             ))}
-            {/* Live sessions indicator — atmospheric, no fake counts */}
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0"
               style={{
                 background: "rgba(212,163,65,0.05)",
-                border: "1px solid rgba(212,163,65,0.12)",
+                border: "1px solid rgba(212,163,65,0.11)",
               }}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full"
                 style={{ background: "#d4a341", animation: "breathe 2s ease-in-out infinite" }}
               />
-              <span className="text-[11px] font-light" style={{ color: "rgba(212,163,65,0.55)" }}>
+              <span className="text-[11px] font-light" style={{ color: "rgba(212,163,65,0.5)" }}>
                 Live sessions open
               </span>
             </div>
@@ -337,7 +345,7 @@ export function LandingPage() {
         <div className="flex items-center gap-8 md:gap-12 flex-wrap">
           {[
             { num: "2–4", label: "creators per room" },
-            { num: "Live", label: "voice & text sessions" },
+            { num: "Open", label: "to guests — no login" },
             { num: "∞",   label: "hooks waiting" },
           ].map(({ num, label }) => (
             <div key={label} className="flex items-baseline gap-2.5 md:gap-3">
