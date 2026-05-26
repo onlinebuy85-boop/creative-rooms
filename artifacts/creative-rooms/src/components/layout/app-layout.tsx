@@ -1,150 +1,257 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import logoImg from "@assets/creative-rooms-wordmark.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LayoutDashboard, Compass, Plus, LogOut, User as UserIcon, Settings, Menu, Radio } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import {
+  Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon, Menu,
+} from "lucide-react";
+
+interface NavLinkProps {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  active: boolean;
+}
+
+function NavLink({ href, icon: Icon, label, active }: NavLinkProps) {
+  return (
+    <Link href={href}>
+      <div
+        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer select-none"
+        style={
+          active
+            ? { background: "rgba(212,163,65,0.12)", color: "#d4a341" }
+            : { color: "rgba(255,255,255,0.45)" }
+        }
+        onMouseEnter={(e) => {
+          if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)";
+        }}
+        onMouseLeave={(e) => {
+          if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+        }}
+      >
+        <Icon className="w-[15px] h-[15px] flex-shrink-0" />
+        <span className="font-light tracking-wide text-[13px]">{label}</span>
+      </div>
+    </Link>
+  );
+}
+
+function WhatIsHooks() {
+  return (
+    <div
+      className="rounded-xl p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(155deg, #1c1028 0%, #0e0a1a 100%)",
+        border: "1px solid rgba(212,163,65,0.12)",
+      }}
+    >
+      {/* atmospheric glow */}
+      <div
+        className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(212,163,65,0.15) 0%, transparent 70%)" }}
+      />
+      <p
+        className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-3"
+        style={{ color: "rgba(212,163,65,0.55)" }}
+      >
+        What is Hooks?
+      </p>
+      <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+        Hooks are short ideas, riffs, melodies, lyrics or vibes that people throw out into the world.
+      </p>
+      <p className="text-[12px] mt-3" style={{ color: "rgba(255,255,255,0.35)" }}>
+        It's an invitation.
+      </p>
+      <p
+        className="text-[12px] italic mt-1.5 font-light leading-snug"
+        style={{ color: "rgba(212,163,65,0.65)" }}
+      >
+        "Does anyone hear something in this?"
+      </p>
+    </div>
+  );
+}
+
+function SidebarContent() {
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const [location] = useLocation();
+  const { data: profile } = useGetMyProfile({
+    query: { enabled: !!user, queryKey: getGetMyProfileQueryKey() },
+  });
+
+  const isHooks = location === "/hooks" || location.startsWith("/hooks");
+
+  const handleSignOut = () => {
+    signOut({ redirectUrl: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Logo */}
+      <div className="px-5 py-5 pb-4 flex-shrink-0">
+        <Link href="/discover">
+          <img
+            src={logoImg}
+            alt="Creative Rooms"
+            style={{ height: 28, width: "auto", objectFit: "contain" }}
+          />
+        </Link>
+      </div>
+
+      {/* What is Hooks? — shown only on /hooks */}
+      {isHooks && (
+        <div className="px-3 pb-4 flex-shrink-0">
+          <WhatIsHooks />
+        </div>
+      )}
+
+      {/* Nav */}
+      <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
+        <NavLink
+          href="/discover"
+          icon={Compass}
+          label="Discover"
+          active={location === "/discover" || location.startsWith("/discover")}
+        />
+        {user && (
+          <NavLink
+            href="/dashboard"
+            icon={LayoutDashboard}
+            label="Dashboard"
+            active={location === "/dashboard"}
+          />
+        )}
+        <NavLink
+          href="/hooks"
+          icon={Radio}
+          label="Hooks"
+          active={location === "/hooks"}
+        />
+        {user && (
+          <NavLink
+            href="/rooms/new"
+            icon={Plus}
+            label="New Room"
+            active={location === "/rooms/new"}
+          />
+        )}
+        {user && profile && (
+          <NavLink
+            href={`/profile/${profile.id}`}
+            icon={UserIcon}
+            label="Your Profile"
+            active={location.startsWith("/profile")}
+          />
+        )}
+      </nav>
+
+      {/* Auth footer */}
+      {user ? (
+        <div className="flex-shrink-0 p-3 border-t border-white/5">
+          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg group cursor-default">
+            <Avatar className="h-7 w-7 flex-shrink-0">
+              <AvatarImage src={profile?.avatarUrl || user?.imageUrl} />
+              <AvatarFallback className="text-[10px] bg-muted">
+                {profile?.displayName?.charAt(0).toUpperCase() ||
+                  user?.firstName?.charAt(0).toUpperCase() ||
+                  "?"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-medium text-foreground/80 truncate">
+                {profile?.displayName || user?.firstName}
+              </p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              title="Sign out"
+              className="transition-opacity p-1 rounded opacity-0 group-hover:opacity-100"
+              style={{ color: "rgba(255,255,255,0.35)" }}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-shrink-0 p-3 border-t border-white/5 space-y-2">
+          <Link href="/sign-up">
+            <button
+              className="w-full py-2 rounded-lg text-[12px] font-semibold transition-all hover:brightness-110"
+              style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+            >
+              Sign up free
+            </button>
+          </Link>
+          <Link href="/sign-in">
+            <button
+              className="w-full py-2 rounded-lg text-[12px] transition-colors"
+              style={{ color: "rgba(255,255,255,0.4)" }}
+            >
+              Log in
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Tagline */}
+      <div className="flex-shrink-0 px-5 py-4">
+        <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.2)" }}>
+          Real people. Real music.{" "}
+          <span style={{ color: "rgba(212,163,65,0.4)" }}>Create together.</span>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { user } = useUser();
-  const { signOut } = useClerk();
-  const [, setLocation] = useLocation();
-  const { data: profile } = useGetMyProfile({
-    query: { enabled: !!user, queryKey: getGetMyProfileQueryKey() },
-  });
-
-  const handleSignOut = () => {
-    signOut({ redirectUrl: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
-  };
-
-  const NavLinks = () => (
-    <>
-      {user && (
-        <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
-          <LayoutDashboard className="w-4 h-4" />
-          <span>Dashboard</span>
-        </Link>
-      )}
-      <Link href="/discover" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
-        <Compass className="w-4 h-4" />
-        <span>Discover</span>
-      </Link>
-      <Link href="/hooks" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
-        <Radio className="w-4 h-4" />
-        <span>Hooks</span>
-      </Link>
-      {user && (
-        <Link href="/rooms/new" className="flex items-center gap-3 px-3 py-2 text-sm text-primary hover:text-primary/80 transition-colors hover-elevate rounded-md font-medium">
-          <Plus className="w-4 h-4" />
-          <span>New Room</span>
-        </Link>
-      )}
-    </>
-  );
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background relative overflow-hidden">
+    <div className="min-h-[100dvh] flex bg-background relative">
       <div className="bg-noise" />
-      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/discover">
-              <img
-                src={logoImg}
-                alt="Creative Rooms"
-                style={{ height: 34, width: "auto", objectFit: "contain" }}
-              />
-            </Link>
-            <nav className="hidden md:flex items-center gap-2">
-              <NavLinks />
-            </nav>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {!user && (
-              <div className="flex items-center gap-3">
-                <Link href="/sign-in">
-                  <button
-                    type="button"
-                    className="text-[13px] transition-colors"
-                    style={{ color: "rgba(255,255,255,0.52)" }}
-                  >
-                    Log in
-                  </button>
-                </Link>
-                <Link href="/sign-up">
-                  <button
-                    type="button"
-                    className="h-8 px-4 rounded-full text-[12.5px] font-semibold transition-all hover:brightness-110"
-                    style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
-                  >
-                    Sign up free
-                  </button>
-                </Link>
-              </div>
-            )}
-            {user && <DropdownMenu>
-              <DropdownMenuTrigger className="outline-none">
-                <Avatar className="h-8 w-8 border border-border/50 hover-elevate transition-all">
-                  <AvatarImage src={profile?.avatarUrl || user?.imageUrl} />
-                  <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                    {profile?.displayName?.charAt(0).toUpperCase() || user?.firstName?.charAt(0).toUpperCase() || '?'}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-popover/95 backdrop-blur-md border-border/50">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-0.5 leading-none">
-                    <p className="font-medium text-sm">{profile?.displayName || user?.fullName}</p>
-                    <p className="text-xs text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator className="bg-border/50" />
-                {profile && (
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href={`/profile/${profile.id}`} className="flex w-full items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <UserIcon className="w-4 h-4" />
-                      <span>View Profile</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/profile/edit" className="flex w-full items-center gap-2 text-muted-foreground hover:text-foreground">
-                    <Settings className="w-4 h-4" />
-                    <span>Edit Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2">
-                  <LogOut className="w-4 h-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>}
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[80vw] sm:w-[350px] bg-background border-border">
-                <nav className="flex flex-col gap-4 mt-8">
-                  <NavLinks />
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </header>
-      <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
+      {/* Desktop sidebar */}
+      <aside
+        className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 border-r border-white/[0.06]"
+        style={{ background: "hsl(270 16% 6%)" }}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile top bar */}
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center px-4 h-14 border-b border-white/[0.06]"
+        style={{ background: "hsl(270 16% 6%)" }}
+      >
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="-ml-2">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="w-[260px] p-0 border-r border-white/[0.06]"
+            style={{ background: "hsl(270 16% 6%)" }}
+          >
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Main content */}
+      <main className="flex-1 md:ml-[240px] min-h-screen pt-14 md:pt-0 relative z-10">
         {children}
       </main>
     </div>

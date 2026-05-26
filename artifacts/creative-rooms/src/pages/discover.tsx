@@ -32,7 +32,7 @@ export function DiscoverPage() {
   };
 
   return (
-    <div className="space-y-10" style={{ animation: "pageIn 0.6s ease both" }}>
+    <div className="space-y-10 px-6 py-8" style={{ animation: "pageIn 0.6s ease both" }}>
 
       {/* ── Header ── */}
       <div className="flex items-end justify-between gap-6">
