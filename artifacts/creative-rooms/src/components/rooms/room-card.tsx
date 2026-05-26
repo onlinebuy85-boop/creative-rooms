@@ -1,9 +1,11 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Room } from "@workspace/api-client-react";
+import { RoomManageMenu } from "./room-manage-menu";
 
 interface RoomCardProps {
   room: Room;
   index?: number;
+  currentProfileId?: number;
 }
 
 const PALETTES = [
@@ -52,11 +54,13 @@ function CardWaveform({ accent }: { accent: string }) {
   );
 }
 
-export function RoomCard({ room, index = 0 }: RoomCardProps) {
+export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
+  const [, setLocation] = useLocation();
   const palette = PALETTES[index % PALETTES.length];
   const tagline = atmosphericLine(room);
   const spotsLeft = (room.maxMembers || 4) - (room.memberCount || 0);
   const isFull = spotsLeft <= 0;
+  const isOwner = !!currentProfileId && currentProfileId === room.ownerId;
 
   return (
     <Link href={`/rooms/${room.id}`}>
@@ -99,6 +103,22 @@ export function RoomCard({ room, index = 0 }: RoomCardProps) {
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.22) 0%, transparent 65%)` }}
         />
+
+        {/* Owner manage menu — top-right corner */}
+        {isOwner && (
+          <div
+            className="absolute top-2.5 right-2.5 z-10"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          >
+            <RoomManageMenu
+              roomId={room.id}
+              roomName={room.name}
+              isOwner={true}
+              isMember={true}
+              onSuccess={(redirect) => { if (redirect) setLocation("/discover"); }}
+            />
+          </div>
+        )}
 
         {/* Top badges row */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between">

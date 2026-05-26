@@ -21,9 +21,10 @@ interface UseVoiceParams {
   myProfileId: number | undefined;
   myDisplayName: string | undefined;
   sendWsMessage: (msg: unknown) => void;
+  onMicError?: (message: string) => void;
 }
 
-export function useVoice({ myProfileId, myDisplayName, sendWsMessage }: UseVoiceParams) {
+export function useVoice({ myProfileId, myDisplayName, sendWsMessage, onMicError }: UseVoiceParams) {
   const [isInVoice, setIsInVoice] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -108,8 +109,18 @@ export function useVoice({ myProfileId, myDisplayName, sendWsMessage }: UseVoice
       isInVoiceRef.current = true;
       setIsInVoice(true);
       sendWsMessage({ type: "voice_join", profileId: myProfileId, displayName: myDisplayName });
-    } catch {
-      /* Microphone denied or unavailable — fail silently */
+    } catch (err: unknown) {
+      const name = err instanceof Error ? err.name : "";
+      const msg = err instanceof Error ? err.message : String(err);
+      let friendly = "Could not access microphone. Please check your settings.";
+      if (name === "NotAllowedError" || msg.includes("Permission denied")) {
+        friendly = "Microphone access denied. Tap the lock icon in your browser address bar to allow it.";
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+        friendly = "No microphone found. Please connect one and try again.";
+      } else if (name === "NotReadableError") {
+        friendly = "Microphone is in use by another app. Close it and try again.";
+      }
+      onMicError?.(friendly);
     }
   }, [myProfileId, myDisplayName, sendWsMessage]);
 

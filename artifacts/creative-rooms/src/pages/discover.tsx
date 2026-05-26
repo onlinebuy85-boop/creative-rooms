@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useListRooms } from "@workspace/api-client-react";
+import { useListRooms, useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import { useUser } from "@clerk/react";
 import { RoomCard } from "@/components/rooms/room-card";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
@@ -23,6 +23,7 @@ function SkeletonCard() {
 export function DiscoverPage() {
   const { data: rooms, isLoading } = useListRooms();
   const { isSignedIn } = useUser();
+  const { data: profile } = useGetMyProfile({ query: { enabled: !!isSignedIn, queryKey: getGetMyProfileQueryKey() } });
   const [guestPromptReason, setGuestPromptReason] = useState<string | null>(null);
 
   const handleNewRoom = () => {
@@ -96,7 +97,7 @@ export function DiscoverPage() {
                 animationDelay: `${index * 80}ms`,
               }}
             >
-              <RoomCard room={room} index={index} />
+              <RoomCard room={room} index={index} currentProfileId={profile?.id} />
             </div>
           ))}
         </div>

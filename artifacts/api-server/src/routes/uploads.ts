@@ -21,7 +21,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
   fileFilter: (_req, file, cb) => {
-    const allowed = [".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aac"];
+    const allowed = [".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aac", ".webm", ".mp4"];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) {
       cb(null, true);

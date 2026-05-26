@@ -50,6 +50,8 @@ app.use(
 );
 
 app.use("/api", router);
+/* Serve uploaded files both under /api/uploads (through the proxy) and /uploads (direct) */
+app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 export default app;

@@ -1,2 +1,4 @@
 - [Clerk version compatibility](clerk-version-compat.md) — @clerk/react and @clerk/express must stay on aligned major versions; v6/v2 uses @clerk/shared@4.x.
 - [pnpm Clerk release age](clerk-release-age.md) — @clerk/react and @clerk/shared added to minimumReleaseAgeExclude so they can stay in sync.
+- [Audio upload URL routing](audio-upload-url.md) — uploaded files must be served under /api/uploads/ (proxy-accessible); /uploads/ alone is unreachable through the shared proxy.
+- [Modal/overlay pattern](portal-pattern.md) — all fullscreen sheets and overlays must use createPortal; Radix Dialog fights CSS transforms and breaks on mobile.

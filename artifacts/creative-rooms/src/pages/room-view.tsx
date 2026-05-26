@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useUser } from "@clerk/react";
 import { useParams, useLocation, Link } from "wouter";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
@@ -10,16 +11,19 @@ import {
 } from "@workspace/api-client-react";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useVoice } from "@/hooks/use-voice";
+import { useRecorder } from "@/hooks/use-recorder";
+import { RoomManageMenu } from "@/components/rooms/room-manage-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DemoDropzone } from "@/components/demo-dropzone";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
   Compass, User, Music2, Mic, MicOff, Video,
-  Circle, Monitor, LogOut, Play, Heart,
+  Circle, Square, Monitor, LogOut, Play, Heart,
   MoreHorizontal, Plus, Send, Loader2,
-  Crown, CloudUpload,
+  Crown, CloudUpload, RefreshCw, CheckCircle, AlertCircle, X,
 } from "lucide-react";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
@@ -281,6 +285,7 @@ export function RoomPage() {
 
   /* ── Auth ── */
   const { isSignedIn } = useUser();
+  const { toast } = useToast();
 
   /* ── Data ── */
   const { data: profile } = useGetMyProfile({ query: { enabled: !!isSignedIn, queryKey: getGetMyProfileQueryKey() } });
@@ -302,6 +307,10 @@ export function RoomPage() {
   const leaveRoom   = useLeaveRoom();
   const sendMessage = useSendMessage();
   const uploadDemo  = useUploadDemo();
+
+  /* ── Recorder ── */
+  const recorder = useRecorder();
+  const [uploadingRecording, setUploadingRecording] = useState(false);
 
   /* ── UI state ── */
   const [messageInput, setMessageInput]     = useState("");
@@ -368,6 +377,7 @@ export function RoomPage() {
     myProfileId: profile?.id,
     myDisplayName: profile?.displayName,
     sendWsMessage: sendWs,
+    onMicError: (msg) => toast({ title: "Microphone error", description: msg, variant: "destructive" }),
   });
 
   /* Identify on connect */
@@ -394,6 +404,7 @@ export function RoomPage() {
   }, [sendWs]);
 
   const isMember = members?.some((m) => m.profileId === profile?.id);
+  const isOwner  = !!profile?.id && profile.id === room?.ownerId;
   const rgb      = moodColor(room?.vibe ?? undefined, room?.genres ?? undefined);
 
   /* ── Handlers ── */
@@ -444,6 +455,35 @@ export function RoomPage() {
   const handlePlayToggle = (id: number) => {
     setPlayingId((prev) => (prev === id ? null : id));
   };
+
+  /* ── Upload a recorded take as a demo ── */
+  const handleUploadRecording = useCallback(async () => {
+    if (!recorder.audioBlob) return;
+    setUploadingRecording(true);
+    try {
+      const ext = recorder.audioBlob.type.includes("mp4") ? ".mp4"
+        : recorder.audioBlob.type.includes("ogg") ? ".ogg"
+        : ".webm";
+      const file = new File(
+        [recorder.audioBlob],
+        `recording-${Date.now()}${ext}`,
+        { type: recorder.audioBlob.type },
+      );
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/uploads", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Upload failed");
+      const data: { url: string } = await res.json();
+      const fileUrl = `/api${data.url}`;
+      await handleDemoUploaded(fileUrl, `Take — ${format(new Date(), "MMM d, HH:mm")}`, "");
+      toast({ title: "Take saved", description: "Your recording has been added to the studio." });
+      recorder.reset();
+    } catch {
+      toast({ title: "Upload failed", description: "Could not save the recording. Please try again.", variant: "destructive" });
+    } finally {
+      setUploadingRecording(false);
+    }
+  }, [recorder, handleDemoUploaded, toast]);
 
   /* ── Loading ── */
   if (roomLoading || !room) {
@@ -508,15 +548,26 @@ export function RoomPage() {
             </span>
           </div>
         </div>
-        <div className="flex -space-x-1.5 flex-shrink-0">
-          {members?.slice(0, 3).map((m) => (
-            <Avatar key={m.profileId} className="w-7 h-7 border" style={{ borderColor: "#0b0910" }}>
-              <AvatarImage src={m.avatarUrl || undefined} />
-              <AvatarFallback className="text-[9px]" style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}>
-                {m.displayName?.charAt(0) || "?"}
-              </AvatarFallback>
-            </Avatar>
-          ))}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex -space-x-1.5">
+            {members?.slice(0, 3).map((m) => (
+              <Avatar key={m.profileId} className="w-7 h-7 border" style={{ borderColor: "#0b0910" }}>
+                <AvatarImage src={m.avatarUrl || undefined} />
+                <AvatarFallback className="text-[9px]" style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}>
+                  {m.displayName?.charAt(0) || "?"}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+          </div>
+          {(isOwner || isMember) && (
+            <RoomManageMenu
+              roomId={roomId}
+              roomName={room.name}
+              isOwner={isOwner}
+              isMember={!!isMember}
+              onSuccess={(redirect) => { if (redirect) setLocation("/discover"); }}
+            />
+          )}
         </div>
       </header>
 
@@ -1125,21 +1176,39 @@ export function RoomPage() {
             {/* Record — large, prominent */}
             <button
               type="button"
-              onClick={!isSignedIn ? () => setGuestPromptReason("record audio") : undefined}
-              className="flex flex-col items-center gap-1.5 transition-all hover:scale-105"
+              onClick={
+                !isSignedIn ? () => setGuestPromptReason("record audio")
+                : !isMember ? handleJoin
+                : recorder.state === "recording" ? recorder.stop
+                : recorder.state === "idle" ? recorder.start
+                : undefined
+              }
+              disabled={recorder.state === "requesting" || recorder.state === "processing"}
+              className="flex flex-col items-center gap-1.5 transition-all hover:scale-105 disabled:opacity-60 disabled:scale-100"
             >
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center"
                 style={{
-                  background: "rgba(239,68,68,0.12)",
-                  border: "2px solid rgba(239,68,68,0.45)",
-                  boxShadow: "0 0 22px rgba(239,68,68,0.18)",
+                  background: recorder.state === "recording"
+                    ? "rgba(239,68,68,0.22)"
+                    : "rgba(239,68,68,0.12)",
+                  border: `2px solid ${recorder.state === "recording" ? "rgba(239,68,68,0.7)" : "rgba(239,68,68,0.45)"}`,
+                  boxShadow: recorder.state === "recording"
+                    ? "0 0 28px rgba(239,68,68,0.4)"
+                    : "0 0 22px rgba(239,68,68,0.18)",
+                  animation: recorder.state === "recording" ? "pulse-dot 1.2s ease-in-out infinite" : "none",
                 }}
               >
-                <Circle className="w-6 h-6 fill-current" style={{ color: "#ef4444" }} />
+                {recorder.state === "requesting" && <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#ef4444" }} />}
+                {recorder.state === "recording" && <Square className="w-5 h-5 fill-current" style={{ color: "#ef4444" }} />}
+                {(recorder.state === "idle" || recorder.state === "error") && <Circle className="w-6 h-6 fill-current" style={{ color: "#ef4444" }} />}
+                {(recorder.state === "processing" || recorder.state === "done") && <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#ef4444" }} />}
               </div>
               <span className="text-[10px] font-medium" style={{ color: "rgba(239,68,68,0.55)" }}>
-                Record
+                {recorder.state === "requesting" ? "Starting…"
+                  : recorder.state === "recording" ? "Stop"
+                  : recorder.state === "processing" ? "Saving…"
+                  : "Record"}
               </span>
             </button>
 
@@ -1360,6 +1429,216 @@ export function RoomPage() {
         reason={guestPromptReason ?? ""}
         onClose={() => setGuestPromptReason(null)}
       />
+
+      {/* ── Recording overlay portal ── */}
+      {recorder.state !== "idle" && createPortal(
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 9998,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "flex-end",
+            padding: "0 0 calc(env(safe-area-inset-bottom, 0px) + 12px)",
+            background: "rgba(0,0,0,0.72)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+          }}
+        >
+          <div
+            style={{
+              width: "100%", maxWidth: "min(480px, 100vw)",
+              background: "hsl(270 18% 7%)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "24px 24px 0 0",
+              overflow: "hidden",
+              paddingBottom: 8,
+            }}
+          >
+            {/* Gold accent bar */}
+            <div style={{ height: 3, background: "linear-gradient(90deg,#e0b050,#c89030)", flexShrink: 0 }} />
+
+            {/* Handle */}
+            <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 2px" }}>
+              <div style={{ width: 36, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.15)" }} />
+            </div>
+
+            <div style={{ padding: "8px 24px 20px" }}>
+              {/* requesting */}
+              {recorder.state === "requesting" && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: 8 }}>
+                  <Loader2 size={36} style={{ color: "#ef4444", animation: "spin 1s linear infinite" }} />
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>
+                    Connecting to microphone…
+                  </p>
+                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
+                    Allow microphone access when your browser asks
+                  </p>
+                  <button
+                    onClick={recorder.reset}
+                    style={{ marginTop: 4, fontSize: 13, color: "rgba(255,255,255,0.35)", background: "none", border: "none", cursor: "pointer" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* recording */}
+              {recorder.state === "recording" && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+                  {/* Timer */}
+                  <p style={{ fontSize: 42, fontWeight: 700, color: "#ef4444", letterSpacing: "-1px", marginTop: 4 }}>
+                    {String(Math.floor(recorder.seconds / 60)).padStart(2, "0")}:{String(recorder.seconds % 60).padStart(2, "0")}
+                  </p>
+
+                  {/* Animated waveform */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 3, height: 40 }}>
+                    {Array.from({ length: 18 }).map((_, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: 3, borderRadius: 99,
+                          background: "#ef4444",
+                          opacity: 0.7,
+                          animation: `miniWave ${0.9 + (i % 5) * 0.18}s ease-in-out infinite`,
+                          animationDelay: `${i * 0.055}s`,
+                          height: `${20 + (i % 7) * 9}px`,
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em" }}>
+                    Recording in progress
+                  </p>
+
+                  <div style={{ display: "flex", gap: 12, width: "100%" }}>
+                    <button
+                      onClick={recorder.reset}
+                      style={{
+                        flex: 1, height: 48, borderRadius: 99,
+                        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                        fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.45)", cursor: "pointer",
+                      }}
+                    >
+                      Discard
+                    </button>
+                    <button
+                      onClick={recorder.stop}
+                      style={{
+                        flex: 2, height: 48, borderRadius: 99,
+                        background: "linear-gradient(135deg,rgba(239,68,68,0.85),rgba(220,38,38,0.85))",
+                        border: "none",
+                        fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      }}
+                    >
+                      <Square size={14} className="fill-current" /> Stop Recording
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* processing */}
+              {recorder.state === "processing" && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "16px 0" }}>
+                  <Loader2 size={32} style={{ color: "#d4a341", animation: "spin 1s linear infinite" }} />
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.75)" }}>Saving your take…</p>
+                </div>
+              )}
+
+              {/* done */}
+              {recorder.state === "done" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 4 }}>
+                    <CheckCircle size={20} color="#4ade80" />
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.88)" }}>Take recorded</p>
+                  </div>
+
+                  {recorder.localUrl && (
+                    <audio
+                      src={recorder.localUrl}
+                      controls
+                      style={{ width: "100%", height: 36, borderRadius: 12, opacity: 0.9, accentColor: "#d4a341" }}
+                    />
+                  )}
+
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      onClick={() => { recorder.reset(); }}
+                      style={{
+                        flex: 1, height: 48, borderRadius: 99,
+                        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                        fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.4)", cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      }}
+                    >
+                      <RefreshCw size={14} /> Try again
+                    </button>
+                    <button
+                      onClick={handleUploadRecording}
+                      disabled={uploadingRecording}
+                      style={{
+                        flex: 2, height: 48, borderRadius: 99,
+                        background: "linear-gradient(135deg,#e0b050,#c89030)",
+                        border: "none",
+                        fontSize: 14, fontWeight: 700, color: "#1a0f00",
+                        cursor: uploadingRecording ? "default" : "pointer",
+                        opacity: uploadingRecording ? 0.7 : 1,
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      }}
+                    >
+                      {uploadingRecording
+                        ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Uploading…</>
+                        : <><CloudUpload size={14} /> Add as Demo</>}
+                    </button>
+                  </div>
+                  <button
+                    onClick={recorder.reset}
+                    style={{
+                      textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.25)",
+                      background: "none", border: "none", cursor: "pointer", paddingBottom: 4,
+                    }}
+                  >
+                    Discard take
+                  </button>
+                </div>
+              )}
+
+              {/* error */}
+              {recorder.state === "error" && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: "8px 0" }}>
+                  <AlertCircle size={32} color="#ef4444" />
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.8)", textAlign: "center" }}>
+                    {recorder.error ?? "Could not start recording."}
+                  </p>
+                  <div style={{ display: "flex", gap: 10, width: "100%" }}>
+                    <button
+                      onClick={recorder.reset}
+                      style={{
+                        flex: 1, height: 44, borderRadius: 99,
+                        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                        fontSize: 14, color: "rgba(255,255,255,0.4)", cursor: "pointer",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={recorder.start}
+                      style={{
+                        flex: 1, height: 44, borderRadius: 99,
+                        background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.35)",
+                        fontSize: 14, fontWeight: 600, color: "#ef4444", cursor: "pointer",
+                      }}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
 
       <style>{`
         @keyframes miniWave {
