@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
-import { useGetMyProfile } from "@workspace/api-client-react";
+import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import logoImg from "@assets/creative-rooms-wordmark.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -16,7 +16,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user } = useUser();
   const { signOut } = useClerk();
   const [, setLocation] = useLocation();
-  const { data: profile } = useGetMyProfile();
+  const { data: profile } = useGetMyProfile({
+    query: { enabled: !!user, queryKey: getGetMyProfileQueryKey() },
+  });
 
   const handleSignOut = () => {
     signOut({ redirectUrl: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
@@ -24,18 +26,22 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const NavLinks = () => (
     <>
-      <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
-        <LayoutDashboard className="w-4 h-4" />
-        <span>Dashboard</span>
-      </Link>
+      {user && (
+        <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
+          <LayoutDashboard className="w-4 h-4" />
+          <span>Dashboard</span>
+        </Link>
+      )}
       <Link href="/discover" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate rounded-md">
         <Compass className="w-4 h-4" />
         <span>Discover</span>
       </Link>
-      <Link href="/rooms/new" className="flex items-center gap-3 px-3 py-2 text-sm text-primary hover:text-primary/80 transition-colors hover-elevate rounded-md font-medium">
-        <Plus className="w-4 h-4" />
-        <span>New Room</span>
-      </Link>
+      {user && (
+        <Link href="/rooms/new" className="flex items-center gap-3 px-3 py-2 text-sm text-primary hover:text-primary/80 transition-colors hover-elevate rounded-md font-medium">
+          <Plus className="w-4 h-4" />
+          <span>New Room</span>
+        </Link>
+      )}
     </>
   );
 
@@ -58,7 +64,29 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
           
           <div className="flex items-center gap-4">
-            <DropdownMenu>
+            {!user && (
+              <div className="flex items-center gap-3">
+                <Link href="/sign-in">
+                  <button
+                    type="button"
+                    className="text-[13px] transition-colors"
+                    style={{ color: "rgba(255,255,255,0.52)" }}
+                  >
+                    Log in
+                  </button>
+                </Link>
+                <Link href="/sign-up">
+                  <button
+                    type="button"
+                    className="h-8 px-4 rounded-full text-[12.5px] font-semibold transition-all hover:brightness-110"
+                    style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+                  >
+                    Sign up free
+                  </button>
+                </Link>
+              </div>
+            )}
+            {user && <DropdownMenu>
               <DropdownMenuTrigger className="outline-none">
                 <Avatar className="h-8 w-8 border border-border/50 hover-elevate transition-all">
                   <AvatarImage src={profile?.avatarUrl || user?.imageUrl} />
@@ -95,7 +123,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu>}
 
             <Sheet>
               <SheetTrigger asChild>

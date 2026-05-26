@@ -114,7 +114,7 @@ export function LandingPage() {
               }}
               asChild
             >
-              <Link href="/sign-up">Enter Creative Rooms</Link>
+              <Link href="/discover">Enter Creative Rooms</Link>
             </Button>
 
             <Button

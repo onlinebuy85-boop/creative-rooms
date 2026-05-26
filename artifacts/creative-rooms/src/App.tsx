@@ -120,6 +120,15 @@ function ProtectedRoute({ component: Component, hideLayout = false }: { componen
   );
 }
 
+function GuestRoute({ component: Component, hideLayout = false }: { component: React.ComponentType, hideLayout?: boolean }) {
+  if (hideLayout) return <Component />;
+  return (
+    <AppLayout>
+      <Component />
+    </AppLayout>
+  );
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
@@ -186,7 +195,7 @@ function App() {
                 <ProtectedRoute component={DiscoverPage} />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <GuestRoute component={DiscoverPage} />
               </Show>
             </Route>
             
@@ -204,7 +213,7 @@ function App() {
                 <ProtectedRoute component={RoomPage} hideLayout />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <GuestRoute component={RoomPage} hideLayout />
               </Show>
             </Route>
             

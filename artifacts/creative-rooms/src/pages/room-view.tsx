@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useUser } from "@clerk/react";
 import { useParams, useLocation, Link } from "wouter";
+import { GuestSignupPrompt } from "@/components/guest-prompt";
 import {
   useGetRoom, useGetRoomMembers, useGetRoomMessages,
   useGetRoomDemos, useSendMessage, useUploadDemo,
   useGetMyProfile, useJoinRoom, useLeaveRoom,
-  useListRooms, getGetRoomMessagesQueryKey,
+  useListRooms, getGetRoomMessagesQueryKey, getGetMyProfileQueryKey,
 } from "@workspace/api-client-react";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useVoice } from "@/hooks/use-voice";
@@ -277,8 +279,11 @@ export function RoomPage() {
   const queryClient = useQueryClient();
   const browseRef = useRef<HTMLInputElement | null>(null);
 
+  /* ── Auth ── */
+  const { isSignedIn } = useUser();
+
   /* ── Data ── */
-  const { data: profile } = useGetMyProfile();
+  const { data: profile } = useGetMyProfile({ query: { enabled: !!isSignedIn, queryKey: getGetMyProfileQueryKey() } });
   const { data: room, isLoading: roomLoading } = useGetRoom(roomId, {
     query: { enabled: !!roomId, queryKey: ["getRoom", roomId] },
   });
@@ -302,6 +307,7 @@ export function RoomPage() {
   const [messageInput, setMessageInput]     = useState("");
   const [typingUsers, setTypingUsers]       = useState<Map<number, string>>(new Map());
   const [onlineIds, setOnlineIds]           = useState<Set<number>>(new Set());
+  const [guestPromptReason, setGuestPromptReason] = useState<string | null>(null);
   const [playingId, setPlayingId]           = useState<number | null>(null);
   const messagesEndRef                       = useRef<HTMLDivElement>(null);
   const typingTimersRef                      = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
@@ -676,8 +682,29 @@ export function RoomPage() {
                   </button>
                 </div>
               </div>
+            ) : !isSignedIn ? (
+              /* Guest gate */
+              <div
+                className="flex flex-col items-center justify-center py-16 rounded-3xl text-center"
+                style={{ border: "1px dashed rgba(255,255,255,0.07)" }}
+              >
+                <p className="text-[14px] mb-2" style={{ color: "rgba(255,255,255,0.38)" }}>
+                  Sign up to share your music here.
+                </p>
+                <p className="text-[12px] mb-6" style={{ color: "rgba(255,255,255,0.22)" }}>
+                  You're listening as a guest.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setGuestPromptReason("share demos")}
+                  className="h-10 px-6 rounded-full text-[13px] font-semibold hover:brightness-110 transition-all"
+                  style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
+                >
+                  Sign up free
+                </button>
+              </div>
             ) : (
-              /* Non-member gate */
+              /* Non-member authenticated gate */
               <div
                 className="flex flex-col items-center justify-center py-16 rounded-3xl text-center"
                 style={{ border: "1px dashed rgba(255,255,255,0.07)" }}
@@ -747,7 +774,7 @@ export function RoomPage() {
               label={isInVoice ? (isMuted ? "Unmute" : "Voice On") : "Voice Chat"}
               active={isInVoice && !isMuted}
               activeColor="#4ade80"
-              onClick={isInVoice ? toggleMute : joinVoice}
+              onClick={isSignedIn ? (isInVoice ? toggleMute : joinVoice) : () => setGuestPromptReason("join voice")}
             />
 
             {/* Video (placeholder) */}
@@ -761,6 +788,7 @@ export function RoomPage() {
             {/* Record — large, prominent */}
             <button
               type="button"
+              onClick={!isSignedIn ? () => setGuestPromptReason("record audio") : undefined}
               className="flex flex-col items-center gap-1.5 transition-all hover:scale-105"
             >
               <div
@@ -962,12 +990,20 @@ export function RoomPage() {
             >
               <input
                 type="text"
-                placeholder={isMember ? "Type a message…" : "Join to chat"}
+                placeholder={
+                  isMember
+                    ? "Type a message…"
+                    : !isSignedIn
+                    ? "Sign up to join the conversation"
+                    : "Join room to chat"
+                }
                 value={messageInput}
                 onChange={handleInputChange}
                 disabled={!isMember}
+                readOnly={!isSignedIn}
+                onClick={!isSignedIn ? () => setGuestPromptReason("write in chat") : undefined}
                 className="flex-1 bg-transparent outline-none text-[12.5px] disabled:opacity-40"
-                style={{ color: "rgba(255,255,255,0.82)" }}
+                style={{ color: "rgba(255,255,255,0.82)", cursor: !isSignedIn ? "pointer" : "text" }}
               />
               <button
                 type="submit"
@@ -981,6 +1017,12 @@ export function RoomPage() {
           </form>
         </div>
       </aside>
+
+      <GuestSignupPrompt
+        open={!!guestPromptReason}
+        reason={guestPromptReason ?? ""}
+        onClose={() => setGuestPromptReason(null)}
+      />
 
       <style>{`
         @keyframes miniWave {

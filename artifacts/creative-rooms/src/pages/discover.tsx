@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useListRooms } from "@workspace/api-client-react";
+import { useUser } from "@clerk/react";
 import { RoomCard } from "@/components/rooms/room-card";
+import { GuestSignupPrompt } from "@/components/guest-prompt";
 import { Link } from "wouter";
 import { Plus } from "lucide-react";
 
@@ -19,6 +22,14 @@ function SkeletonCard() {
 
 export function DiscoverPage() {
   const { data: rooms, isLoading } = useListRooms();
+  const { isSignedIn } = useUser();
+  const [guestPromptReason, setGuestPromptReason] = useState<string | null>(null);
+
+  const handleNewRoom = () => {
+    if (!isSignedIn) {
+      setGuestPromptReason("create a room");
+    }
+  };
 
   return (
     <div className="space-y-10" style={{ animation: "pageIn 0.6s ease both" }}>
@@ -40,18 +51,34 @@ export function DiscoverPage() {
           </p>
         </div>
 
-        <Link
-          href="/rooms/new"
-          className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all hover:scale-[1.04] hover:brightness-110"
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            color: "rgba(255,255,255,0.65)",
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          New room
-        </Link>
+        {isSignedIn ? (
+          <Link
+            href="/rooms/new"
+            className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all hover:scale-[1.04] hover:brightness-110"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.65)",
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            New room
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handleNewRoom}
+            className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all hover:scale-[1.04] hover:brightness-110"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.65)",
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            New room
+          </button>
+        )}
       </div>
 
       {/* ── Room grid ── */}
@@ -98,28 +125,51 @@ export function DiscoverPage() {
               <circle cx="18" cy="16" r="3" />
             </svg>
           </div>
-          <h3 className="font-serif text-[1.4rem] text-white/70 mb-3">It's quiet right now.</h3>
+          <h3 className="font-serif text-[1.4rem] text-white/70 mb-3">
+            The rooms are quiet tonight.
+          </h3>
           <p
             className="text-[13px] max-w-xs font-light leading-relaxed mb-8"
             style={{ color: "rgba(255,255,255,0.35)" }}
           >
-            No open rooms yet. Start the first session and invite
-            someone to create with.
+            No active sessions yet. Start the first one and invite someone to create with.
           </p>
-          <Link
-            href="/rooms/new"
-            className="flex items-center gap-2 px-7 py-3 rounded-full text-[13.5px] font-semibold transition-all hover:scale-[1.03]"
-            style={{
-              background: "linear-gradient(135deg, #e0b050, #c89030)",
-              color: "#1a0f00",
-              boxShadow: "0 0 28px -6px rgba(212,163,65,0.4)",
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Start a room
-          </Link>
+          {isSignedIn ? (
+            <Link
+              href="/rooms/new"
+              className="flex items-center gap-2 px-7 py-3 rounded-full text-[13.5px] font-semibold transition-all hover:scale-[1.03]"
+              style={{
+                background: "linear-gradient(135deg, #e0b050, #c89030)",
+                color: "#1a0f00",
+                boxShadow: "0 0 28px -6px rgba(212,163,65,0.4)",
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Start a room
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setGuestPromptReason("create a room")}
+              className="flex items-center gap-2 px-7 py-3 rounded-full text-[13.5px] font-semibold transition-all hover:scale-[1.03]"
+              style={{
+                background: "linear-gradient(135deg, #e0b050, #c89030)",
+                color: "#1a0f00",
+                boxShadow: "0 0 28px -6px rgba(212,163,65,0.4)",
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Start a room
+            </button>
+          )}
         </div>
       )}
+
+      <GuestSignupPrompt
+        open={!!guestPromptReason}
+        reason={guestPromptReason ?? ""}
+        onClose={() => setGuestPromptReason(null)}
+      />
 
       <style>{`
         @keyframes pageIn {
