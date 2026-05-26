@@ -154,6 +154,11 @@ export function HookCard({ hook, selected, onClick, onJoinRequest }: HookCardPro
                     background: playing
                       ? `${accent}${i % 3 === 0 ? "bb" : i % 3 === 1 ? "77" : "44"}`
                       : `rgba(255,255,255,${i % 2 === 0 ? "0.15" : "0.08"})`,
+                    animation: playing
+                      ? `breathe ${1.1 + (i % 6) * 0.2}s ease-in-out infinite`
+                      : undefined,
+                    animationDelay: playing ? `${i * 0.04}s` : undefined,
+                    transition: "background 0.3s ease, height 0.3s ease",
                   }}
                 />
               ))}

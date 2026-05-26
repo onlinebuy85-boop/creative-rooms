@@ -94,13 +94,31 @@ function SidebarContent() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Logo */}
-      <div className="px-5 py-5 pb-4 flex-shrink-0">
-        <Link href="/discover">
-          <img
-            src={logoImg}
-            alt="Creative Rooms"
-            style={{ height: 28, width: "auto", objectFit: "contain" }}
-          />
+      <div className="px-5 pt-6 pb-5 flex-shrink-0">
+        <Link href="/">
+          <div
+            className="inline-block relative group"
+            style={{ padding: "4px 0" }}
+          >
+            {/* Warm hover glow */}
+            <div
+              className="absolute -inset-3 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              style={{ background: "radial-gradient(ellipse, rgba(212,163,65,0.1) 0%, transparent 70%)" }}
+            />
+            <img
+              src={logoImg}
+              alt="Creative Rooms"
+              style={{
+                height: 40,
+                width: "auto",
+                objectFit: "contain",
+                position: "relative",
+                filter: "brightness(1.05)",
+                transition: "filter 0.3s ease",
+              }}
+              className="group-hover:brightness-125"
+            />
+          </div>
         </Link>
       </div>
 
@@ -199,8 +217,23 @@ function SidebarContent() {
         </div>
       )}
 
-      {/* Tagline */}
-      <div className="flex-shrink-0 px-5 py-4">
+      {/* Ambient waveform + tagline */}
+      <div className="flex-shrink-0 px-5 pb-5">
+        {/* Breathing bars */}
+        <div className="flex items-end gap-[3px] h-[18px] mb-3 opacity-30">
+          {[5,8,4,10,6,9,4,7,3,8,5,9,4,7,5,8,3,6].map((h, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-full"
+              style={{
+                height: `${h * 10}%`,
+                background: "#d4a341",
+                animation: `breathe ${1.8 + (i % 5) * 0.3}s ease-in-out infinite`,
+                animationDelay: `${i * 0.09}s`,
+              }}
+            />
+          ))}
+        </div>
         <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.2)" }}>
           Real people. Real music.{" "}
           <span style={{ color: "rgba(212,163,65,0.4)" }}>Create together.</span>

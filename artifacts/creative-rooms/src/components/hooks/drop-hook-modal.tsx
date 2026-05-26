@@ -1,6 +1,68 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCreateHook, getListHooksQueryKey } from "@workspace/api-client-react";
+
+function seededWave(id: number, bars = 48): number[] {
+  let s = ((id * 1664525) + 1013904223) >>> 0;
+  return Array.from({ length: bars }, () => {
+    s = ((s * 1664525) + 1013904223) >>> 0;
+    return (s % 65) + 18;
+  });
+}
+
+function SuccessPanel({ onClose }: { onClose: () => void }) {
+  const bars = seededWave((Date.now() % 10000) | 0);
+  useEffect(() => {
+    const t = setTimeout(onClose, 3500);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center py-10 px-6 gap-7 text-center"
+      style={{ animation: "pageIn 0.5s ease both" }}
+    >
+      {/* Animated waveform */}
+      <div className="flex items-end justify-center gap-[3px] h-14 w-full">
+        {bars.map((h, i) => (
+          <div
+            key={i}
+            className="flex-1 rounded-full"
+            style={{
+              minWidth: 2,
+              height: `${h}%`,
+              background: `rgba(212,163,65,${0.25 + (i % 3) * 0.25})`,
+              animation: `breathe ${1.3 + (i % 5) * 0.28}s ease-in-out infinite`,
+              animationDelay: `${i * 0.05}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div>
+        <p className="font-serif text-[1.6rem] mb-2" style={{ color: "#d4a341" }}>
+          Your hook is live.
+        </p>
+        <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+          Your signal is out there.<br />Listening for someone who hears it.
+        </p>
+      </div>
+      {/* Breathing dots */}
+      <div className="flex items-center gap-2">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="w-1.5 h-1.5 rounded-full"
+            style={{
+              background: "#d4a341",
+              animation: "breathe 1.4s ease-in-out infinite",
+              animationDelay: `${i * 0.35}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -34,14 +96,14 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [succeeded, setSucceeded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createMutation = useCreateHook({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListHooksQueryKey() });
-        toast({ title: "Hook dropped", description: "Your signal is out there." });
-        handleClose();
+        setSucceeded(true);
       },
       onError: () => {
         toast({ title: "Something went wrong", description: "Couldn't drop the hook. Try again.", variant: "destructive" });
@@ -56,6 +118,7 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
     setLookingFor([]);
     setMaxSeats(3);
     setAudioFile(null);
+    setSucceeded(false);
     onClose();
   };
 
@@ -117,6 +180,10 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="sm:max-w-[520px] bg-card border-border/60 p-0 overflow-hidden">
         <div className="h-[2px] w-full" style={{ background: "linear-gradient(90deg,#e0b050,#c89030)" }} />
+
+        {succeeded ? (
+          <SuccessPanel onClose={handleClose} />
+        ) : (
         <div className="p-6">
           <DialogHeader className="mb-5">
             <DialogTitle className="font-serif text-xl text-foreground">Drop a Hook</DialogTitle>
@@ -275,6 +342,7 @@ export function DropHookModal({ open, onClose }: DropHookModalProps) {
             </div>
           </form>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );

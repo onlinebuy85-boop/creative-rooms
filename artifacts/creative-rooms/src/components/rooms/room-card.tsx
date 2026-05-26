@@ -87,8 +87,7 @@ export function RoomCard({ room, index = 0 }: RoomCardProps) {
               className="w-1.5 h-1.5 rounded-full"
               style={{
                 background: "#4ade80",
-                boxShadow: "0 0 6px 2px rgba(74,222,128,0.55)",
-                animation: "liveGlow 2s ease-in-out infinite",
+                animation: "pulse-dot 2s ease-in-out infinite",
               }}
             />
             Live
@@ -156,12 +155,6 @@ export function RoomCard({ room, index = 0 }: RoomCardProps) {
         </div>
       </div>
 
-      <style>{`
-        @keyframes liveGlow {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.5; }
-        }
-      `}</style>
     </Link>
   );
 }
