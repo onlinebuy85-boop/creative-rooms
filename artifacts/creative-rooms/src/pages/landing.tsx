@@ -175,18 +175,23 @@ export function LandingPage() {
 
         {/* Nav links */}
         <nav className="hidden md:flex items-center gap-9">
-          {["Rooms", "People", "Inspiration", "About"].map((item, i) => (
-            <span
-              key={item}
-              className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/80"
-              style={{
-                color: i === 0 ? "rgba(212,163,65,0.9)" : "rgba(255,255,255,0.42)",
-                borderBottom: i === 0 ? "1px solid rgba(212,163,65,0.45)" : "none",
-                paddingBottom: i === 0 ? "2px" : "0",
-              }}
-            >
-              {item}
-            </span>
+          {[
+            { label: "Rooms",       href: "/discover" },
+            { label: "Hooks",       href: "/hooks" },
+            { label: "About",       href: "/about" },
+          ].map(({ label, href }, i) => (
+            <Link key={label} href={href}>
+              <span
+                className="text-[13px] tracking-wide cursor-pointer transition-colors hover:text-white/80"
+                style={{
+                  color: i === 0 ? "rgba(212,163,65,0.9)" : "rgba(255,255,255,0.42)",
+                  borderBottom: i === 0 ? "1px solid rgba(212,163,65,0.45)" : "none",
+                  paddingBottom: i === 0 ? "2px" : "0",
+                }}
+              >
+                {label}
+              </span>
+            </Link>
           ))}
         </nav>
 
