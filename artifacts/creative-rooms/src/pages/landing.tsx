@@ -107,6 +107,12 @@ export function LandingPage() {
             filter: saturate(1.1) contrast(1.06) brightness(1.08) !important;
           }
         }
+        /* Integer pixel sizing for the landing logo — avoids fractional clamp() heights
+           which browsers must anti-alias, producing visible softness. */
+        .cr-landing-logo { height: 32px; }
+        @media (min-width: 640px) { .cr-landing-logo { height: 36px; } }
+        @media (min-width: 1024px) { .cr-landing-logo { height: 40px; } }
+        @media (min-width: 1280px) { .cr-landing-logo { height: 44px; } }
       `}</style>
 
       {/* ── FLOATING DUST PARTICLES ── */}
@@ -163,17 +169,17 @@ export function LandingPage() {
               src={logoImg}
               alt="Creative Room"
               decoding="sync"
+              width={924}
+              height={177}
+              className="cr-landing-logo"
               style={{
-                height: "clamp(32px, 7vw, 44px)",
                 width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                /* Bare crisp logo — no halo on the wordmark itself.
-                   The breathing glow divs behind provide all the warm atmosphere. */
-                filter: "brightness(1.05) contrast(1.08)",
+                /* Crisp wordmark — saturation/contrast lift sharpens perceived edges;
+                   tight 1px dark shadow separates gold edges from background cleanly. */
+                filter: "saturate(1.15) contrast(1.12) drop-shadow(0 1px 1px rgba(0,0,0,0.6))",
                 imageRendering: "auto",
-                WebkitBackfaceVisibility: "hidden",
-                backfaceVisibility: "hidden",
               }}
             />
           </div>
