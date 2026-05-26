@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
-import logoImg from "../../assets/images/creative-rooms-logo-v2.png";
+import logoImg from "../../assets/images/creative-rooms-logo-v3.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -126,22 +126,21 @@ function SidebarContent() {
               src={logoImg}
               alt="Creative Rooms"
               style={{
-                height: 56,
-                width: "auto",
-                maxWidth: "100%",
+                width: "100%",
+                height: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.12) drop-shadow(0 0 8px rgba(212,163,65,0.22))",
+                filter: "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))",
                 transition: "filter 0.4s ease, transform 0.3s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.28) drop-shadow(0 0 16px rgba(212,163,65,0.55))";
+                  "brightness(1.35) drop-shadow(0 0 20px rgba(212,163,65,0.65))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1.02)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLImageElement).style.filter =
-                  "brightness(1.12) drop-shadow(0 0 8px rgba(212,163,65,0.22))";
+                  "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.3))";
                 (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
               }}
             />
