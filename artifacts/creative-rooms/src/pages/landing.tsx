@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
-import logoImg from "../assets/images/creative-rooms-logo-v3.png";
+import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
 /* ── Atmospheric signals — evocative, never fake-numeric ── */
 const SIGNALS_TOP = [

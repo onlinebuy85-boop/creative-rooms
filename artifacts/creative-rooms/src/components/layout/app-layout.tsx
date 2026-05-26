@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
-import logoImg from "../../assets/images/creative-rooms-logo-v3.png";
+import logoImg from "../../assets/images/creative-rooms-logo-v4.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon,
