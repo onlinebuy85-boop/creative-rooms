@@ -76,17 +76,33 @@ export function LandingPage() {
             background: "linear-gradient(100deg, rgba(5,3,10,0.96) 0%, rgba(5,3,10,0.80) 35%, rgba(5,3,10,0.40) 62%, rgba(5,3,10,0.12) 100%)",
           }}
         />
-        {/* Top & bottom fades */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/78" />
-        {/* Warm ambient light — breathes slowly */}
+        {/* Top fade — very soft so logo floats in the atmosphere, not in a dark box */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(180deg, rgba(5,3,10,0.18) 0%, rgba(5,3,10,0.0) 18%, rgba(5,3,10,0.0) 55%, rgba(5,3,10,0.72) 100%)",
+          }}
+        />
+        {/* Warm ambient bloom — large pool behind logo area, no hard edges */}
         <div
           className="absolute pointer-events-none"
           style={{
-            left: "-5%", top: "5%", width: "55%", height: "70%",
-            background: "radial-gradient(ellipse at 30% 40%, rgba(180,110,20,0.12) 0%, rgba(140,80,10,0.04) 45%, transparent 70%)",
-            animation: "warm-glow 6s ease-in-out infinite",
+            left: "-8%", top: "-8%", width: "60%", height: "75%",
+            background: "radial-gradient(ellipse at 28% 28%, rgba(190,120,18,0.18) 0%, rgba(160,95,10,0.08) 35%, rgba(100,55,5,0.02) 60%, transparent 75%)",
+            animation: "warm-glow 5.5s ease-in-out infinite",
           }}
         />
+        {/* Tighter cinematic light bloom directly around logo position */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: "-2%", top: "-4%", width: "32%", height: "38%",
+            background: "radial-gradient(ellipse at 35% 35%, rgba(212,163,65,0.12) 0%, rgba(180,120,20,0.05) 45%, transparent 70%)",
+            animation: "breathe 3.8s ease-in-out infinite",
+            animationDelay: "0.6s",
+          }}
+        />
+        {/* Cool-purple ambient from upper right */}
         <div
           className="absolute pointer-events-none"
           style={{
