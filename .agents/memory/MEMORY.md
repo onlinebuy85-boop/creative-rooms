@@ -2,3 +2,5 @@
 - [pnpm Clerk release age](clerk-release-age.md) — @clerk/react and @clerk/shared added to minimumReleaseAgeExclude so they can stay in sync.
 - [Audio upload URL routing](audio-upload-url.md) — uploaded files must be served under /api/uploads/ (proxy-accessible); /uploads/ alone is unreachable through the shared proxy.
 - [Modal/overlay pattern](portal-pattern.md) — all fullscreen sheets and overlays must use createPortal; Radix Dialog fights CSS transforms and breaks on mobile.
+- [Audio static MIME override](audio-mime-static.md) — express.static maps .m4a to audio/x-m4a (wrong); must use setHeaders to serve it as audio/mp4 or browsers decode-fail.
+- [MediaRecorder blob upload](mediarecorder-upload.md) — browser-recorded blobs arrive with originalname="blob" (no ext); multer fileFilter must accept by MIME type, filename must derive ext from MIME.

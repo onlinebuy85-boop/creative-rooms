@@ -118,4 +118,54 @@ router.post("/rooms/:id/messages", requireAuth, async (req: any, res): Promise<v
   });
 });
 
+// DELETE /rooms/:id/messages/:msgId
+router.delete("/rooms/:id/messages/:msgId", requireAuth, async (req: any, res): Promise<void> => {
+  const roomId = parseInt(req.params.id, 10);
+  const msgId  = parseInt(req.params.msgId, 10);
+  if (isNaN(roomId) || isNaN(msgId)) { res.status(400).json({ error: "Invalid params" }); return; }
+
+  const [message] = await db.select().from(messagesTable).where(eq(messagesTable.id, msgId));
+  if (!message || message.roomId !== roomId) { res.status(404).json({ error: "Message not found" }); return; }
+
+  const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.clerkId, req.clerkUserId));
+  if (!profile) { res.status(404).json({ error: "Profile not found" }); return; }
+  if (message.profileId !== profile.id) { res.status(403).json({ error: "Not authorized" }); return; }
+
+  await db.delete(messagesTable).where(eq(messagesTable.id, msgId));
+  res.status(204).end();
+});
+
+// PATCH /rooms/:id/messages/:msgId
+router.patch("/rooms/:id/messages/:msgId", requireAuth, async (req: any, res): Promise<void> => {
+  const roomId = parseInt(req.params.id, 10);
+  const msgId  = parseInt(req.params.msgId, 10);
+  if (isNaN(roomId) || isNaN(msgId)) { res.status(400).json({ error: "Invalid params" }); return; }
+
+  const [message] = await db.select().from(messagesTable).where(eq(messagesTable.id, msgId));
+  if (!message || message.roomId !== roomId) { res.status(404).json({ error: "Message not found" }); return; }
+
+  const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.clerkId, req.clerkUserId));
+  if (!profile) { res.status(404).json({ error: "Profile not found" }); return; }
+  if (message.profileId !== profile.id) { res.status(403).json({ error: "Not authorized" }); return; }
+
+  const { content } = req.body as { content?: string };
+  if (!content?.trim()) { res.status(400).json({ error: "Content is required" }); return; }
+
+  const [updated] = await db
+    .update(messagesTable)
+    .set({ content: content.trim() })
+    .where(eq(messagesTable.id, msgId))
+    .returning();
+
+  res.json({
+    id: updated.id,
+    roomId: updated.roomId,
+    profileId: updated.profileId,
+    senderName: profile.displayName,
+    senderAvatarUrl: profile.avatarUrl ?? null,
+    content: updated.content,
+    createdAt: updated.createdAt.toISOString(),
+  });
+});
+
 export default router;

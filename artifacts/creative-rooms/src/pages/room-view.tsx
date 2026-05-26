@@ -6,12 +6,12 @@ import { GuestSignupPrompt } from "@/components/guest-prompt";
 import {
   useGetRoom, useGetRoomMembers, useGetRoomMessages,
   useGetRoomDemos, useSendMessage, useUploadDemo,
-  useGetMyProfile, useJoinRoom, useLeaveRoom,
+  useGetMyProfile, useJoinRoom, useLeaveRoom, useDeleteMessage, useEditMessage,
   useListRooms, getGetRoomMessagesQueryKey, getGetMyProfileQueryKey,
 } from "@workspace/api-client-react";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useVoice } from "@/hooks/use-voice";
-import { useRecorder } from "@/hooks/use-recorder";
+import { useRecorder, mimeToExt } from "@/hooks/use-recorder";
 import { RoomManageMenu } from "@/components/rooms/room-manage-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -303,10 +303,12 @@ export function RoomPage() {
   });
   const { data: allRooms } = useListRooms();
 
-  const joinRoom    = useJoinRoom();
-  const leaveRoom   = useLeaveRoom();
-  const sendMessage = useSendMessage();
-  const uploadDemo  = useUploadDemo();
+  const joinRoom      = useJoinRoom();
+  const leaveRoom     = useLeaveRoom();
+  const sendMessage   = useSendMessage();
+  const uploadDemo    = useUploadDemo();
+  const deleteMessage = useDeleteMessage();
+  const editMessage   = useEditMessage();
 
   /* ── Recorder ── */
   const recorder = useRecorder();
@@ -322,6 +324,11 @@ export function RoomPage() {
   const typingTimersRef                      = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const typingDebounceRef                    = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mobileTab, setMobileTab]            = useState<"chat" | "studio" | "people">("chat");
+
+  /* ── Message management ── */
+  const [editingMsgId, setEditingMsgId]   = useState<number | null>(null);
+  const [editContent, setEditContent]     = useState("");
+  const [msgMenuOpenId, setMsgMenuOpenId] = useState<number | null>(null);
 
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -456,14 +463,52 @@ export function RoomPage() {
     setPlayingId((prev) => (prev === id ? null : id));
   };
 
+  /* ── Message management handlers ── */
+  const handleDeleteMessage = useCallback((msgId: number) => {
+    deleteMessage.mutate(
+      { id: roomId, msgId },
+      {
+        onSuccess: () => {
+          queryClient.setQueryData(
+            ["getRoomMessages", roomId],
+            (old: any) => Array.isArray(old) ? old.filter((m: any) => m.id !== msgId) : old,
+          );
+          toast({ title: "Message deleted." });
+          setMsgMenuOpenId(null);
+        },
+        onError: () => toast({ title: "Could not delete message", variant: "destructive" }),
+      },
+    );
+  }, [deleteMessage, roomId, queryClient, toast]);
+
+  const handleEditSave = useCallback((msgId: number) => {
+    const content = editContent.trim();
+    if (!content) return;
+    editMessage.mutate(
+      { id: roomId, msgId, data: { content } },
+      {
+        onSuccess: (updated) => {
+          queryClient.setQueryData(
+            ["getRoomMessages", roomId],
+            (old: any) => Array.isArray(old) ? old.map((m: any) => m.id === msgId ? updated : m) : old,
+          );
+          setEditingMsgId(null);
+        },
+        onError: () => toast({ title: "Could not edit message", variant: "destructive" }),
+      },
+    );
+  }, [editMessage, roomId, editContent, queryClient]);
+
   /* ── Upload a recorded take as a demo ── */
   const handleUploadRecording = useCallback(async () => {
     if (!recorder.audioBlob) return;
+    if (recorder.audioBlob.size === 0) {
+      toast({ title: "Empty recording", description: "No audio was captured. Please try again.", variant: "destructive" });
+      return;
+    }
     setUploadingRecording(true);
     try {
-      const ext = recorder.audioBlob.type.includes("mp4") ? ".mp4"
-        : recorder.audioBlob.type.includes("ogg") ? ".ogg"
-        : ".webm";
+      const ext  = mimeToExt(recorder.audioBlob.type);
       const file = new File(
         [recorder.audioBlob],
         `recording-${Date.now()}${ext}`,
@@ -472,13 +517,17 @@ export function RoomPage() {
       const form = new FormData();
       form.append("file", file);
       const res = await fetch("/api/uploads", { method: "POST", body: form });
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Upload failed ${res.status}: ${text}`);
+      }
       const data: { url: string } = await res.json();
       const fileUrl = `/api${data.url}`;
       await handleDemoUploaded(fileUrl, `Take — ${format(new Date(), "MMM d, HH:mm")}`, "");
       toast({ title: "Take saved", description: "Your recording has been added to the studio." });
       recorder.reset();
-    } catch {
+    } catch (err) {
+      console.error("[uploadRecording]", err);
       toast({ title: "Upload failed", description: "Could not save the recording. Please try again.", variant: "destructive" });
     } finally {
       setUploadingRecording(false);
@@ -606,22 +655,74 @@ export function RoomPage() {
                     <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.22)" }}>No messages yet. Say something.</p>
                   </div>
                 )}
-                {messages?.map((msg) => (
-                  <div key={msg.id} className="flex gap-3">
-                    <Avatar className="w-9 h-9 shrink-0 mt-0.5">
-                      <AvatarFallback className="text-[10px]" style={{ background: `hsl(${((msg.profileId || 0) * 47) % 360},32%,26%)` }}>
-                        {msg.senderName?.charAt(0) || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{msg.senderName}</span>
-                        <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.22)" }}>{format(new Date(msg.createdAt), "HH:mm")}</span>
+                {messages?.map((msg) => {
+                  const isOwn  = msg.profileId === profile?.id;
+                  const isMenu = msgMenuOpenId === msg.id;
+                  const isEdit = editingMsgId  === msg.id;
+                  return (
+                    <div key={msg.id} className="flex gap-3 group">
+                      <Avatar className="w-9 h-9 shrink-0 mt-0.5">
+                        <AvatarFallback className="text-[10px]" style={{ background: `hsl(${((msg.profileId || 0) * 47) % 360},32%,26%)` }}>
+                          {msg.senderName?.charAt(0) || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{msg.senderName}</span>
+                          <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.22)" }}>{format(new Date(msg.createdAt), "HH:mm")}</span>
+                          {isOwn && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setMsgMenuOpenId(isMenu ? null : msg.id); }}
+                              className="ml-auto opacity-40 active:opacity-100 transition-opacity shrink-0"
+                              style={{ color: "rgba(255,255,255,0.6)" }}
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        {isEdit ? (
+                          <form onSubmit={(e) => { e.preventDefault(); handleEditSave(msg.id); }} className="flex flex-col gap-1.5">
+                            <input
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              autoFocus
+                              className="w-full bg-transparent border-b outline-none text-[14px]"
+                              style={{ color: "rgba(255,255,255,0.85)", borderColor: "rgba(212,163,65,0.4)" }}
+                            />
+                            <div className="flex gap-3">
+                              <button type="submit" className="text-[12px] font-semibold" style={{ color: "#d4a341" }}>Save</button>
+                              <button type="button" onClick={() => setEditingMsgId(null)} className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>Cancel</button>
+                            </div>
+                          </form>
+                        ) : (
+                          <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>{msg.content}</p>
+                        )}
+                        {isMenu && !isEdit && (
+                          <div className="flex gap-2 mt-1.5">
+                            <button
+                              type="button"
+                              onClick={() => { setEditingMsgId(msg.id); setEditContent(msg.content); setMsgMenuOpenId(null); }}
+                              className="text-[11px] px-2.5 py-1 rounded-lg font-medium"
+                              style={{ color: "#d4a341", background: "rgba(212,163,65,0.08)", border: "1px solid rgba(212,163,65,0.15)" }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              disabled={deleteMessage.isPending}
+                              className="text-[11px] px-2.5 py-1 rounded-lg font-medium disabled:opacity-50"
+                              style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>{msg.content}</p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {typingUsers.size > 0 && (
                   <div className="flex items-center gap-2">
                     <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.28)" }}>
@@ -812,8 +913,15 @@ export function RoomPage() {
 
         <button
           type="button"
-          onClick={!isSignedIn ? () => setGuestPromptReason("record audio") : undefined}
-          className="flex flex-col items-center gap-1.5 transition-all active:scale-95"
+          onClick={
+            !isSignedIn ? () => setGuestPromptReason("record audio")
+            : !isMember ? handleJoin
+            : recorder.state === "recording" ? recorder.stop
+            : recorder.state === "idle" || recorder.state === "error" ? recorder.start
+            : undefined
+          }
+          disabled={recorder.state === "requesting" || recorder.state === "processing"}
+          className="flex flex-col items-center gap-1.5 transition-all active:scale-95 disabled:opacity-60"
         >
           <div
             className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -1339,37 +1447,83 @@ export function RoomPage() {
 
           <ScrollArea className="flex-1">
             <div className="px-4 py-3 space-y-3.5">
-              {messages?.map((msg) => (
-                <div key={msg.id} className="flex gap-2.5">
-                  <Avatar className="w-7 h-7 shrink-0 mt-0.5">
-                    <AvatarFallback
-                      className="text-[9px]"
-                      style={{ background: `hsl(${((msg.profileId || 0) * 47) % 360},32%,26%)` }}
-                    >
-                      {msg.senderName?.charAt(0) || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2 mb-0.5">
-                      <span
-                        className="text-[11.5px] font-semibold"
-                        style={{ color: "rgba(255,255,255,0.7)" }}
+              {messages?.map((msg) => {
+                const isOwn  = msg.profileId === profile?.id;
+                const isMenu = msgMenuOpenId === msg.id;
+                const isEdit = editingMsgId  === msg.id;
+                return (
+                  <div key={msg.id} className="flex gap-2.5 group">
+                    <Avatar className="w-7 h-7 shrink-0 mt-0.5">
+                      <AvatarFallback
+                        className="text-[9px]"
+                        style={{ background: `hsl(${((msg.profileId || 0) * 47) % 360},32%,26%)` }}
                       >
-                        {msg.senderName}
-                      </span>
-                      <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.22)" }}>
-                        {format(new Date(msg.createdAt), "HH:mm")}
-                      </span>
+                        {msg.senderName?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="text-[11.5px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+                          {msg.senderName}
+                        </span>
+                        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.22)" }}>
+                          {format(new Date(msg.createdAt), "HH:mm")}
+                        </span>
+                        {isOwn && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setMsgMenuOpenId(isMenu ? null : msg.id); }}
+                            className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity shrink-0"
+                            style={{ color: "rgba(255,255,255,0.6)" }}
+                          >
+                            <MoreHorizontal className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      {isEdit ? (
+                        <form onSubmit={(e) => { e.preventDefault(); handleEditSave(msg.id); }} className="flex flex-col gap-1.5">
+                          <input
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            autoFocus
+                            className="w-full bg-transparent border-b outline-none text-[12.5px]"
+                            style={{ color: "rgba(255,255,255,0.82)", borderColor: "rgba(212,163,65,0.4)" }}
+                          />
+                          <div className="flex gap-3">
+                            <button type="submit" className="text-[11px] font-semibold" style={{ color: "#d4a341" }}>Save</button>
+                            <button type="button" onClick={() => setEditingMsgId(null)} className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Cancel</button>
+                          </div>
+                        </form>
+                      ) : (
+                        <p className="text-[12.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                          {msg.content}
+                        </p>
+                      )}
+                      {isMenu && !isEdit && (
+                        <div className="flex gap-1.5 mt-1">
+                          <button
+                            type="button"
+                            onClick={() => { setEditingMsgId(msg.id); setEditContent(msg.content); setMsgMenuOpenId(null); }}
+                            className="text-[10px] px-2 py-0.5 rounded-md font-medium"
+                            style={{ color: "#d4a341", background: "rgba(212,163,65,0.08)", border: "1px solid rgba(212,163,65,0.15)" }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            disabled={deleteMessage.isPending}
+                            className="text-[10px] px-2 py-0.5 rounded-md font-medium disabled:opacity-50"
+                            style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p
-                      className="text-[12.5px] leading-relaxed"
-                      style={{ color: "rgba(255,255,255,0.65)" }}
-                    >
-                      {msg.content}
-                    </p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Typing indicator */}
               {typingUsers.size > 0 && (

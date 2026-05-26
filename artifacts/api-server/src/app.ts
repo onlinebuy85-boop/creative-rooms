@@ -50,8 +50,35 @@ app.use(
 );
 
 app.use("/api", router);
-/* Serve uploaded files both under /api/uploads (through the proxy) and /uploads (direct) */
-app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+/* ── Serve uploads with correct Content-Type for all audio formats ── */
+/* express.static uses mime-db which maps .m4a to audio/x-m4a — browsers reject it.
+   We override every audio extension to the correct IANA MIME type. */
+const AUDIO_CONTENT_TYPES: Record<string, string> = {
+  ".m4a":  "audio/mp4",
+  ".mp3":  "audio/mpeg",
+  ".wav":  "audio/wav",
+  ".ogg":  "audio/ogg",
+  ".webm": "audio/webm",
+  ".aac":  "audio/aac",
+  ".flac": "audio/flac",
+  ".mp4":  "video/mp4",
+};
+
+function makeAudioStatic(root: string) {
+  return express.static(root, {
+    setHeaders(res, filePath) {
+      const ext = path.extname(filePath).toLowerCase();
+      const ct = AUDIO_CONTENT_TYPES[ext];
+      if (ct) {
+        res.setHeader("Content-Type", ct);
+        res.setHeader("Accept-Ranges", "bytes");
+      }
+    },
+  });
+}
+
+app.use("/api/uploads", makeAudioStatic(path.join(process.cwd(), "uploads")));
+app.use("/uploads",     makeAudioStatic(path.join(process.cwd(), "uploads")));
 
 export default app;

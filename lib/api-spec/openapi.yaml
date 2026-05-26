@@ -364,6 +364,62 @@ paths:
               schema:
                 $ref: "#/components/schemas/Message"
 
+  /rooms/{id}/messages/{msgId}:
+    delete:
+      operationId: deleteMessage
+      tags: [messages]
+      summary: Delete a message (sender only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: msgId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    patch:
+      operationId: editMessage
+      tags: [messages]
+      summary: Edit a message (sender only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: msgId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+
   # ── Demos ──────────────────────────────────────────────────────────────────
   /rooms/{id}/demos:
     get:

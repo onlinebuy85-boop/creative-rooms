@@ -375,6 +375,41 @@ export const SendMessageBody = zod.object({
 
 
 /**
+ * @summary Delete a message (sender only)
+ */
+export const DeleteMessageParams = zod.object({
+  "id": zod.coerce.number(),
+  "msgId": zod.coerce.number()
+})
+
+
+/**
+ * @summary Edit a message (sender only)
+ */
+export const EditMessageParams = zod.object({
+  "id": zod.coerce.number(),
+  "msgId": zod.coerce.number()
+})
+
+
+
+
+export const EditMessageBody = zod.object({
+  "content": zod.string().min(1)
+})
+
+export const EditMessageResponse = zod.object({
+  "id": zod.number(),
+  "roomId": zod.number(),
+  "profileId": zod.number(),
+  "senderName": zod.string().nullish(),
+  "senderAvatarUrl": zod.string().nullish(),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Get demos uploaded to a room
  */
 export const GetRoomDemosParams = zod.object({
