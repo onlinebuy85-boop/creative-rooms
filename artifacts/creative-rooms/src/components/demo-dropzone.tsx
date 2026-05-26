@@ -60,6 +60,8 @@ interface Props {
   /** Return a promise; on resolution the dropzone resets itself */
   onUpload: (fileUrl: string, title: string, description: string) => Promise<void>;
   className?: string;
+  /** Optional ref for a hidden <input type="file"> — lets parent trigger file picker */
+  fileInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 /* ── Waveform bar visual ── */
@@ -82,7 +84,7 @@ function WaveformBars({ data, height = 36 }: { data: number[]; height?: number }
 }
 
 /* ── Component ── */
-export function DemoDropzone({ children, enabled, onUpload, className }: Props) {
+export function DemoDropzone({ children, enabled, onUpload, className, fileInputRef }: Props) {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
@@ -119,25 +121,16 @@ export function DemoDropzone({ children, enabled, onUpload, className }: Props) 
     e.preventDefault();
   }, []);
 
-  const onDrop = useCallback(
-    async (e: React.DragEvent) => {
-      e.preventDefault();
-      dragCount.current = 0;
-      if (!enabled) return;
-
-      const file = e.dataTransfer.files[0];
-      if (!file) { reset(); return; }
-
+  const processFile = useCallback(
+    async (file: File) => {
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
       if (!AUDIO_MIME.has(file.type) && !AUDIO_EXT.has(ext)) {
         reset();
         return;
       }
-
       setTitle(file.name.replace(/\.[^/.]+$/, ""));
       setDesc("");
       setPhase({ kind: "uploading", name: file.name });
-
       try {
         const [url, waveform] = await Promise.all([
           uploadAudioFile(file, basePath),
@@ -148,7 +141,19 @@ export function DemoDropzone({ children, enabled, onUpload, className }: Props) 
         reset();
       }
     },
-    [enabled, basePath],
+    [basePath],
+  );
+
+  const onDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      dragCount.current = 0;
+      if (!enabled) return;
+      const file = e.dataTransfer.files[0];
+      if (!file) { reset(); return; }
+      await processFile(file);
+    },
+    [enabled, processFile],
   );
 
   const handleConfirm = async () => {
@@ -172,6 +177,21 @@ export function DemoDropzone({ children, enabled, onUpload, className }: Props) 
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
+      {/* Hidden file input for "Browse Files" button in parent */}
+      {fileInputRef && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file && enabled) await processFile(file);
+            if (e.target) e.target.value = "";
+          }}
+        />
+      )}
+
       {children}
 
       {/* ── Drag-over overlay ── */}
