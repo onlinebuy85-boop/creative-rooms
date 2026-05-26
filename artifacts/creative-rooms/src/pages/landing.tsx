@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779788136339.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
-import iconImg from "../assets/images/creative-rooms-icon.png";
 
 /* ── Floating dust particles ── */
 const PARTICLES = [
@@ -79,37 +78,26 @@ export function LandingPage() {
       {/* ── NAV ── */}
       <header className="relative z-10 flex items-center justify-between px-5 md:px-10 pt-9 md:pt-8 max-w-[1280px] mx-auto">
         <Link href="/">
-          <div className="relative cursor-pointer flex items-center gap-2.5 md:gap-3">
+          <div className="relative cursor-pointer">
             {/* Subtle ambient warmth behind the logo */}
             <div
               className="absolute pointer-events-none"
               style={{
-                left: -18, top: "50%", transform: "translateY(-50%)",
-                width: 220, height: 110,
-                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.16) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
+                left: -20, top: "50%", transform: "translateY(-50%)",
+                width: "110%", height: 110,
+                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.16) 0%, rgba(212,163,65,0.035) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
-              }}
-            />
-            <img
-              src={iconImg}
-              alt=""
-              style={{
-                height: "clamp(48px, 13vw, 64px)",
-                width: "auto",
-                objectFit: "contain",
-                position: "relative",
-                filter: "brightness(1.05) drop-shadow(0 0 12px rgba(212,163,65,0.38))",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Room"
               style={{
-                height: "clamp(26px, 6.6vw, 38px)",
-                width: "auto",
+                width: "clamp(260px, 70vw, 360px)",
+                height: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.15) drop-shadow(0 0 10px rgba(212,163,65,0.28))",
+                filter: "brightness(1.1) drop-shadow(0 0 14px rgba(212,163,65,0.35))",
               }}
             />
           </div>
