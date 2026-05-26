@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
-import logoImg from "@assets/creative-rooms-wordmark.png";
+import logoImg from "../../assets/images/creative-rooms-logo-v2.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -94,30 +94,64 @@ function SidebarContent() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Logo */}
-      <div className="px-5 pt-6 pb-5 flex-shrink-0">
+      <div
+        className="flex-shrink-0 px-4 pt-7 pb-6"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}
+      >
         <Link href="/">
           <div
-            className="inline-block relative group"
-            style={{ padding: "4px 0" }}
+            className="relative group cursor-pointer"
+            title="Return to home"
           >
-            {/* Warm hover glow */}
+            {/* Atmospheric waveform glow — always present, intensifies on hover */}
             <div
-              className="absolute -inset-3 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{ background: "radial-gradient(ellipse, rgba(212,163,65,0.1) 0%, transparent 70%)" }}
+              className="absolute pointer-events-none transition-opacity duration-700"
+              style={{
+                left: -8,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: 90,
+                height: 80,
+                background: "radial-gradient(ellipse at 38% 50%, rgba(200,130,30,0.32) 0%, rgba(212,163,65,0.10) 45%, transparent 70%)",
+                animation: "warm-glow 3.5s ease-in-out infinite",
+              }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              style={{
+                background: "radial-gradient(ellipse at 25% 50%, rgba(212,163,65,0.18) 0%, transparent 65%)",
+              }}
             />
             <img
               src={logoImg}
               alt="Creative Rooms"
               style={{
-                height: 40,
+                height: 56,
                 width: "auto",
+                maxWidth: "100%",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.05)",
-                transition: "filter 0.3s ease",
+                filter: "brightness(1.12) drop-shadow(0 0 8px rgba(212,163,65,0.22))",
+                transition: "filter 0.4s ease, transform 0.3s ease",
               }}
-              className="group-hover:brightness-125"
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLImageElement).style.filter =
+                  "brightness(1.28) drop-shadow(0 0 16px rgba(212,163,65,0.55))";
+                (e.currentTarget as HTMLImageElement).style.transform = "scale(1.02)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLImageElement).style.filter =
+                  "brightness(1.12) drop-shadow(0 0 8px rgba(212,163,65,0.22))";
+                (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
+              }}
             />
+            {/* "Home" label — appears on hover */}
+            <span
+              className="absolute -bottom-5 left-0 text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              style={{ color: "rgba(212,163,65,0.55)" }}
+            >
+              ↑ home
+            </span>
           </div>
         </Link>
       </div>
@@ -264,7 +298,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* Mobile top bar */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center px-4 h-14 border-b border-white/[0.06]"
+        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 border-b border-white/[0.06]"
         style={{ background: "hsl(270 16% 6%)" }}
       >
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -281,6 +315,20 @@ export function AppLayout({ children }: AppLayoutProps) {
             <SidebarContent />
           </SheetContent>
         </Sheet>
+        {/* Mobile logo — centered */}
+        <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+          <img
+            src={logoImg}
+            alt="Creative Rooms"
+            style={{
+              height: 32,
+              width: "auto",
+              objectFit: "contain",
+              filter: "brightness(1.15) drop-shadow(0 0 6px rgba(212,163,65,0.3))",
+            }}
+          />
+        </Link>
+        <div /> {/* spacer */}
       </div>
 
       {/* Main content */}
