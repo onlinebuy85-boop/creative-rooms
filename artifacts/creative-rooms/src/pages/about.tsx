@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import logoImg from "../assets/images/creative-room-logo.png";
+import logoImg from "../assets/images/creative-rooms-logo-v3.png";
 
 /* ── Floating dust particles ── */
 const PARTICLES = [

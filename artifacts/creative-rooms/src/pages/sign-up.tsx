@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { SignUp } from "@clerk/react";
-import logoImg from "../assets/images/creative-room-logo.png";
+import logoImg from "../assets/images/creative-rooms-logo-v3.png";
 
 export function SignUpPage() {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
-import logoImg from "../../assets/images/creative-room-logo.png";
+import logoImg from "../../assets/images/creative-rooms-logo-v3.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon,
@@ -339,13 +339,14 @@ export function AppLayout({ children }: AppLayoutProps) {
         />
 
         {/* ── CENTER PRIMARY ACTION — elevated gold button ── */}
-        <Link href={user ? "/rooms/new" : "/discover"}>
+        <Link href={user ? "/rooms/new" : "/sign-up"}>
           <div className="flex flex-col items-center gap-1.5 pb-2 cursor-pointer select-none" style={{ marginTop: "-18px" }}>
+            {/* Outer glow ring */}
             <div className="relative">
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
-                  background: "radial-gradient(circle, rgba(212,163,65,0.32) 0%, transparent 70%)",
+                  background: "radial-gradient(circle, rgba(212,163,65,0.35) 0%, transparent 70%)",
                   animation: "breathe 2.4s ease-in-out infinite",
                   transform: "scale(1.5)",
                 }}
@@ -354,7 +355,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 className="relative w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95"
                 style={{
                   background: "linear-gradient(145deg, #e8bc55, #c48c28)",
-                  boxShadow: "0 4px 24px rgba(212,163,65,0.42), 0 0 0 1px rgba(212,163,65,0.18)",
+                  boxShadow: "0 4px 24px rgba(212,163,65,0.45), 0 0 0 1px rgba(212,163,65,0.2)",
                 }}
               >
                 <Plus className="w-6 h-6" style={{ color: "#1a0f00", strokeWidth: 2.5 }} />
@@ -362,9 +363,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
             <span
               className="text-[9px] font-semibold tracking-widest uppercase"
-              style={{ color: "rgba(212,163,65,0.62)", letterSpacing: "0.12em" }}
+              style={{ color: "rgba(212,163,65,0.65)", letterSpacing: "0.12em" }}
             >
-              {user ? "Create" : "Explore"}
+              {user ? "Create" : "Join"}
             </span>
           </div>
         </Link>

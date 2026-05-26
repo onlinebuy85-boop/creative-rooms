@@ -21,7 +21,7 @@ import {
   MoreHorizontal, Plus, Send, Loader2,
   Crown, CloudUpload,
 } from "lucide-react";
-import logoImg from "../assets/images/creative-room-logo.png";
+import logoImg from "../assets/images/creative-rooms-logo-v3.png";
 
 /* ── Helpers ── */
 function moodColor(vibe = "", genres: string[] = []): string {
