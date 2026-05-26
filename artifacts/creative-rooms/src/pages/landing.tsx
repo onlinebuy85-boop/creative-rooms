@@ -61,9 +61,10 @@ function WaveOrnament({ color = "rgba(212,163,65,0.28)" }: { color?: string }) {
 }
 
 export function LandingPage() {
-  const featRef  = useFadeIn(0.08);
-  const quoteRef = useFadeIn(0.08);
-  const footRef  = useFadeIn(0.05);
+  const manifestoRef = useFadeIn(0.06);
+  const featRef      = useFadeIn(0.08);
+  const quoteRef     = useFadeIn(0.08);
+  const footRef      = useFadeIn(0.05);
 
   return (
     <div
@@ -385,6 +386,85 @@ export function LandingPage() {
           </p>
         </div>
       </section>
+
+      {/* ── MANIFESTO ── quiet brand statement, cinematic ── */}
+      <div ref={manifestoRef.ref}>
+        <section
+          className="relative z-10 px-5 md:px-10 py-24 md:py-44 text-center overflow-hidden"
+          style={{
+            opacity:    manifestoRef.visible ? 1 : 0,
+            transform:  manifestoRef.visible ? "translateY(0)" : "translateY(36px)",
+            transition: "opacity 1.4s cubic-bezier(0.16,1,0.3,1), transform 1.4s cubic-bezier(0.16,1,0.3,1)",
+          }}
+        >
+          {/* Ambient glow — wide, warm, very faint */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: "50%", top: "50%",
+              width: "min(900px, 100vw)", height: 560,
+              transform: "translate(-50%, -50%)",
+              background: "radial-gradient(ellipse, rgba(212,140,40,0.065) 0%, rgba(160,90,15,0.022) 48%, transparent 72%)",
+              animation: "warm-glow 16s ease-in-out infinite",
+            }}
+          />
+
+          {/* Top hairline */}
+          <div
+            className="mx-auto mb-16 md:mb-24"
+            style={{
+              width: 56,
+              height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(212,163,65,0.32), transparent)",
+            }}
+          />
+
+          <div className="relative max-w-[740px] mx-auto">
+            {/* The statement — large, breathing, serif */}
+            <p
+              className="font-serif font-normal leading-[1.28] tracking-tight"
+              style={{
+                fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
+                color: "rgba(255,255,255,0.87)",
+                opacity:    manifestoRef.visible ? 1 : 0,
+                transition: "opacity 1.2s ease 120ms",
+              }}
+            >
+              Creative Room is a home for musicians and creative people
+              looking for inspiration, collaboration, and{" "}
+              <em
+                className="not-italic"
+                style={{ color: "rgba(212,163,65,0.84)" }}
+              >
+                real human connection through music.
+              </em>
+            </p>
+
+            {/* Micro-copy — quiet, italic, muted */}
+            <p
+              className="text-[13px] md:text-[14.5px] font-light leading-[1.9] mt-9 md:mt-11 max-w-[440px] mx-auto"
+              style={{
+                color: "rgba(255,255,255,0.25)",
+                fontStyle: "italic",
+                opacity:    manifestoRef.visible ? 1 : 0,
+                transition: "opacity 1.2s ease 480ms",
+              }}
+            >
+              Not another music app. A place where unfinished ideas become something real together.
+            </p>
+          </div>
+
+          {/* Bottom hairline */}
+          <div
+            className="mx-auto mt-16 md:mt-24"
+            style={{
+              width: 56,
+              height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(212,163,65,0.18), transparent)",
+            }}
+          />
+        </section>
+      </div>
 
       {/* ── WHAT THIS IS ── emotional, honest ── */}
       <div ref={featRef.ref}>
