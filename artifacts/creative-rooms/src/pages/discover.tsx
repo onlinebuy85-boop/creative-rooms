@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useListRooms, useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
+import { useListRooms, useGetMyProfile, useGetRoomsPresence, getGetMyProfileQueryKey, getGetRoomsPresenceQueryKey } from "@workspace/api-client-react";
 import { useUser } from "@clerk/react";
 import { RoomCard } from "@/components/rooms/room-card";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
@@ -24,6 +24,8 @@ export function DiscoverPage() {
   const { data: rooms, isLoading } = useListRooms();
   const { isSignedIn } = useUser();
   const { data: profile } = useGetMyProfile({ query: { enabled: !!isSignedIn, queryKey: getGetMyProfileQueryKey() } });
+  /* Poll live presence every 6 seconds — no auth required */
+  const { data: presence } = useGetRoomsPresence({ query: { queryKey: getGetRoomsPresenceQueryKey(), refetchInterval: 6000 } });
   const [guestPromptReason, setGuestPromptReason] = useState<string | null>(null);
 
   const handleNewRoom = () => {
@@ -97,7 +99,12 @@ export function DiscoverPage() {
                 animationDelay: `${index * 80}ms`,
               }}
             >
-              <RoomCard room={room} index={index} currentProfileId={profile?.id} />
+              <RoomCard
+                room={room}
+                index={index}
+                currentProfileId={profile?.id}
+                liveCount={presence?.[String(room.id)]}
+              />
             </div>
           ))}
         </div>

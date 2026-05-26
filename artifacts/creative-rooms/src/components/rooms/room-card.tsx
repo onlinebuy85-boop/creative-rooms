@@ -6,6 +6,7 @@ interface RoomCardProps {
   room: Room;
   index?: number;
   currentProfileId?: number;
+  liveCount?: number;
 }
 
 const PALETTES = [
@@ -16,6 +17,22 @@ const PALETTES = [
 ];
 
 const AVATAR_COLORS = ["#7c4a1e","#1e3a5f","#4a1d6e","#7f1d1d","#14532d","#1a3a2a"];
+
+/* Deterministic atmospheric empty-room phrases based on room ID — never fake metrics */
+const EMPTY_PHRASES = [
+  "Waiting for the first sound",
+  "Open for collaborators",
+  "Quiet room",
+  "Room forming",
+  "No one here yet",
+  "Listening for someone",
+  "Still and waiting",
+  "An empty studio",
+];
+
+function emptyPhrase(roomId: number): string {
+  return EMPTY_PHRASES[roomId % EMPTY_PHRASES.length];
+}
 
 function atmosphericLine(room: Room): string {
   if (room.description && room.description.trim().length > 6) return room.description;
@@ -32,20 +49,24 @@ function atmosphericLine(room: Room): string {
   return "A quiet place to create together.";
 }
 
-/* Mini waveform — appears on hover */
-function CardWaveform({ accent }: { accent: string }) {
+/* Mini waveform — always gently alive, brightens when people are present */
+function CardWaveform({ accent, active }: { accent: string; active: boolean }) {
   const heights = [3, 6, 4, 8, 5, 9, 4, 7, 3, 6, 5, 8, 4];
   return (
     <div className="flex items-end gap-[2px]" style={{ height: 16 }}>
       {heights.map((h, i) => (
         <div
           key={i}
-          className="rounded-full transition-all duration-300"
+          className="rounded-full transition-all duration-500"
           style={{
             width: 2,
             height: `${h * 10}%`,
-            background: `rgba(${accent},0.7)`,
-            animation: `breathe ${1.6 + (i % 5) * 0.28}s ease-in-out infinite`,
+            background: active
+              ? `rgba(${accent},0.75)`
+              : `rgba(${accent},0.28)`,
+            animation: active
+              ? `breathe ${1.6 + (i % 5) * 0.28}s ease-in-out infinite`
+              : `breathe ${3.2 + (i % 5) * 0.5}s ease-in-out infinite`,
             animationDelay: `${i * 0.07}s`,
           }}
         />
@@ -54,7 +75,7 @@ function CardWaveform({ accent }: { accent: string }) {
   );
 }
 
-export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
+export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomCardProps) {
   const [, setLocation] = useLocation();
   const palette = PALETTES[index % PALETTES.length];
   const tagline = atmosphericLine(room);
@@ -62,14 +83,22 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
   const isFull = spotsLeft <= 0;
   const isOwner = !!currentProfileId && currentProfileId === room.ownerId;
 
+  /* Real live presence — undefined means still loading, treat as empty */
+  const realCount = liveCount ?? 0;
+  const isLive = realCount > 0;
+
   return (
     <Link href={`/rooms/${room.id}`}>
       <div
         className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500"
         style={{
           aspectRatio: "4/3",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "0 4px 28px rgba(0,0,0,0.5)",
+          border: isLive
+            ? "1px solid rgba(255,255,255,0.10)"
+            : "1px solid rgba(255,255,255,0.06)",
+          boxShadow: isLive
+            ? `0 4px 32px rgba(0,0,0,0.5), 0 0 0 1px ${palette.glow}`
+            : "0 4px 24px rgba(0,0,0,0.45)",
           transform: "translateZ(0)",
         }}
         onMouseEnter={(e) => {
@@ -78,7 +107,9 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLElement).style.transform = "scale(1) translateZ(0)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 28px rgba(0,0,0,0.5)";
+          (e.currentTarget as HTMLElement).style.boxShadow = isLive
+            ? `0 4px 32px rgba(0,0,0,0.5), 0 0 0 1px ${palette.glow}`
+            : "0 4px 24px rgba(0,0,0,0.45)";
         }}
       >
         {/* Background */}
@@ -98,18 +129,20 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
         {/* Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/25 to-black/12" />
 
-        {/* Resting ambient glow — very subtle, always present */}
+        {/* Resting ambient glow — subtle even when empty */}
         <div
-          className="absolute inset-0 opacity-30 group-hover:opacity-0 transition-opacity duration-500"
-          style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.10) 0%, transparent 60%)` }}
+          className="absolute inset-0 transition-opacity duration-700"
+          style={{
+            background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},${isLive ? 0.14 : 0.06}) 0%, transparent 60%)`,
+          }}
         />
-        {/* Hover glow from bottom — accent colour, full intensity on hover */}
+        {/* Hover glow — full intensity on hover */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ background: `radial-gradient(ellipse at 50% 100%, rgba(${palette.accent},0.26) 0%, transparent 65%)` }}
         />
 
-        {/* Owner manage menu — top-right corner */}
+        {/* Owner manage menu */}
         {isOwner && (
           <div
             className="absolute top-2.5 right-2.5 z-10"
@@ -134,16 +167,16 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
               style={{
                 background: "rgba(0,0,0,0.45)",
                 backdropFilter: "blur(6px)",
-                color: "rgba(255,255,255,0.42)",
-                border: "1px solid rgba(255,255,255,0.09)",
+                color: "rgba(255,255,255,0.38)",
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
               {room.vibe || room.genres?.[0]}
             </span>
           )}
 
-          {/* Live indicator */}
-          {room.isActive && (
+          {/* Live indicator — only shown when real people are present */}
+          {isLive && (
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
               style={{
@@ -163,11 +196,9 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
           )}
         </div>
 
-        {/* Spots-left indicator — when nearly full */}
-        {!isFull && spotsLeft <= 2 && (
-          <div
-            className="absolute top-10 right-3 mt-1"
-          >
+        {/* Spots-left indicator — when nearly full and real members exist */}
+        {!isFull && spotsLeft <= 2 && isLive && (
+          <div className="absolute top-10 right-3 mt-1">
             <span
               className="text-[10px] px-2 py-0.5 rounded-full"
               style={{
@@ -194,54 +225,62 @@ export function RoomCard({ room, index = 0, currentProfileId }: RoomCardProps) {
           {/* Tagline */}
           <p
             className="text-[11.5px] font-light leading-snug line-clamp-2"
-            style={{ color: "rgba(255,255,255,0.4)", fontStyle: "italic" }}
+            style={{ color: "rgba(255,255,255,0.38)", fontStyle: "italic" }}
           >
             "{tagline}"
           </p>
 
-          {/* Members + waveform row */}
+          {/* Presence row */}
           <div className="flex items-center justify-between mt-0.5">
-            <div className="flex items-center gap-2.5">
-              {/* Avatar stack — slightly larger for readability */}
-              <div className="flex -space-x-2">
-                {Array.from({ length: Math.min(room.memberCount || 0, 4) }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-6 h-6 rounded-full border-[1.5px] flex items-center justify-center text-[8px] font-semibold"
-                    style={{
-                      background: AVATAR_COLORS[i % AVATAR_COLORS.length],
-                      borderColor: "rgba(0,0,0,0.8)",
-                      color: "rgba(255,255,255,0.7)",
-                    }}
-                  />
-                ))}
-                {(room.memberCount || 0) === 0 && (
-                  <div
-                    className="w-6 h-6 rounded-full border-[1.5px]"
-                    style={{
-                      background: "rgba(212,163,65,0.04)",
-                      borderColor: "rgba(212,163,65,0.18)",
-                      borderStyle: "dashed",
-                      animation: "breathe 3.5s ease-in-out infinite",
-                    }}
-                  />
-                )}
+
+            {isLive ? (
+              /* ── Real presence — actual people are here ── */
+              <div className="flex items-center gap-2.5">
+                {/* Avatar stack based on real count */}
+                <div className="flex -space-x-2">
+                  {Array.from({ length: Math.min(realCount, 4) }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-6 h-6 rounded-full border-[1.5px] flex items-center justify-center"
+                      style={{
+                        background: AVATAR_COLORS[i % AVATAR_COLORS.length],
+                        borderColor: "rgba(0,0,0,0.8)",
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.42)" }}>
+                  {realCount === 1 ? "1 creating" : `${realCount} creating`}
+                </span>
               </div>
+            ) : (
+              /* ── Empty — poetic atmospheric state, never fake metrics ── */
+              <div className="flex items-center gap-2">
+                {/* Single waiting circle — pulsing gold to feel intentional */}
+                <div
+                  className="w-5 h-5 rounded-full border-[1px]"
+                  style={{
+                    background: "rgba(212,163,65,0.03)",
+                    borderColor: "rgba(212,163,65,0.18)",
+                    borderStyle: "dashed",
+                    animation: "breathe 4s ease-in-out infinite",
+                  }}
+                />
+                <span
+                  className="text-[10.5px] font-light"
+                  style={{ color: "rgba(255,255,255,0.24)", fontStyle: "italic" }}
+                >
+                  {emptyPhrase(room.id)}
+                </span>
+              </div>
+            )}
 
-              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.30)" }}>
-                {(room.memberCount || 0) === 0
-                  ? "Open session"
-                  : `${room.memberCount} in the room`}
-              </span>
-
-            </div>
-
-            {/* Waveform — always gently alive, brightens on hover */}
+            {/* Waveform — always present, intensity reflects live activity */}
             <div
-              className="opacity-20 group-hover:opacity-100 transition-opacity duration-500"
+              className={`transition-opacity duration-500 ${isLive ? "opacity-70 group-hover:opacity-100" : "opacity-15 group-hover:opacity-40"}`}
               style={{ paddingBottom: "1px" }}
             >
-              <CardWaveform accent={palette.accent} />
+              <CardWaveform accent={palette.accent} active={isLive} />
             </div>
           </div>
         </div>

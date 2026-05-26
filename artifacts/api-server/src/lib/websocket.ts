@@ -198,3 +198,20 @@ export function setupWebSocket(server: Server) {
 export function broadcastToRoom(roomId: number, payload: unknown) {
   broadcastRoom(roomId, payload);
 }
+
+/**
+ * Returns a map of roomId → number of live WebSocket connections currently
+ * open in that room. Only rooms with at least one active connection are
+ * included, so the caller can treat a missing key as zero.
+ */
+export function getRoomPresenceCounts(): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const [roomId, conns] of roomConns.entries()) {
+    let live = 0;
+    for (const ws of conns) {
+      if (ws.readyState === WebSocket.OPEN) live++;
+    }
+    if (live > 0) counts[String(roomId)] = live;
+  }
+  return counts;
+}

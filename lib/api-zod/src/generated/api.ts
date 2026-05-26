@@ -193,6 +193,12 @@ export const GetMyRoomsResponse = zod.array(GetMyRoomsResponseItem)
 
 
 /**
+ * @summary Get real-time live presence counts for all active rooms
+ */
+export const GetRoomsPresenceResponse = zod.record(zod.string(), zod.number()).describe('Map of roomId (as string key) to the number of live connections in that room')
+
+
+/**
  * @summary Get a room by ID
  */
 export const GetRoomParams = zod.object({

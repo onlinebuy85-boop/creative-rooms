@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { getAuth } from "@clerk/express";
 import { eq, and, count, desc, sql } from "drizzle-orm";
 import { db, profilesTable, roomsTable, roomMembersTable, messagesTable, demosTable } from "@workspace/db";
+import { getRoomPresenceCounts } from "../lib/websocket";
 import {
   ListRoomsQueryParams,
   CreateRoomBody,
@@ -229,6 +230,11 @@ router.get("/rooms/my", requireAuth, async (req: any, res): Promise<void> => {
 
   const enriched = await Promise.all(roomIds.map(id => getRoomWithMemberCount(id)));
   res.json(enriched.filter(Boolean));
+});
+
+// GET /rooms/presence — live WebSocket presence counts, no auth required
+router.get("/rooms/presence", (_req, res): void => {
+  res.json(getRoomPresenceCounts());
 });
 
 // GET /rooms/:id

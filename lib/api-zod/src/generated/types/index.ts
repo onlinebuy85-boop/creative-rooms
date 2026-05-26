@@ -23,4 +23,5 @@ export * from './roomActivity';
 export * from './roomInput';
 export * from './roomMember';
 export * from './roomMemberRole';
+export * from './roomPresenceMap';
 export * from './roomUpdate';

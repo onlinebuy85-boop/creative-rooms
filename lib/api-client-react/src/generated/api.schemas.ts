@@ -69,6 +69,11 @@ export interface Room {
   createdAt: string;
 }
 
+/**
+ * Map of roomId (as string key) to the number of live connections in that room
+ */
+export interface RoomPresenceMap {[key: string]: number}
+
 export interface RoomInput {
   /** @minLength 1 */
   name: string;

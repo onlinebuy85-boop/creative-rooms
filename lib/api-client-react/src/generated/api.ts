@@ -36,6 +36,7 @@ import type {
   RoomActivity,
   RoomInput,
   RoomMember,
+  RoomPresenceMap,
   RoomUpdate
 } from './api.schemas';
 
@@ -722,6 +723,83 @@ export function useGetMyRooms<TData = Awaited<ReturnType<typeof getMyRooms>>, TE
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetMyRoomsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetRoomsPresenceUrl = () => {
+
+
+
+
+  return `/api/rooms/presence`
+}
+
+/**
+ * @summary Get real-time live presence counts for all active rooms
+ */
+export const getRoomsPresence = async ( options?: RequestInit): Promise<RoomPresenceMap> => {
+
+  return customFetch<RoomPresenceMap>(getGetRoomsPresenceUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRoomsPresenceQueryKey = () => {
+    return [
+    `/api/rooms/presence`
+    ] as const;
+    }
+
+
+export const getGetRoomsPresenceQueryOptions = <TData = Awaited<ReturnType<typeof getRoomsPresence>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRoomsPresence>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRoomsPresenceQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoomsPresence>>> = ({ signal }) => getRoomsPresence({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRoomsPresence>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRoomsPresenceQueryResult = NonNullable<Awaited<ReturnType<typeof getRoomsPresence>>>
+export type GetRoomsPresenceQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get real-time live presence counts for all active rooms
+ */
+
+export function useGetRoomsPresence<TData = Awaited<ReturnType<typeof getRoomsPresence>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRoomsPresence>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRoomsPresenceQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
