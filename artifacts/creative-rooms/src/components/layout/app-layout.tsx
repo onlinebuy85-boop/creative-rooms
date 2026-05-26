@@ -4,7 +4,7 @@ import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-
 import logoImg from "../../assets/images/creative-rooms-logo-v4.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Compass, Radio, LayoutDashboard, Plus, LogOut, User as UserIcon,
+  Compass, Radio, Plus, LogOut, User as UserIcon, Info,
 } from "lucide-react";
 
 interface NavLinkProps {
@@ -82,6 +82,7 @@ function SidebarContent() {
   });
 
   const isHooks = location === "/hooks" || location.startsWith("/hooks");
+  const isHome = location === "/" || location === "/discover" || location.startsWith("/discover");
 
   const handleSignOut = () => {
     signOut({ redirectUrl: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
@@ -89,13 +90,13 @@ function SidebarContent() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Logo */}
+      {/* Logo — always a home button */}
       <div
         className="flex-shrink-0 px-4 pt-7 pb-6"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}
       >
-        <Link href="/">
-          <div className="relative cursor-pointer" title="Return to home">
+        <Link href={user ? "/discover" : "/"}>
+          <div className="relative cursor-pointer" title="Home">
             <div
               className="absolute pointer-events-none"
               style={{
@@ -127,19 +128,39 @@ function SidebarContent() {
 
       {/* Nav */}
       <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
-        <NavLink href="/discover" icon={Compass} label="Discover" active={location === "/discover" || location.startsWith("/discover")} />
-        {user && <NavLink href="/dashboard" icon={LayoutDashboard} label="Dashboard" active={location === "/dashboard"} />}
-        <NavLink href="/hooks" icon={Radio} label="Hooks" active={location === "/hooks"} />
-        {user && <NavLink href="/rooms/new" icon={Plus} label="New Room" active={location === "/rooms/new"} />}
+        <NavLink
+          href="/discover"
+          icon={Compass}
+          label="Discover"
+          active={isHome}
+        />
+        <NavLink
+          href="/hooks"
+          icon={Radio}
+          label="Hooks"
+          active={location === "/hooks"}
+        />
         {user && profile && (
-          <NavLink href={`/profile/${profile.id}`} icon={UserIcon} label="Your Profile" active={location.startsWith("/profile")} />
+          <NavLink
+            href={`/profile/${profile.id}`}
+            icon={UserIcon}
+            label="Your Profile"
+            active={location.startsWith("/profile")}
+          />
         )}
+        <NavLink
+          href="/about"
+          icon={Info}
+          label="About"
+          active={location === "/about"}
+        />
       </nav>
 
       {/* Auth footer */}
       {user ? (
-        <div className="flex-shrink-0 p-3 border-t border-white/5">
-          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg group cursor-default">
+        <div className="flex-shrink-0 border-t border-white/5" style={{ padding: "10px 12px" }}>
+          {/* User info row */}
+          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg mb-1">
             <Avatar className="h-7 w-7 flex-shrink-0">
               <AvatarImage src={profile?.avatarUrl || user?.imageUrl} />
               <AvatarFallback className="text-[10px] bg-muted">
@@ -151,15 +172,18 @@ function SidebarContent() {
                 {profile?.displayName || user?.firstName}
               </p>
             </div>
-            <button
-              onClick={handleSignOut}
-              title="Sign out"
-              className="transition-opacity p-1 rounded opacity-0 group-hover:opacity-100"
-              style={{ color: "rgba(255,255,255,0.35)" }}
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
           </div>
+          {/* Always-visible sign out */}
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] transition-all"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.65)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.35)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+          >
+            <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Sign out</span>
+          </button>
         </div>
       ) : (
         <div className="flex-shrink-0 p-3 border-t border-white/5 space-y-2">
@@ -206,29 +230,70 @@ function SidebarContent() {
 
 /* ── Mobile bottom nav tab ── */
 function BottomNavItem({
-  href, icon: Icon, label, active,
+  href, icon: Icon, label, active, avatarSrc, avatarFallback,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   active: boolean;
+  avatarSrc?: string;
+  avatarFallback?: string;
 }) {
+  const activeColor = "#d4a341";
+  const inactiveColor = "rgba(255,255,255,0.38)";
+
   return (
     <Link href={href}>
-      <div className="flex flex-col items-center gap-1 py-2 px-4 min-w-[60px] cursor-pointer select-none">
-        <div style={{ color: active ? "#d4a341" : "rgba(255,255,255,0.38)" }}>
-          <Icon className="w-5 h-5" />
-        </div>
+      <div
+        className="relative flex flex-col items-center gap-1 py-2 px-3 min-w-[56px] cursor-pointer select-none"
+        style={{ minHeight: 52 }}
+      >
+        {/* Icon or avatar */}
+        {avatarSrc !== undefined ? (
+          <div
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: "50%",
+              overflow: "hidden",
+              border: active ? `2px solid ${activeColor}` : "2px solid rgba(255,255,255,0.18)",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(212,163,65,0.1)",
+              transition: "border-color 0.2s",
+            }}
+          >
+            {avatarSrc ? (
+              <img src={avatarSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 10, fontWeight: 600, color: active ? activeColor : inactiveColor }}>
+                {avatarFallback}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div style={{ color: active ? activeColor : inactiveColor, transition: "color 0.2s" }}>
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
+
         <span
           className="text-[10px] font-medium tracking-wide"
-          style={{ color: active ? "#d4a341" : "rgba(255,255,255,0.32)" }}
+          style={{
+            color: active ? activeColor : "rgba(255,255,255,0.32)",
+            transition: "color 0.2s",
+          }}
         >
           {label}
         </span>
+
+        {/* Active indicator dot */}
         {active && (
           <div
-            className="absolute bottom-0 w-6 h-[2px] rounded-full"
-            style={{ background: "#d4a341" }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+            style={{ background: activeColor }}
           />
         )}
       </div>
@@ -243,9 +308,19 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [location] = useLocation();
   const { user } = useUser();
+  const { signOut } = useClerk();
   const { data: profile } = useGetMyProfile({
     query: { enabled: !!user, queryKey: getGetMyProfileQueryKey() },
   });
+
+  const isHome = location === "/" || location === "/discover" || location.startsWith("/discover");
+  const isHooks = location === "/hooks";
+  const isProfile = location.startsWith("/profile");
+  const isAbout = location === "/about";
+
+  const handleSignOut = () => {
+    signOut({ redirectUrl: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
+  };
 
   return (
     <div className="min-h-[100dvh] flex bg-background relative overflow-x-hidden w-full max-w-[100vw]">
@@ -259,20 +334,20 @@ export function AppLayout({ children }: AppLayoutProps) {
         <SidebarContent />
       </aside>
 
-      {/* ── Mobile top bar — logo only ── */}
+      {/* ── Mobile top bar ── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-5 border-b border-white/[0.05]"
+        className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 border-b border-white/[0.05]"
         style={{
           background: "rgba(10,7,16,0.92)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
-          height: "calc(60px + env(safe-area-inset-top, 0px))",
+          height: "calc(56px + env(safe-area-inset-top, 0px))",
           paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
-        <Link href="/">
-          <div className="relative flex items-center">
-            {/* Subtle ambient warmth — softer, tighter */}
+        {/* Logo — tapping always goes home */}
+        <Link href={user ? "/discover" : "/"}>
+          <div className="relative flex items-center cursor-pointer">
             <div
               className="absolute pointer-events-none"
               style={{
@@ -284,9 +359,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             />
             <img
               src={logoImg}
-              alt="Creative Room"
+              alt="Creative Room — Home"
               style={{
-                height: 28,
+                height: 26,
                 width: "auto",
                 objectFit: "contain",
                 position: "relative",
@@ -295,12 +370,60 @@ export function AppLayout({ children }: AppLayoutProps) {
             />
           </div>
         </Link>
+
+        {/* Right side: avatar + sign-out when logged in, or sign-in link */}
+        {user && profile ? (
+          <div className="flex items-center gap-2">
+            <Link href={`/profile/${profile.id}`}>
+              <div
+                style={{
+                  width: 32, height: 32, borderRadius: "50%", overflow: "hidden",
+                  border: isProfile ? "2px solid #d4a341" : "2px solid rgba(255,255,255,0.18)",
+                  cursor: "pointer", flexShrink: 0,
+                  background: "rgba(212,163,65,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "border-color 0.2s",
+                }}
+              >
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: 12, fontWeight: 600, color: isProfile ? "#d4a341" : "rgba(255,255,255,0.6)" }}>
+                    {profile.displayName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </Link>
+            <button
+              onClick={handleSignOut}
+              title="Sign out"
+              style={{
+                width: 32, height: 32, borderRadius: 99,
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", color: "rgba(255,255,255,0.45)",
+                flexShrink: 0,
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        ) : (
+          !user && (
+            <Link href="/sign-in">
+              <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
+                Log in
+              </span>
+            </Link>
+          )
+        )}
       </div>
 
       {/* ── Main content ── */}
       <main
         className="flex-1 min-w-0 md:ml-[240px] min-h-screen md:pt-0 pb-[72px] md:pb-0 relative z-10 overflow-x-hidden"
-        style={{ paddingTop: "calc(60px + env(safe-area-inset-top, 0px))" }}
+        style={{ paddingTop: "calc(56px + env(safe-area-inset-top, 0px))" }}
       >
         {children}
       </main>
@@ -311,8 +434,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         style={{
           background: "rgba(8,5,13,0.97)",
           backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
           paddingBottom: "env(safe-area-inset-bottom, 6px)",
-          height: "calc(72px + env(safe-area-inset-bottom, 0px))",
+          height: "calc(64px + env(safe-area-inset-bottom, 0px))",
         }}
       >
         {/* Discover */}
@@ -320,7 +444,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           href="/discover"
           icon={Compass}
           label="Discover"
-          active={location === "/discover" || location.startsWith("/discover")}
+          active={isHome}
         />
 
         {/* Hooks */}
@@ -328,13 +452,15 @@ export function AppLayout({ children }: AppLayoutProps) {
           href="/hooks"
           icon={Radio}
           label="Hooks"
-          active={location === "/hooks"}
+          active={isHooks}
         />
 
-        {/* ── CENTER PRIMARY ACTION — elevated gold button ── */}
+        {/* ── CENTER: Create (elevated gold button) ── */}
         <Link href={user ? "/rooms/new" : "/sign-up"}>
-          <div className="flex flex-col items-center gap-1.5 pb-2 cursor-pointer select-none" style={{ marginTop: "-18px" }}>
-            {/* Outer glow ring */}
+          <div
+            className="flex flex-col items-center gap-1 pb-2 cursor-pointer select-none"
+            style={{ marginTop: "-20px" }}
+          >
             <div className="relative">
               <div
                 className="absolute inset-0 rounded-full"
@@ -363,13 +489,15 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </Link>
 
-        {/* Profile (signed-in) or quiet placeholder (guest) */}
+        {/* Profile (signed-in) or Log in (guest) */}
         {user && profile ? (
           <BottomNavItem
             href={`/profile/${profile.id}`}
             icon={UserIcon}
             label="Profile"
-            active={location.startsWith("/profile")}
+            active={isProfile}
+            avatarSrc={profile.avatarUrl ?? ""}
+            avatarFallback={profile.displayName.charAt(0).toUpperCase()}
           />
         ) : (
           <BottomNavItem
@@ -380,12 +508,12 @@ export function AppLayout({ children }: AppLayoutProps) {
           />
         )}
 
-        {/* Settings / extra nav slot — keeps symmetry */}
+        {/* About */}
         <BottomNavItem
           href="/about"
-          icon={Compass}
+          icon={Info}
           label="About"
-          active={location === "/about"}
+          active={isAbout}
         />
       </nav>
     </div>

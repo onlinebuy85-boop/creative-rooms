@@ -4,19 +4,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Calendar, Music, Sparkles, Wand2, ArrowLeft, Settings } from "lucide-react";
+import { MapPin, Calendar, Music, Sparkles, Wand2, ArrowLeft, Settings, LogOut } from "lucide-react";
+import { useClerk } from "@clerk/react";
 import { format } from "date-fns";
 
 export function ProfilePage() {
   const params = useParams<{ id: string }>();
   const profileId = Number(params.id);
-  
+  const { signOut } = useClerk();
+
   const { data: currentUser } = useGetMyProfile();
-  const { data: profile, isLoading } = useGetProfile(profileId, { 
-    query: { enabled: !!profileId, queryKey: ['getProfile', profileId] } 
+  const { data: profile, isLoading } = useGetProfile(profileId, {
+    query: { enabled: !!profileId, queryKey: ["getProfile", profileId] },
   });
 
   const isOwnProfile = currentUser?.id === profileId;
+
+  const handleSignOut = () => {
+    signOut({ redirectUrl: import.meta.env.BASE_URL?.replace(/\/$/, "") || "/" });
+  };
 
   if (isLoading || !profile) {
     return (
@@ -35,21 +41,68 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="mb-6">
+    <div
+      className="max-w-3xl mx-auto py-4 px-4 sm:px-6 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      style={{ animation: "pageIn 0.5s ease both" }}
+    >
+      {/* Back + actions row */}
+      <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" size="sm" className="text-muted-foreground -ml-3" asChild>
-          <Link href="/dashboard">
-            <ArrowLeft className="w-4 h-4 mr-1.5" /> Back
+          <Link href="/discover">
+            <ArrowLeft className="w-4 h-4 mr-1.5" /> Discover
           </Link>
         </Button>
+
+        {isOwnProfile && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border/50 bg-background/50 backdrop-blur"
+              asChild
+            >
+              <Link href="/profile/edit">
+                <Settings className="w-3.5 h-3.5 mr-1.5" /> Edit Profile
+              </Link>
+            </Button>
+
+            {/* Sign out — clearly visible on own profile */}
+            <button
+              onClick={handleSignOut}
+              title="Sign out"
+              className="flex items-center gap-1.5 rounded-lg transition-all"
+              style={{
+                height: 32,
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 500,
+                color: "rgba(255,255,255,0.4)",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.7)";
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)";
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+              }}
+            >
+              <LogOut size={13} />
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-card/20 backdrop-blur shadow-sm">
-        {/* Cover abstract */}
+        {/* Cover */}
         <div className="h-32 sm:h-48 bg-muted relative overflow-hidden">
-          <img 
-            src="/assets/images/hero-bg.png" 
-            alt="Cover" 
+          <img
+            src="/assets/images/hero-bg.png"
+            alt="Cover"
             className="w-full h-full object-cover opacity-30 mix-blend-screen"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -63,24 +116,16 @@ export function ProfilePage() {
                 {profile.displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            
+
             <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
               <div className="space-y-1">
                 <h1 className="font-serif text-3xl font-medium tracking-tight text-foreground">
                   {profile.displayName}
                 </h1>
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5" /> Joined {format(new Date(profile.createdAt), 'MMMM yyyy')}
+                  <Calendar className="w-3.5 h-3.5" /> Joined {format(new Date(profile.createdAt), "MMMM yyyy")}
                 </p>
               </div>
-              
-              {isOwnProfile && (
-                <Button variant="outline" className="border-border/50 bg-background/50 backdrop-blur w-full sm:w-auto" asChild>
-                  <Link href="/profile/edit">
-                    <Settings className="w-4 h-4 mr-2" /> Edit Profile
-                  </Link>
-                </Button>
-              )}
             </div>
           </div>
 
@@ -106,7 +151,7 @@ export function ProfilePage() {
                     </p>
                   </div>
                 </section>
-                
+
                 <section className="space-y-3">
                   <h2 className="text-sm font-medium text-foreground/80 uppercase tracking-widest flex items-center">
                     <Sparkles className="w-4 h-4 mr-2 text-primary" /> Emotional Vibe
@@ -127,8 +172,12 @@ export function ProfilePage() {
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {profile.genres && profile.genres.length > 0 ? (
-                    profile.genres.map(genre => (
-                      <Badge key={genre} variant="secondary" className="bg-secondary/40 text-secondary-foreground hover:bg-secondary/60 font-normal border-transparent">
+                    profile.genres.map((genre) => (
+                      <Badge
+                        key={genre}
+                        variant="secondary"
+                        className="bg-secondary/40 text-secondary-foreground hover:bg-secondary/60 font-normal border-transparent"
+                      >
                         {genre}
                       </Badge>
                     ))
@@ -146,6 +195,39 @@ export function ProfilePage() {
                   {profile.inspirations || "None added"}
                 </div>
               </section>
+
+              {/* Own profile: sign-out card — always visible on mobile */}
+              {isOwnProfile && (
+                <section className="md:hidden space-y-2">
+                  <div
+                    className="rounded-xl p-4"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                    }}
+                  >
+                    <p className="text-[11px] font-semibold tracking-widest uppercase mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      Account
+                    </p>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center justify-center gap-2 rounded-xl transition-all active:scale-95"
+                      style={{
+                        height: 44,
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: "rgba(255,255,255,0.5)",
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <LogOut size={15} />
+                      Sign out
+                    </button>
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>
