@@ -590,10 +590,14 @@ export function RoomPage() {
           <div className="flex items-center gap-1.5 mt-0.5">
             <div
               className="w-1.5 h-1.5 rounded-full"
-              style={{ background: isConnected ? "#4ade80" : "#f87171", animation: "pulse-dot 2s ease-in-out infinite" }}
+              style={{ background: isConnected ? "#4ade80" : "rgba(255,255,255,0.2)", animation: isConnected ? "pulse-dot 2s ease-in-out infinite" : "none" }}
             />
             <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.28)" }}>
-              {members?.length || 0} {members?.length === 1 ? "person" : "people"}
+              {isConnected
+                ? onlineIds.size > 1
+                  ? `${onlineIds.size} in the room`
+                  : "Open studio"
+                : "Connecting…"}
             </span>
           </div>
         </div>
@@ -848,16 +852,20 @@ export function RoomPage() {
                           {m.displayName?.charAt(0) || "?"}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2" style={{ borderColor: "#0b0910", background: isOnline ? "#4ade80" : "rgba(255,255,255,0.2)" }} />
+                      {isOnline && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2" style={{ borderColor: "#0b0910", background: "#4ade80" }} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[14px] font-medium truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
                         {m.displayName}
                         {isMe && <span className="ml-2 text-[11px] font-normal" style={{ color: "rgba(212,163,65,0.6)" }}>you</span>}
                       </p>
-                      <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.28)" }}>
-                        {isSpeaking ? "Talking" : isInV ? "In voice" : isOnline ? "Online" : "Away"}
-                      </p>
+                      {(isSpeaking || isInV || isOnline) && (
+                        <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.28)" }}>
+                          {isSpeaking ? "Talking" : isInV ? "In voice" : "In the room"}
+                        </p>
+                      )}
                     </div>
                     <MiniWave color={isSpeaking ? "#4ade80" : isInV ? "#f59e0b" : "rgba(255,255,255,0.1)"} active={isSpeaking || isInV} bars={5} />
                   </div>
@@ -1082,9 +1090,11 @@ export function RoomPage() {
               >
                 {room.name}
               </h1>
-              <p className="text-[12px] truncate mt-0.5" style={{ color: "rgba(255,255,255,0.36)" }}>
-                {room.description || "A space for creative minds."}
-              </p>
+              {(room.description || room.vibe || (room.genres?.length ?? 0) > 0) && (
+                <p className="text-[12px] truncate mt-0.5" style={{ color: "rgba(255,255,255,0.36)" }}>
+                  {room.description || [room.vibe, ...(room.genres ?? [])].filter(Boolean).join(" · ")}
+                </p>
+              )}
             </div>
 
             {/* Avatar stack */}
@@ -1362,8 +1372,8 @@ export function RoomPage() {
               {members?.length || 0}
             </span>
             {onlineIds.size > 0 && (
-              <span className="ml-auto text-[11px]" style={{ color: "#4ade80" }}>
-                {onlineIds.size} online
+              <span className="ml-auto text-[11px]" style={{ color: "rgba(74,222,128,0.7)" }}>
+                {onlineIds.size} in the room
               </span>
             )}
           </div>
@@ -1391,13 +1401,12 @@ export function RoomPage() {
                           {m.displayName?.charAt(0) || "?"}
                         </AvatarFallback>
                       </Avatar>
-                      <div
-                        className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-[1.5px]"
-                        style={{
-                          background: isOnline ? "#4ade80" : "rgba(255,255,255,0.1)",
-                          borderColor: "#0b0910",
-                        }}
-                      />
+                      {isOnline && (
+                        <div
+                          className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-[1.5px]"
+                          style={{ background: "#4ade80", borderColor: "#0b0910" }}
+                        />
+                      )}
                     </div>
 
                     {/* Info */}
@@ -1413,9 +1422,11 @@ export function RoomPage() {
                           <Crown className="w-3 h-3 shrink-0" style={{ color: "#d4a341" }} />
                         )}
                       </div>
-                      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.28)" }}>
-                        {isSpeaking ? "Talking" : isInV ? "Listening" : isOnline ? "Online" : "Away"}
-                      </span>
+                      {(isSpeaking || isInV || isOnline) && (
+                        <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.28)" }}>
+                          {isSpeaking ? "Talking" : isInV ? "Listening" : "In the room"}
+                        </span>
+                      )}
                     </div>
 
                     {/* Waveform indicator */}
