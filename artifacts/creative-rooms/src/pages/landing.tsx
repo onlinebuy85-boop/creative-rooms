@@ -283,24 +283,16 @@ export function LandingPage() {
               </span>
             </Link>
           ) : (
-            <>
-              <Link href="/sign-in">
-                <span
-                  className="cr-nav-link hidden sm:inline"
-                  style={{ color: "rgba(255,255,255,0.38)" }}
-                >
-                  Sign in
-                </span>
-              </Link>
-              <Link href="/sign-up">
-                <span
-                  className="text-[12px] md:text-[13px] tracking-[0.05em] cursor-pointer transition-colors hover:text-amber-400/75"
-                  style={{ color: "rgba(212,163,65,0.6)" }}
-                >
-                  Join free
-                </span>
-              </Link>
-            </>
+            <Link href="/sign-in">
+              <span
+                className="text-[12px] md:text-[13px] tracking-[0.05em] cursor-pointer transition-colors"
+                style={{ color: "rgba(255,255,255,0.38)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.65)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.38)"; }}
+              >
+                Log in
+              </span>
+            </Link>
           )}
         </div>
       </header>

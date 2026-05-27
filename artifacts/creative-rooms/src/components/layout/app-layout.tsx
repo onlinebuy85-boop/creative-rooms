@@ -193,17 +193,18 @@ function SidebarContent() {
           </button>
         </div>
       ) : (
-        <div className="flex-shrink-0 p-3 border-t border-white/5 space-y-2">
-          <Link href="/sign-up">
-            <button
-              className="w-full py-2 rounded-lg text-[12px] font-semibold transition-all hover:brightness-110"
-              style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
-            >
-              Sign up free
-            </button>
-          </Link>
+        <div className="flex-shrink-0 px-4 pb-5 border-t border-white/5 pt-4">
           <Link href="/sign-in">
-            <button className="w-full py-2 rounded-lg text-[12px] transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <button
+              className="w-full py-2.5 rounded-lg text-[12px] font-medium transition-all"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.09)",
+                color: "rgba(255,255,255,0.48)",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.72)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.48)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            >
               Log in
             </button>
           </Link>
@@ -468,7 +469,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         />
 
         {/* ── CENTER: Create (elevated gold button) ── */}
-        <Link href={user ? "/rooms/new" : "/sign-up"}>
+        <Link href={user ? "/rooms/new" : "/sign-in"}>
           <div
             className="flex flex-col items-center gap-1 pb-2 cursor-pointer select-none"
             style={{ marginTop: "-20px" }}
@@ -496,7 +497,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               className="text-[9px] font-semibold tracking-widest uppercase"
               style={{ color: "rgba(212,163,65,0.65)", letterSpacing: "0.12em" }}
             >
-              {user ? "Create" : "Join"}
+              {user ? "Create" : "Enter"}
             </span>
           </div>
         </Link>
