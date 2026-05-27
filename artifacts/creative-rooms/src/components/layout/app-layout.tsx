@@ -95,7 +95,7 @@ function SidebarContent() {
         className="flex-shrink-0 px-4 pt-7 pb-6"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}
       >
-        <Link href={user ? "/discover" : "/"}>
+        <Link href="/">
           <div
             className="relative cursor-pointer"
             title="Home"
@@ -353,7 +353,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         }}
       >
         {/* Logo — tapping always goes home */}
-        <Link href={user ? "/discover" : "/"}>
+        <Link href="/">
           <div
             className="relative flex items-center cursor-pointer"
             style={{ transition: "opacity 0.18s ease" }}

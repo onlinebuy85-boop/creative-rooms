@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { useUser } from "@clerk/react";
 import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779820980322.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
@@ -39,6 +40,7 @@ function useFadeIn(threshold = 0.1) {
 }
 
 export function LandingPage() {
+  const { isSignedIn } = useUser();
   const manifestoRef = useFadeIn(0.06);
   const featRef      = useFadeIn(0.08);
   const quoteRef     = useFadeIn(0.08);
@@ -271,22 +273,35 @@ export function LandingPage() {
         </nav>
 
         <div className="flex items-center gap-4 md:gap-5">
-          <Link href="/sign-in">
-            <span
-              className="cr-nav-link hidden sm:inline"
-              style={{ color: "rgba(255,255,255,0.38)" }}
-            >
-              Sign in
-            </span>
-          </Link>
-          <Link href="/sign-up">
-            <span
-              className="text-[12px] md:text-[13px] tracking-[0.05em] cursor-pointer transition-colors hover:text-amber-400/75"
-              style={{ color: "rgba(212,163,65,0.6)" }}
-            >
-              Join free
-            </span>
-          </Link>
+          {isSignedIn ? (
+            <Link href="/discover">
+              <span
+                className="text-[12px] md:text-[13px] tracking-[0.05em] cursor-pointer transition-colors hover:text-amber-400/75"
+                style={{ color: "rgba(212,163,65,0.6)" }}
+              >
+                Go to rooms →
+              </span>
+            </Link>
+          ) : (
+            <>
+              <Link href="/sign-in">
+                <span
+                  className="cr-nav-link hidden sm:inline"
+                  style={{ color: "rgba(255,255,255,0.38)" }}
+                >
+                  Sign in
+                </span>
+              </Link>
+              <Link href="/sign-up">
+                <span
+                  className="text-[12px] md:text-[13px] tracking-[0.05em] cursor-pointer transition-colors hover:text-amber-400/75"
+                  style={{ color: "rgba(212,163,65,0.6)" }}
+                >
+                  Join free
+                </span>
+              </Link>
+            </>
+          )}
         </div>
       </header>
 

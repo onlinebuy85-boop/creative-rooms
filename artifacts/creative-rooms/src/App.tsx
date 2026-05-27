@@ -90,16 +90,7 @@ const clerkAppearance = {
 };
 
 function HomeRedirect() {
-  return (
-    <>
-      <Show when="signed-in">
-        <Redirect to="/discover" />
-      </Show>
-      <Show when="signed-out">
-        <LandingPage />
-      </Show>
-    </>
-  );
+  return <LandingPage />;
 }
 
 function ProtectedRoute({ component: Component, hideLayout = false }: { component: React.ComponentType, hideLayout?: boolean }) {
