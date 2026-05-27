@@ -36,6 +36,23 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 
   # ── Profiles ──────────────────────────────────────────────────────────────
+  /profiles/me/creator:
+    post:
+      operationId: activateCreator
+      tags: [profiles]
+      summary: Self-activate creator membership
+      responses:
+        "200":
+          description: Creator status activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Profile not found
+
   /profiles/me:
     get:
       operationId: getMyProfile
@@ -653,6 +670,8 @@ components:
             type: string
         avatarUrl:
           type: ["string", "null"]
+        isCreator:
+          type: boolean
         createdAt:
           type: string
           format: date-time

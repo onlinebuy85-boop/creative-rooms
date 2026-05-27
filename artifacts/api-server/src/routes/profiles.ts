@@ -36,10 +36,32 @@ function profileToResponse(p: typeof profilesTable.$inferSelect) {
     inspirations: p.inspirations ?? null,
     genres: p.genres ?? [],
     avatarUrl: p.avatarUrl ?? null,
+    isCreator: p.isCreator,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
 }
+
+// POST /profiles/me/creator — self-activate creator membership
+router.post("/profiles/me/creator", requireAuth, async (req: any, res): Promise<void> => {
+  const [profile] = await db
+    .select()
+    .from(profilesTable)
+    .where(eq(profilesTable.clerkId, req.clerkUserId));
+
+  if (!profile) {
+    res.status(404).json({ error: "Profile not found" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(profilesTable)
+    .set({ isCreator: true, updatedAt: new Date() })
+    .where(eq(profilesTable.clerkId, req.clerkUserId))
+    .returning();
+
+  res.json(profileToResponse(updated));
+});
 
 // GET /profiles/me
 router.get("/profiles/me", requireAuth, async (req: any, res): Promise<void> => {

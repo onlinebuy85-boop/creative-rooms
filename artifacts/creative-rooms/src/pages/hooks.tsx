@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
 import { useUser } from "@clerk/react";
-import { useListHooks, useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
+import { useListHooks, useGetMyProfile, useActivateCreator, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import type { Hook } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { HookCard } from "@/components/hooks/hook-card";
 import { HookRoomPanel } from "@/components/hooks/hook-room-panel";
 import { DropHookModal } from "@/components/hooks/drop-hook-modal";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
+import { CreatorUpgradePrompt } from "@/components/creator-upgrade-prompt";
 import { Loader2, Radio, Upload, Users, Music, Layers, Sparkles } from "lucide-react";
 
 // ── Filter tabs ──────────────────────────────────────────────────────────────
@@ -126,14 +128,19 @@ function HowHooksWork() {
 
 export function HooksPage() {
   const { isSignedIn } = useUser();
+  const queryClient = useQueryClient();
   const { data: hooks, isLoading } = useListHooks();
   const { data: myProfile } = useGetMyProfile({
     query: { queryKey: getGetMyProfileQueryKey(), enabled: isSignedIn === true, retry: false },
   });
+  const activateCreator = useActivateCreator();
+  const isCreator = !!myProfile?.isCreator;
+
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedHook, setSelectedHook] = useState<Hook | null>(null);
   const [dropModalOpen, setDropModalOpen] = useState(false);
   const [guestPromptOpen, setGuestPromptOpen] = useState(false);
+  const [upgradePromptOpen, setUpgradePromptOpen] = useState(false);
 
   const filtered = useMemo(
     () => filterHooks(hooks ?? [], activeFilter),
@@ -142,6 +149,7 @@ export function HooksPage() {
 
   const handleDropClick = () => {
     if (!isSignedIn) setGuestPromptOpen(true);
+    else if (!isCreator) setUpgradePromptOpen(true);
     else setDropModalOpen(true);
   };
 
@@ -319,6 +327,20 @@ export function HooksPage() {
         open={guestPromptOpen}
         reason="drop a hook"
         onClose={() => setGuestPromptOpen(false)}
+      />
+      <CreatorUpgradePrompt
+        open={upgradePromptOpen}
+        reason="drop a hook"
+        onClose={() => setUpgradePromptOpen(false)}
+        onActivate={() => {
+          activateCreator.mutate(undefined, {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
+              setUpgradePromptOpen(false);
+            },
+          });
+        }}
+        activating={activateCreator.isPending}
       />
     </div>
   );

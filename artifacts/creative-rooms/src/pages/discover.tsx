@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { useListRooms, useGetMyProfile, useGetRoomsPresence, getGetMyProfileQueryKey, getGetRoomsPresenceQueryKey } from "@workspace/api-client-react";
+import { useListRooms, useGetMyProfile, useGetRoomsPresence, useActivateCreator, getGetMyProfileQueryKey, getGetRoomsPresenceQueryKey } from "@workspace/api-client-react";
 import { useUser } from "@clerk/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { RoomCard } from "@/components/rooms/room-card";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
+import { CreatorUpgradePrompt } from "@/components/creator-upgrade-prompt";
 import { Link } from "wouter";
 import { Plus } from "lucide-react";
 
@@ -23,15 +25,19 @@ function SkeletonCard() {
 export function DiscoverPage() {
   const { data: rooms, isLoading } = useListRooms();
   const { isSignedIn } = useUser();
+  const queryClient = useQueryClient();
   const { data: profile } = useGetMyProfile({ query: { enabled: !!isSignedIn, queryKey: getGetMyProfileQueryKey() } });
+  const activateCreator = useActivateCreator();
+  const isCreator = !!profile?.isCreator;
+
   /* Poll live presence every 6 seconds — no auth required */
   const { data: presence } = useGetRoomsPresence({ query: { queryKey: getGetRoomsPresenceQueryKey(), refetchInterval: 6000 } });
   const [guestPromptReason, setGuestPromptReason] = useState<string | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<string | null>(null);
 
   const handleNewRoom = () => {
-    if (!isSignedIn) {
-      setGuestPromptReason("create a room");
-    }
+    if (!isSignedIn) setGuestPromptReason("create a room");
+    else if (!isCreator) setUpgradeReason("create a room");
   };
 
   return (
@@ -54,7 +60,7 @@ export function DiscoverPage() {
           </p>
         </div>
 
-        {isSignedIn ? (
+        {isSignedIn && isCreator ? (
           <Link
             href="/rooms/new"
             className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all hover:scale-[1.04] hover:brightness-110"
@@ -142,7 +148,7 @@ export function DiscoverPage() {
           >
             No sessions open right now. Start the first one and invite someone to create with.
           </p>
-          {isSignedIn ? (
+          {isSignedIn && isCreator ? (
             <Link
               href="/rooms/new"
               className="flex items-center gap-2 px-7 py-3 rounded-full text-[13.5px] font-semibold transition-all hover:scale-[1.03]"
@@ -158,7 +164,7 @@ export function DiscoverPage() {
           ) : (
             <button
               type="button"
-              onClick={() => setGuestPromptReason("create a room")}
+              onClick={handleNewRoom}
               className="flex items-center gap-2 px-7 py-3 rounded-full text-[13.5px] font-semibold transition-all hover:scale-[1.03]"
               style={{
                 background: "linear-gradient(135deg, #e0b050, #c89030)",
@@ -177,6 +183,20 @@ export function DiscoverPage() {
         open={!!guestPromptReason}
         reason={guestPromptReason ?? ""}
         onClose={() => setGuestPromptReason(null)}
+      />
+      <CreatorUpgradePrompt
+        open={!!upgradeReason}
+        reason={upgradeReason ?? ""}
+        onClose={() => setUpgradeReason(null)}
+        onActivate={() => {
+          activateCreator.mutate(undefined, {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
+              setUpgradeReason(null);
+            },
+          });
+        }}
+        activating={activateCreator.isPending}
       />
 
       <style>{`

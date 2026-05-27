@@ -3,11 +3,12 @@ import { createPortal } from "react-dom";
 import { useUser } from "@clerk/react";
 import { useParams, useLocation, Link } from "wouter";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
+import { CreatorUpgradePrompt } from "@/components/creator-upgrade-prompt";
 import {
   useGetRoom, useGetRoomMembers, useGetRoomMessages,
   useGetRoomDemos, useSendMessage, useUploadDemo,
   useGetMyProfile, useJoinRoom, useLeaveRoom, useDeleteMessage, useEditMessage,
-  useListRooms, getGetRoomMessagesQueryKey, getGetMyProfileQueryKey,
+  useListRooms, useActivateCreator, getGetRoomMessagesQueryKey, getGetMyProfileQueryKey,
 } from "@workspace/api-client-react";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useVoice } from "@/hooks/use-voice";
@@ -319,6 +320,16 @@ export function RoomPage() {
   const [typingUsers, setTypingUsers]       = useState<Map<number, string>>(new Map());
   const [onlineIds, setOnlineIds]           = useState<Set<number>>(new Set());
   const [guestPromptReason, setGuestPromptReason] = useState<string | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<string | null>(null);
+  const activateCreator = useActivateCreator();
+
+  const isCreator = !!profile?.isCreator;
+
+  const requireCreator = (reason: string, action: () => void) => {
+    if (!isSignedIn) { setGuestPromptReason(reason); return; }
+    if (!isCreator) { setUpgradeReason(reason); return; }
+    action();
+  };
   const [playingId, setPlayingId]           = useState<number | null>(null);
   const messagesEndRef                       = useRef<HTMLDivElement>(null);
   const typingTimersRef                      = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
@@ -749,14 +760,14 @@ export function RoomPage() {
               >
                 <input
                   type="text"
-                  placeholder={isMember ? "Type a message…" : !isSignedIn ? "Sign up to join" : "Join room to chat"}
+                  placeholder={isMember && isCreator ? "Type a message…" : !isSignedIn ? "Enter to listen" : !isCreator ? "Become a creator to chat" : "Join room to chat"}
                   value={messageInput}
                   onChange={handleInputChange}
-                  disabled={!isMember}
-                  readOnly={!isSignedIn}
-                  onClick={!isSignedIn ? () => setGuestPromptReason("write in chat") : undefined}
+                  disabled={!isMember || !isCreator}
+                  readOnly={!isSignedIn || !isCreator}
+                  onClick={!isSignedIn ? () => setGuestPromptReason("write in chat") : !isCreator ? () => setUpgradeReason("write in chat") : undefined}
                   className="flex-1 bg-transparent outline-none text-[14px] disabled:opacity-40"
-                  style={{ color: "rgba(255,255,255,0.85)", cursor: !isSignedIn ? "pointer" : "text" }}
+                  style={{ color: "rgba(255,255,255,0.85)", cursor: (!isSignedIn || !isCreator) ? "pointer" : "text" }}
                 />
                 <button
                   type="submit"
@@ -774,7 +785,7 @@ export function RoomPage() {
         {/* STUDIO TAB */}
         {mobileTab === "studio" && (
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            {isMember ? (
+            {isMember && isCreator ? (
               <button
                 type="button"
                 onClick={() => browseRef.current?.click()}
@@ -797,9 +808,16 @@ export function RoomPage() {
               </button>
             ) : !isSignedIn ? (
               <div className="flex flex-col items-center justify-center py-14 rounded-3xl text-center" style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
-                <p className="text-[14px] mb-4" style={{ color: "rgba(255,255,255,0.38)" }}>Sign up to share your music here.</p>
-                <button type="button" onClick={() => setGuestPromptReason("share demos")} className="h-11 px-7 rounded-full text-[14px] font-semibold" style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}>
-                  Sign up free
+                <p className="text-[14px] mb-3" style={{ color: "rgba(255,255,255,0.38)" }}>You're listening as a guest.</p>
+                <button type="button" onClick={() => setGuestPromptReason("share demos")} className="h-11 px-7 rounded-full text-[14px] font-medium" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}>
+                  Create an account
+                </button>
+              </div>
+            ) : !isCreator ? (
+              <div className="flex flex-col items-center justify-center py-14 rounded-3xl text-center" style={{ border: "1px dashed rgba(255,255,255,0.07)" }}>
+                <p className="text-[14px] mb-3" style={{ color: "rgba(255,255,255,0.38)" }}>Creators can upload and share demos.</p>
+                <button type="button" onClick={() => setUpgradeReason("share demos")} className="h-11 px-7 rounded-full text-[14px] font-semibold" style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}>
+                  Become a Creator
                 </button>
               </div>
             ) : (
@@ -901,7 +919,7 @@ export function RoomPage() {
       >
         <button
           type="button"
-          onClick={isSignedIn ? (isInVoice ? toggleMute : joinVoice) : () => setGuestPromptReason("join voice")}
+          onClick={() => requireCreator("join voice", isInVoice ? toggleMute : joinVoice)}
           className="flex flex-col items-center gap-1.5"
         >
           <div
@@ -921,13 +939,11 @@ export function RoomPage() {
 
         <button
           type="button"
-          onClick={
-            !isSignedIn ? () => setGuestPromptReason("record audio")
-            : !isMember ? handleJoin
-            : recorder.state === "recording" ? recorder.stop
+          onClick={() => requireCreator("record audio",
+            recorder.state === "recording" ? recorder.stop
             : recorder.state === "idle" || recorder.state === "error" ? recorder.start
-            : undefined
-          }
+            : () => {}
+          )}
           disabled={recorder.state === "requesting" || recorder.state === "processing"}
           className="flex flex-col items-center gap-1.5 transition-all active:scale-95 disabled:opacity-60"
         >
@@ -953,6 +969,20 @@ export function RoomPage() {
       </div>
 
       <GuestSignupPrompt open={!!guestPromptReason} reason={guestPromptReason ?? ""} onClose={() => setGuestPromptReason(null)} />
+      <CreatorUpgradePrompt
+        open={!!upgradeReason}
+        reason={upgradeReason ?? ""}
+        onClose={() => setUpgradeReason(null)}
+        onActivate={() => {
+          activateCreator.mutate(undefined, {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
+              setUpgradeReason(null);
+            },
+          });
+        }}
+        activating={activateCreator.isPending}
+      />
     </div>
 
     {/* ══════════════════════════════════════════
@@ -1200,22 +1230,43 @@ export function RoomPage() {
                 style={{ border: "1px dashed rgba(255,255,255,0.07)" }}
               >
                 <p className="text-[14px] mb-2" style={{ color: "rgba(255,255,255,0.38)" }}>
-                  Sign up to share your music here.
+                  You're listening as a guest.
                 </p>
                 <p className="text-[12px] mb-6" style={{ color: "rgba(255,255,255,0.22)" }}>
-                  You're listening as a guest.
+                  Create an account to share your music here.
                 </p>
                 <button
                   type="button"
                   onClick={() => setGuestPromptReason("share demos")}
+                  className="h-10 px-6 rounded-full text-[13px] font-medium hover:brightness-110 transition-all"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}
+                >
+                  Create an account
+                </button>
+              </div>
+            ) : !isCreator ? (
+              /* Listener upgrade gate */
+              <div
+                className="flex flex-col items-center justify-center py-16 rounded-3xl text-center"
+                style={{ border: "1px dashed rgba(255,255,255,0.07)" }}
+              >
+                <p className="text-[14px] mb-2" style={{ color: "rgba(255,255,255,0.38)" }}>
+                  Creators can upload and share demos.
+                </p>
+                <p className="text-[12px] mb-6" style={{ color: "rgba(255,255,255,0.22)" }}>
+                  You're listening as a member.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setUpgradeReason("share demos")}
                   className="h-10 px-6 rounded-full text-[13px] font-semibold hover:brightness-110 transition-all"
                   style={{ background: "linear-gradient(135deg,#e0b050,#c89030)", color: "#1a0f00" }}
                 >
-                  Sign up free
+                  Become a Creator
                 </button>
               </div>
             ) : (
-              /* Non-member authenticated gate */
+              /* Non-member creator gate */
               <div
                 className="flex flex-col items-center justify-center py-16 rounded-3xl text-center"
                 style={{ border: "1px dashed rgba(255,255,255,0.07)" }}
@@ -1565,23 +1616,25 @@ export function RoomPage() {
               <input
                 type="text"
                 placeholder={
-                  isMember
+                  isMember && isCreator
                     ? "Type a message…"
                     : !isSignedIn
-                    ? "Sign up to join the conversation"
+                    ? "Enter to listen"
+                    : !isCreator
+                    ? "Become a creator to chat"
                     : "Join room to chat"
                 }
                 value={messageInput}
                 onChange={handleInputChange}
-                disabled={!isMember}
-                readOnly={!isSignedIn}
-                onClick={!isSignedIn ? () => setGuestPromptReason("write in chat") : undefined}
+                disabled={!isMember || !isCreator}
+                readOnly={!isSignedIn || !isCreator}
+                onClick={!isSignedIn ? () => setGuestPromptReason("write in chat") : !isCreator ? () => setUpgradeReason("write in chat") : undefined}
                 className="flex-1 bg-transparent outline-none text-[12.5px] disabled:opacity-40"
-                style={{ color: "rgba(255,255,255,0.82)", cursor: !isSignedIn ? "pointer" : "text" }}
+                style={{ color: "rgba(255,255,255,0.82)", cursor: (!isSignedIn || !isCreator) ? "pointer" : "text" }}
               />
               <button
                 type="submit"
-                disabled={!messageInput.trim() || !isMember}
+                disabled={!messageInput.trim() || !isMember || !isCreator}
                 className="w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-25 transition-all hover:brightness-110 shrink-0"
                 style={{ background: "rgba(212,163,65,0.18)", color: "#d4a341" }}
               >
@@ -1596,6 +1649,20 @@ export function RoomPage() {
         open={!!guestPromptReason}
         reason={guestPromptReason ?? ""}
         onClose={() => setGuestPromptReason(null)}
+      />
+      <CreatorUpgradePrompt
+        open={!!upgradeReason}
+        reason={upgradeReason ?? ""}
+        onClose={() => setUpgradeReason(null)}
+        onActivate={() => {
+          activateCreator.mutate(undefined, {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
+              setUpgradeReason(null);
+            },
+          });
+        }}
+        activating={activateCreator.isPending}
       />
 
       {/* ── Recording overlay portal ── */}

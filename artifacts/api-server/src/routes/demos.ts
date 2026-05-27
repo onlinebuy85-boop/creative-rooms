@@ -84,6 +84,11 @@ router.post("/rooms/:id/demos", requireAuth, async (req: any, res): Promise<void
     return;
   }
 
+  if (!profile.isCreator) {
+    res.status(403).json({ error: "Creator membership required to upload demos." });
+    return;
+  }
+
   const [demo] = await db
     .insert(demosTable)
     .values({

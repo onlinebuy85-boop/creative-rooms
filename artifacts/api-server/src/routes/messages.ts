@@ -81,6 +81,11 @@ router.post("/rooms/:id/messages", requireAuth, async (req: any, res): Promise<v
     return;
   }
 
+  if (!profile.isCreator) {
+    res.status(403).json({ error: "Creator membership required to send messages." });
+    return;
+  }
+
   const [message] = await db
     .insert(messagesTable)
     .values({

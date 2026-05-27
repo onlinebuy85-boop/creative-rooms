@@ -24,6 +24,7 @@ export interface Profile {
   genres?: string[];
   /** @nullable */
   avatarUrl?: string | null;
+  isCreator?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

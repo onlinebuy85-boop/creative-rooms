@@ -99,6 +99,11 @@ router.post("/hooks", requireAuth, async (req: any, res): Promise<void> => {
     return;
   }
 
+  if (!profile.isCreator) {
+    res.status(403).json({ error: "Creator membership required to drop hooks." });
+    return;
+  }
+
   const [hook] = await db
     .insert(hooksTable)
     .values({

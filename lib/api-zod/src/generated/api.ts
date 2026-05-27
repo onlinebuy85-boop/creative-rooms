@@ -17,6 +17,25 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Self-activate creator membership
+ */
+export const ActivateCreatorResponse = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string(),
+  "displayName": zod.string(),
+  "bio": zod.string().nullish(),
+  "musicalStyle": zod.string().nullish(),
+  "emotionalVibe": zod.string().nullish(),
+  "inspirations": zod.string().nullish(),
+  "genres": zod.array(zod.string()).optional(),
+  "avatarUrl": zod.string().nullish(),
+  "isCreator": zod.boolean().optional(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
  * @summary Get current user's profile
  */
 export const GetMyProfileResponse = zod.object({
@@ -29,6 +48,7 @@ export const GetMyProfileResponse = zod.object({
   "inspirations": zod.string().nullish(),
   "genres": zod.array(zod.string()).optional(),
   "avatarUrl": zod.string().nullish(),
+  "isCreator": zod.boolean().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -68,6 +88,7 @@ export const GetProfileResponse = zod.object({
   "inspirations": zod.string().nullish(),
   "genres": zod.array(zod.string()).optional(),
   "avatarUrl": zod.string().nullish(),
+  "isCreator": zod.boolean().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -103,6 +124,7 @@ export const UpdateProfileResponse = zod.object({
   "inspirations": zod.string().nullish(),
   "genres": zod.array(zod.string()).optional(),
   "avatarUrl": zod.string().nullish(),
+  "isCreator": zod.boolean().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })

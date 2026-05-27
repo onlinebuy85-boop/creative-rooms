@@ -145,6 +145,11 @@ router.post("/rooms", requireAuth, async (req: any, res): Promise<void> => {
     return;
   }
 
+  if (!profile.isCreator) {
+    res.status(403).json({ error: "Creator membership required to create rooms." });
+    return;
+  }
+
   const [room] = await db
     .insert(roomsTable)
     .values({ ...parsed.data, ownerId: profile.id })
