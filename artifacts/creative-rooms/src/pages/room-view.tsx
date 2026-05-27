@@ -603,7 +603,7 @@ export function RoomPage() {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <div className="flex -space-x-1.5">
-            {members?.slice(0, 3).map((m) => (
+            {members?.filter((m) => onlineIds.has(m.profileId)).slice(0, 3).map((m) => (
               <Avatar key={m.profileId} className="w-7 h-7 border" style={{ borderColor: "#0b0910" }}>
                 <AvatarImage src={m.avatarUrl || undefined} />
                 <AvatarFallback className="text-[9px]" style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}>
@@ -1097,32 +1097,37 @@ export function RoomPage() {
               )}
             </div>
 
-            {/* Avatar stack */}
-            <div className="flex -space-x-2 shrink-0">
-              {members?.slice(0, 4).map((m) => (
-                <Avatar
-                  key={m.profileId}
-                  className="w-7 h-7 border-2"
-                  style={{ borderColor: "#0b0910" }}
-                >
-                  <AvatarImage src={m.avatarUrl || undefined} />
-                  <AvatarFallback
-                    className="text-[9px]"
-                    style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}
-                  >
-                    {m.displayName?.charAt(0) || "?"}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {(members?.length || 0) > 4 && (
-                <div
-                  className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-[9px] font-bold"
-                  style={{ borderColor: "#0b0910", background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}
-                >
-                  +{(members?.length || 0) - 4}
+            {/* Avatar stack — live users only */}
+            {(() => {
+              const live = (members ?? []).filter((m) => onlineIds.has(m.profileId));
+              return live.length > 0 ? (
+                <div className="flex -space-x-2 shrink-0">
+                  {live.slice(0, 4).map((m) => (
+                    <Avatar
+                      key={m.profileId}
+                      className="w-7 h-7 border-2"
+                      style={{ borderColor: "#0b0910" }}
+                    >
+                      <AvatarImage src={m.avatarUrl || undefined} />
+                      <AvatarFallback
+                        className="text-[9px]"
+                        style={{ background: `hsl(${(m.profileId * 47) % 360},32%,28%)` }}
+                      >
+                        {m.displayName?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {live.length > 4 && (
+                    <div
+                      className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-[9px] font-bold"
+                      style={{ borderColor: "#0b0910", background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}
+                    >
+                      +{live.length - 4}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              ) : null;
+            })()}
 
             {/* Invite */}
             {isMember && (
@@ -1365,15 +1370,13 @@ export function RoomPage() {
             <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.65)" }}>
               People
             </span>
-            <span
-              className="text-[11px] px-1.5 py-0.5 rounded-full"
-              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.35)" }}
-            >
-              {members?.length || 0}
-            </span>
-            {onlineIds.size > 0 && (
-              <span className="ml-auto text-[11px]" style={{ color: "rgba(74,222,128,0.7)" }}>
+            {onlineIds.size > 0 ? (
+              <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.08)", color: "rgba(74,222,128,0.7)", border: "1px solid rgba(74,222,128,0.15)" }}>
                 {onlineIds.size} in the room
+              </span>
+            ) : (
+              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)", fontStyle: "italic" }}>
+                Open studio
               </span>
             )}
           </div>
