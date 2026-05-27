@@ -248,9 +248,10 @@ export function LandingPage() {
               width={924}
               height={177}
               className="cr-landing-logo"
+              draggable={false}
               style={{
                 width: "auto", objectFit: "contain", position: "relative",
-                filter: "saturate(1.15) contrast(1.12) drop-shadow(0 1px 1px rgba(0,0,0,0.6))",
+                filter: "saturate(1.1) contrast(1.08)",
                 imageRendering: "auto",
               }}
             />

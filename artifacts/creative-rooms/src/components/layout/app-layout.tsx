@@ -96,23 +96,30 @@ function SidebarContent() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}
       >
         <Link href={user ? "/discover" : "/"}>
-          <div className="relative cursor-pointer" title="Home">
+          <div
+            className="relative cursor-pointer"
+            title="Home"
+            style={{ transition: "opacity 0.18s ease" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.82"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+          >
             <div
               className="absolute pointer-events-none"
               style={{
                 left: -10, top: "50%", transform: "translateY(-50%)",
                 width: 170, height: 70,
-                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.20) 0%, rgba(212,163,65,0.04) 50%, transparent 75%)",
+                background: "radial-gradient(ellipse at 28% 50%, rgba(212,163,65,0.22) 0%, rgba(212,163,65,0.05) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Room"
+              draggable={false}
               style={{
                 height: 32, width: "auto", objectFit: "contain", position: "relative",
                 maxWidth: 184,
-                filter: "brightness(1.12) drop-shadow(0 0 10px rgba(212,163,65,0.32))",
+                imageRendering: "auto",
               }}
             />
           </div>
@@ -347,25 +354,30 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         {/* Logo — tapping always goes home */}
         <Link href={user ? "/discover" : "/"}>
-          <div className="relative flex items-center cursor-pointer">
+          <div
+            className="relative flex items-center cursor-pointer"
+            style={{ transition: "opacity 0.18s ease" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+          >
             <div
               className="absolute pointer-events-none"
               style={{
                 left: -14, top: "50%", transform: "translateY(-50%)",
                 width: "108%", height: 56,
-                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.14) 0%, rgba(212,163,65,0.025) 50%, transparent 75%)",
+                background: "radial-gradient(ellipse at 30% 50%, rgba(212,163,65,0.16) 0%, rgba(212,163,65,0.03) 50%, transparent 75%)",
                 animation: "warm-glow 5s ease-in-out infinite",
               }}
             />
             <img
               src={logoImg}
               alt="Creative Room — Home"
+              draggable={false}
               style={{
                 height: 26,
                 width: "auto",
                 objectFit: "contain",
                 position: "relative",
-                filter: "brightness(1.1) drop-shadow(0 0 10px rgba(212,163,65,0.32))",
               }}
             />
           </div>
