@@ -247,28 +247,45 @@ export function HooksPage() {
         >
           <div className="p-4 sm:p-5 space-y-3 w-full max-w-full">
             {isLoading ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="w-5 h-5 animate-spin" style={{ color: "rgba(255,255,255,0.3)" }} />
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <div className="flex items-end gap-[3px] h-7">
+                  {[4,6,5,8,5,9,4,7,5,8,4,6,5].map((h, i) => (
+                    <div
+                      key={i}
+                      className="rounded-full"
+                      style={{
+                        width: 3,
+                        height: `${h * 10}%`,
+                        background: "rgba(212,163,65,0.4)",
+                        animation: `breathe ${1.4 + (i % 4) * 0.25}s ease-in-out infinite`,
+                        animationDelay: `${i * 0.09}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="text-[11.5px] font-light italic" style={{ color: "rgba(255,255,255,0.2)" }}>
+                  picking up signals…
+                </p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
                 <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
                   style={{
-                    background: "rgba(212,163,65,0.07)",
-                    border: "1px solid rgba(212,163,65,0.15)",
+                    background: "rgba(212,163,65,0.06)",
+                    border: "1px solid rgba(212,163,65,0.12)",
                   }}
                 >
-                  <Radio className="w-7 h-7" style={{ color: "rgba(212,163,65,0.4)" }} />
+                  <Radio className="w-6 h-6" style={{ color: "rgba(212,163,65,0.35)" }} />
                 </div>
                 {activeFilter === "all" ? (
                   <>
                     <div>
-                      <p className="text-[16px] font-medium mb-2" style={{ color: "rgba(255,255,255,0.6)" }}>
-                        No hooks dropped yet.
+                      <p className="text-[15px] font-light mb-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+                        The world is listening.
                       </p>
-                      <p className="text-[14px] max-w-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
-                        Be the first to send a signal into the world.
+                      <p className="text-[12.5px] font-light max-w-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.25)" }}>
+                        No signals yet. Be the first to drop something honest.
                       </p>
                     </div>
                     <button
@@ -277,15 +294,15 @@ export function HooksPage() {
                       style={{
                         background: "linear-gradient(135deg,#e0b050,#c89030)",
                         color: "#1a0f00",
-                        boxShadow: "0 2px 12px rgba(212,163,65,0.25)",
+                        boxShadow: "0 2px 12px rgba(212,163,65,0.22)",
                       }}
                     >
                       Drop the first hook
                     </button>
                   </>
                 ) : (
-                  <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-                    No hooks match this filter.
+                  <p className="text-[13.5px] font-light" style={{ color: "rgba(255,255,255,0.32)" }}>
+                    Nothing here yet. Try a different signal.
                   </p>
                 )}
               </div>

@@ -208,6 +208,9 @@ function SidebarContent() {
               Log in
             </button>
           </Link>
+          <p className="text-center text-[10.5px] font-light italic mt-3" style={{ color: "rgba(255,255,255,0.16)" }}>
+            Come as you are.
+          </p>
         </div>
       )}
 
@@ -227,9 +230,8 @@ function SidebarContent() {
             />
           ))}
         </div>
-        <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.2)" }}>
-          Real people. Real music.{" "}
-          <span style={{ color: "rgba(212,163,65,0.4)" }}>Create together.</span>
+        <p className="text-[11px] font-light italic leading-relaxed" style={{ color: "rgba(212,163,65,0.32)" }}>
+          No pressure. Just presence.
         </p>
       </div>
     </div>

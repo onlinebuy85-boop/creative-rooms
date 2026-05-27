@@ -548,8 +548,35 @@ export function RoomPage() {
   /* ── Loading ── */
   if (roomLoading || !room) {
     return (
-      <div className="flex h-[100dvh] items-center justify-center" style={{ background: "#0b0910" }}>
-        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#d4a341" }} />
+      <div className="flex flex-col h-[100dvh] items-center justify-center gap-6" style={{ background: "#0b0910" }}>
+        {/* Waveform animation */}
+        <div className="flex items-end gap-[3px] h-8">
+          {[4,7,5,9,6,10,5,8,4,9,6,8,5,7,4].map((h, i) => (
+            <div
+              key={i}
+              className="rounded-full"
+              style={{
+                width: 3,
+                height: `${h * 10}%`,
+                background: "rgba(212,163,65,0.55)",
+                animation: `breathe ${1.4 + (i % 5) * 0.22}s ease-in-out infinite`,
+                animationDelay: `${i * 0.08}s`,
+              }}
+            />
+          ))}
+        </div>
+        <p className="text-[14px] font-light tracking-wide" style={{ color: "rgba(255,255,255,0.38)" }}>
+          Preparing the room…
+        </p>
+        <p className="text-[12px] font-light italic" style={{ color: "rgba(212,163,65,0.28)", marginTop: -8 }}>
+          something good is about to happen.
+        </p>
+        <style>{`
+          @keyframes breathe {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
+          }
+        `}</style>
       </div>
     );
   }

@@ -309,7 +309,7 @@ export function LandingPage() {
               animation: "pageIn 0.6s ease both",
             }}
           >
-            A late-night creative space
+            A space for honest music
           </p>
 
           {/* Headline */}

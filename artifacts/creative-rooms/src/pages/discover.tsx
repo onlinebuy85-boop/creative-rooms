@@ -92,8 +92,13 @@ export function DiscoverPage() {
 
       {/* ── Room grid ── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
+          </div>
+          <p className="text-center text-[11.5px] font-light italic mt-8" style={{ color: "rgba(255,255,255,0.15)" }}>
+            listening for open rooms…
+          </p>
         </div>
       ) : rooms && rooms.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -140,13 +145,13 @@ export function DiscoverPage() {
             </svg>
           </div>
           <h3 className="font-serif text-[1.4rem] text-white/70 mb-3">
-            The rooms are quiet tonight.
+            The rooms are quiet.
           </h3>
           <p
             className="text-[13px] max-w-xs font-light leading-relaxed mb-8"
-            style={{ color: "rgba(255,255,255,0.35)" }}
+            style={{ color: "rgba(255,255,255,0.32)" }}
           >
-            No sessions open right now. Start the first one and invite someone to create with.
+            No sessions open right now.<br />Start the first one.
           </p>
           {isSignedIn && isCreator ? (
             <Link

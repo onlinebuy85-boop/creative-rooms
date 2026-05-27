@@ -1,4 +1,4 @@
-import { X, Sparkles } from "lucide-react";
+import { X, Lock, Check } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -8,36 +8,47 @@ interface Props {
   activating?: boolean;
 }
 
+const FEATURE_LIST = [
+  "Upload hooks",
+  "Join live rooms",
+  "Chat & collaborate",
+  "Create rooms",
+];
+
 const COPY: Record<string, { headline: string; body: string }> = {
   "write in chat": {
     headline: "Speak into the room.",
-    body: "Chat is open to creator members. Join the creative space to write, collaborate and be heard.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
   },
   "record audio": {
     headline: "Capture the moment.",
-    body: "Recording is for creator members. Step inside the space to start capturing ideas.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
   },
   "share demos": {
     headline: "Share your music.",
-    body: "Demo uploads are open to creator members. Join to drop your work into the room.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
   },
   "create a room": {
     headline: "Open your own room.",
-    body: "Creator members can open rooms and invite collaborators. It only takes a moment.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
   },
   "drop a hook": {
     headline: "Send a signal into the world.",
-    body: "Dropping hooks is for creator members. Join to share your idea and find who hears it.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
   },
   "join a hook": {
     headline: "Answer the call.",
-    body: "Joining hooks is for creator members. Step inside to collaborate on this idea.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
+  },
+  "join voice": {
+    headline: "Step into the space.",
+    body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
   },
 };
 
 const DEFAULT = {
-  headline: "Join the creative space.",
-  body: "Creator membership unlocks chat, recording, uploads, and collaboration. Anyone can listen — creators participate.",
+  headline: "Become a Creator Member",
+  body: "Share your ideas.\nJoin the room.\nCreate from the heart.",
 };
 
 export function CreatorUpgradePrompt({ open, onClose, reason = "", onActivate, activating }: Props) {
@@ -48,25 +59,25 @@ export function CreatorUpgradePrompt({ open, onClose, reason = "", onActivate, a
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: "rgba(5,3,10,0.75)", backdropFilter: "blur(16px)" }}
+      style={{ background: "rgba(5,3,10,0.82)", backdropFilter: "blur(20px)" }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-[420px] rounded-3xl overflow-hidden"
+        className="relative w-full max-w-[360px] rounded-3xl overflow-hidden flex flex-col"
         style={{
-          background: "linear-gradient(160deg, #0f0b1a 0%, #0a0714 100%)",
-          border: "1px solid rgba(212,163,65,0.18)",
-          boxShadow: "0 40px 80px -8px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,163,65,0.06) inset",
-          animation: "promptIn 0.24s cubic-bezier(0.16,1,0.3,1) both",
+          background: "linear-gradient(168deg, #100c1c 0%, #09070e 100%)",
+          border: "1px solid rgba(212,163,65,0.15)",
+          boxShadow: "0 40px 80px -8px rgba(0,0,0,0.85)",
+          animation: "promptIn 0.22s cubic-bezier(0.16,1,0.3,1) both",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Ambient glow */}
+        {/* Ambient top glow */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-40 pointer-events-none"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-36 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse, rgba(212,163,65,0.14) 0%, transparent 70%)",
-            filter: "blur(24px)",
+            background: "radial-gradient(ellipse, rgba(212,163,65,0.12) 0%, transparent 70%)",
+            filter: "blur(20px)",
           }}
         />
 
@@ -74,74 +85,102 @@ export function CreatorUpgradePrompt({ open, onClose, reason = "", onActivate, a
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-          style={{ color: "rgba(255,255,255,0.3)" }}
+          className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10 z-10"
+          style={{ color: "rgba(255,255,255,0.25)" }}
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
 
-        <div className="relative px-8 py-11 text-center">
-          {/* Icon */}
+        <div className="relative px-7 pt-9 pb-7">
+          {/* Lock icon */}
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-7"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-6"
             style={{
               background: "rgba(212,163,65,0.08)",
-              border: "1px solid rgba(212,163,65,0.22)",
+              border: "1px solid rgba(212,163,65,0.18)",
             }}
           >
-            <Sparkles className="w-7 h-7" style={{ color: "#d4a341" }} />
+            <Lock className="w-5 h-5" style={{ color: "rgba(212,163,65,0.7)" }} />
           </div>
 
-          <p
-            className="text-[10px] font-semibold tracking-[0.22em] uppercase mb-4"
-            style={{ color: "rgba(212,163,65,0.5)" }}
-          >
-            Creator Membership
-          </p>
-
+          {/* Headline */}
           <h2
-            className="font-serif text-[1.55rem] tracking-tight mb-4 leading-tight"
-            style={{ color: "rgba(255,255,255,0.92)" }}
+            className="font-serif text-center leading-tight mb-4"
+            style={{ fontSize: "1.4rem", color: "rgba(255,255,255,0.9)" }}
           >
             {copy.headline}
           </h2>
 
-          <p
-            className="text-[13.5px] leading-relaxed mb-9 max-w-[300px] mx-auto"
-            style={{ color: "rgba(255,255,255,0.4)" }}
-          >
-            {copy.body}
-          </p>
+          {/* Body — line-break aware */}
+          <div className="text-center mb-6">
+            {copy.body.split("\n").map((line, i) => (
+              <p key={i} className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+                {line}
+              </p>
+            ))}
+          </div>
 
+          {/* Feature checklist */}
+          <div
+            className="rounded-2xl px-5 py-4 mb-6 space-y-2.5"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            {FEATURE_LIST.map((feat) => (
+              <div key={feat} className="flex items-center gap-3">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(212,163,65,0.12)", border: "1px solid rgba(212,163,65,0.22)" }}
+                >
+                  <Check className="w-2.5 h-2.5" style={{ color: "#d4a341" }} />
+                </div>
+                <span className="text-[12.5px] font-light" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  {feat}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Primary CTA */}
           <button
             type="button"
             onClick={onActivate}
             disabled={activating}
-            className="w-full h-13 rounded-2xl text-[14px] font-semibold transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-2xl text-[13.5px] font-semibold transition-all hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
-              height: 52,
+              height: 50,
               background: activating
                 ? "rgba(212,163,65,0.3)"
                 : "linear-gradient(135deg, #e0b050, #c89030)",
               color: "#1a0f00",
-              boxShadow: activating ? "none" : "0 0 32px -8px rgba(212,163,65,0.55)",
+              boxShadow: activating ? "none" : "0 0 28px -6px rgba(212,163,65,0.5)",
             }}
           >
-            {activating ? "Joining…" : "Become a Creator Member"}
+            {activating ? "Joining…" : "Become a Creator"}
           </button>
 
-          <p
-            className="text-[11px] mt-5 leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.16)" }}
+          {/* Secondary dismiss */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full mt-3 py-2 text-[12px] font-light transition-colors hover:text-white/40"
+            style={{ color: "rgba(255,255,255,0.22)" }}
           >
-            Free during early access. No card required.
+            Maybe later
+          </button>
+
+          {/* Quiet micro-moment */}
+          <p
+            className="text-center text-[11px] font-light italic mt-5"
+            style={{ color: "rgba(212,163,65,0.22)" }}
+          >
+            Heartfelt creations only.
           </p>
         </div>
       </div>
 
       <style>{`
         @keyframes promptIn {
-          from { opacity: 0; transform: translateY(16px) scale(0.96); }
+          from { opacity: 0; transform: translateY(14px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
