@@ -343,18 +343,6 @@ export function LandingPage() {
             </Link>
           </div>
 
-          {/* Cinematic whisper */}
-          <p
-            className="text-[11px] font-light tracking-[0.1em] mt-12"
-            style={{
-              color: "rgba(255,255,255,0.18)",
-              animation: "pageIn 0.6s ease both",
-              animationDelay: "420ms",
-              fontStyle: "italic",
-            }}
-          >
-            Quiet rooms are already forming.
-          </p>
         </div>
       </section>
 
