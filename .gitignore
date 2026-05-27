@@ -47,3 +47,16 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Environment & secrets — never commit these
+.env
+.env.local
+.env.*.local
+*.pem
+
+# User-uploaded media (local dev storage)
+artifacts/api-server/uploads/
+
+# Logs
+*.log
+logs/

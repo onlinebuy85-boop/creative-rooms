@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useUser } from "@clerk/react";
-import heroImg from "@assets/ChatGPT_Image_26_maj_2026_11_33_28_1779820980322.png";
+import heroImg from "../assets/images/hero.png";
 import logoImg from "../assets/images/creative-rooms-logo-v4.png";
 
 /* ── More particles for a denser atmospheric field ── */
