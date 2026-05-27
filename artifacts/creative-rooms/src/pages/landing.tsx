@@ -42,6 +42,7 @@ export function LandingPage() {
   const manifestoRef = useFadeIn(0.06);
   const featRef      = useFadeIn(0.08);
   const quoteRef     = useFadeIn(0.08);
+  const lennonRef    = useFadeIn(0.04);
   const footRef      = useFadeIn(0.05);
 
   return (
@@ -599,6 +600,52 @@ export function LandingPage() {
             </div>
           </div>
         </section>
+      </div>
+
+      {/* ── LENNON QUOTE ── discovered, not announced ── */}
+      <div ref={lennonRef.ref}>
+        <div
+          className="relative z-10 flex flex-col items-center px-5 py-16 md:py-20"
+          style={{
+            opacity:    lennonRef.visible ? 1 : 0,
+            transition: "opacity 2s ease",
+          }}
+        >
+          {/* Tiny waveform — muted gold, no motion */}
+          <div className="flex items-end gap-[2.5px] mb-7" style={{ height: 12 }}>
+            {[4, 7, 5, 10, 7, 12, 8, 10, 6, 8, 4, 7, 5].map((h, i) => (
+              <div
+                key={i}
+                className="rounded-full"
+                style={{
+                  width: 1.5,
+                  height: h,
+                  background: "rgba(212,163,65,0.22)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* The quote */}
+          <blockquote className="text-center max-w-[380px]">
+            <p
+              className="font-serif font-normal leading-[1.65] tracking-wide"
+              style={{
+                fontSize: "clamp(0.82rem, 1.6vw, 0.95rem)",
+                color: "rgba(255, 240, 200, 0.42)",
+                fontStyle: "italic",
+              }}
+            >
+              "Music is everybody's possession."
+            </p>
+            <footer
+              className="mt-4 text-[10.5px] tracking-[0.14em] uppercase"
+              style={{ color: "rgba(255,255,255,0.18)" }}
+            >
+              — John Lennon
+            </footer>
+          </blockquote>
+        </div>
       </div>
 
       {/* ── CLOSING LINE ── */}
