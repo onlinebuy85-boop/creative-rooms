@@ -40,7 +40,7 @@ export function RoomHero() {
   const room = MOCK_ROOM;
 
   return (
-    <section className="cr-room-hero-section space-y-4">
+    <section className="cr-room-hero-section">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h1 className="font-serif text-2xl md:text-[1.75rem] text-foreground/95 tracking-tight">

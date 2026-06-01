@@ -10,10 +10,25 @@ import { RoomSettingsBar } from "@/components/rooms/room-settings-bar";
 import { RoomChat } from "@/components/rooms/room-chat";
 import { MessageCircle, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MOCK_ROOM } from "@/lib/room-mock-data";
+
+function RoomStudioAmbient() {
+  return (
+    <div className="cr-room-studio-ambient" aria-hidden>
+      <img
+        src={MOCK_ROOM.heroImage}
+        alt=""
+        className="cr-room-studio-ambient-img"
+        style={{ objectPosition: MOCK_ROOM.heroObjectPosition }}
+      />
+      <div className="cr-room-studio-ambient-scrim" />
+    </div>
+  );
+}
 
 function RoomStudioCenter() {
   return (
-    <div className="cr-room-studio-center w-full max-w-[var(--center-content-max)] space-y-5 pb-6">
+    <div className="cr-room-studio-center w-full max-w-[var(--center-content-max)] pb-4">
       <RoomHero />
       <RoomControls />
       <RoomTrack />
@@ -28,11 +43,13 @@ export function RoomStudioPage() {
 
   return (
     <div className="cr-room-studio-root min-h-[100dvh] bg-background relative">
+      <RoomStudioAmbient />
       <div className="bg-noise" />
 
       {/* Desktop */}
-      <div className="hidden lg:block min-h-[100dvh]">
+      <div className="hidden lg:block min-h-[100dvh] relative z-[1]">
         <AppShell
+          className="cr-room-studio-frame"
           sidebar={<SidebarNav />}
           rail={<RoomChat />}
         >
@@ -41,8 +58,12 @@ export function RoomStudioPage() {
       </div>
 
       {/* Tablet: center + collapsible chat via tabs */}
-      <div className="hidden md:block lg:hidden min-h-[100dvh]">
-        <AppShell sidebar={<SidebarNav />} rail={mobilePanel === "chat" ? <RoomChat /> : null}>
+      <div className="hidden md:block lg:hidden min-h-[100dvh] relative z-[1]">
+        <AppShell
+          className="cr-room-studio-frame"
+          sidebar={<SidebarNav />}
+          rail={mobilePanel === "chat" ? <RoomChat /> : null}
+        >
           <div className="w-full">
             <div className="flex gap-2 mb-4">
               <button

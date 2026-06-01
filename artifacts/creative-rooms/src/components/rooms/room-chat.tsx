@@ -32,7 +32,7 @@ export function RoomChat() {
       </div>
 
       <ScrollArea className="flex-1 min-h-0">
-        <div className="px-1 py-3 space-y-3">
+        <div className="cr-room-chat-messages px-1 py-3">
           {tab === "chat" ? (
             MOCK_CHAT.map((msg) =>
               msg.system ? (

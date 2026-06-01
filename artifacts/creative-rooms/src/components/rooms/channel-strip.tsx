@@ -44,6 +44,11 @@ export function ChannelStrip({ channel }: ChannelStripProps) {
   return (
     <div className={cn("cr-channel-strip", channel.isYou && "cr-channel-strip--you")}>
       <div className="cr-channel-header">
+        <span className="cr-channel-signal-leds" aria-hidden>
+          <span className={cn("cr-amber-led", channel.inputActive && "cr-amber-led--on")} />
+          <span className={cn("cr-amber-led", channel.level > 50 && "cr-amber-led--on")} />
+          <span className={cn("cr-amber-led", channel.level > 72 && "cr-amber-led--pulse")} />
+        </span>
         <span className={cn("cr-input-led", channel.inputActive && "cr-input-led--on")} />
         <div className="min-w-0 text-center">
           <p className="cr-channel-name">{channel.label}</p>

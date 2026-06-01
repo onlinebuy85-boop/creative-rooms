@@ -46,7 +46,7 @@ export function AnalogMixer() {
       <div className="cr-analog-mixer-grain" aria-hidden />
       <div className="cr-analog-mixer-inner">
         <div className="cr-mixer-col cr-mixer-col--inputs">
-          <p className="cr-mixer-section-label">Inputs</p>
+          <p className="cr-mixer-section-label cr-mixer-label-engraved">Inputs</p>
           <div className="cr-channel-row">
             {MOCK_CHANNELS.map((ch) => (
               <ChannelStrip key={ch.id} channel={ch} />
@@ -59,7 +59,7 @@ export function AnalogMixer() {
         </div>
 
         <div className="cr-mixer-col cr-mixer-col--master">
-          <p className="cr-mixer-section-label">Master</p>
+          <p className="cr-mixer-section-label cr-mixer-label-engraved">Master</p>
           <div className="cr-master-panel">
             <MasterKnob label="Analog warmth" value={72} on />
             <MasterKnob label="Reverb" value={45} />

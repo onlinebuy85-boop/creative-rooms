@@ -19,7 +19,14 @@ export function RoomVibe() {
 
       <div className="cr-room-freq-viz" aria-hidden>
         {freqBars.map((h, i) => (
-          <span key={i} style={{ height: `${h * 0.35}%`, opacity: 0.5 + (h / 100) * 0.5 }} />
+          <span
+            key={i}
+            style={{
+              height: `${h * 0.35}%`,
+              opacity: 0.45 + (h / 100) * 0.45,
+              background: `hsl(12 45% ${42 + (h / 100) * 18}%)`,
+            }}
+          />
         ))}
       </div>
 
