@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DemoDropzone } from "@/components/demo-dropzone";
+import { RoomDawTimeline } from "@/components/rooms/room-daw-timeline";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
@@ -26,7 +27,7 @@ import {
   MoreHorizontal, Plus, Send, Loader2,
   Crown, CloudUpload, RefreshCw, CheckCircle, AlertCircle, X,
 } from "lucide-react";
-import logoImg from "../assets/images/creative-rooms-logo-v4.png";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 /* ── Helpers ── */
 function moodColor(vibe = "", genres: string[] = []): string {
@@ -187,13 +188,7 @@ function DemoRow({
   }, [isPlaying]);
 
   return (
-    <div
-      className="group flex items-center gap-3 px-4 py-3 rounded-2xl transition-all"
-      style={{
-        background: isPlaying ? "rgba(212,163,65,0.06)" : "rgba(255,255,255,0.025)",
-        border: `1px solid ${isPlaying ? "rgba(212,163,65,0.2)" : "rgba(255,255,255,0.06)"}`,
-      }}
-    >
+    <div className={isPlaying ? "cr-track-row cr-track-row-active" : "cr-track-row"}>
       {/* Play button */}
       <button
         type="button"
@@ -1015,27 +1010,13 @@ export function RoomPage() {
     {/* ══════════════════════════════════════════
         DESKTOP LAYOUT  (hidden below md)
     ══════════════════════════════════════════ */}
-    <div className="hidden md:flex h-[100dvh] overflow-hidden" style={{ background: "#0b0910" }}>
+    <div className="hidden md:flex cr-room-app-frame">
 
       {/* ═══════ LEFT SIDEBAR ═══════ */}
-      <aside
-        className="w-[210px] flex flex-col shrink-0 overflow-y-auto"
-        style={{ background: "#09070e", borderRight: "1px solid rgba(255,255,255,0.06)" }}
-      >
+      <aside className="cr-app-sidebar">
         {/* Logo */}
         <div className="px-5 pt-5 pb-4">
-          <Link href="/discover">
-            <img
-              src={logoImg}
-              alt="Creative Room"
-              style={{
-                height: 28,
-                width: "auto",
-                objectFit: "contain",
-                filter: "brightness(1.12) drop-shadow(0 0 10px rgba(212,163,65,0.32))",
-              }}
-            />
-          </Link>
+          <BrandLogo variant="icon" size="sidebar" href="/discover" className="cr-brand-logo--glow" />
         </div>
 
         {/* Nav */}
@@ -1120,7 +1101,7 @@ export function RoomPage() {
         enabled={!!isMember}
         onUpload={handleDemoUploaded}
         fileInputRef={browseRef}
-        className="flex-1 flex flex-col min-w-0 min-h-0"
+        className="min-w-0 min-h-0 flex flex-col overflow-hidden border-r border-border/25"
       >
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
 
@@ -1315,25 +1296,34 @@ export function RoomPage() {
 
             {/* ── Demo list ── */}
             {demos && demos.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: "rgba(255,255,255,0.32)" }}>
-                    Room Demos
-                    <span className="ml-2 font-normal normal-case" style={{ color: "rgba(255,255,255,0.2)" }}>
-                      {demos.length}
-                    </span>
-                  </h2>
+              <div className="space-y-4">
+                <div className="cr-room-panel">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                      Tracks
+                      <span className="ml-2 font-normal normal-case text-muted-foreground/60">
+                        {demos.length}
+                      </span>
+                    </h2>
+                  </div>
+                  <div className="space-y-2">
+                    {demos.map((demo) => (
+                      <DemoRow
+                        key={demo.id}
+                        demo={demo}
+                        isPlaying={playingId === demo.id}
+                        onPlayToggle={() => handlePlayToggle(demo.id)}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {demos.map((demo) => (
-                    <DemoRow
-                      key={demo.id}
-                      demo={demo}
-                      isPlaying={playingId === demo.id}
-                      onPlayToggle={() => handlePlayToggle(demo.id)}
-                    />
-                  ))}
-                </div>
+                <RoomDawTimeline
+                  tracks={demos.map((d) => ({
+                    id: d.id,
+                    title: d.title,
+                    uploaderName: d.uploaderName,
+                  }))}
+                />
               </div>
             )}
 
@@ -1349,14 +1339,7 @@ export function RoomPage() {
           </div>
 
           {/* ── Action bar ── */}
-          <div
-            className="shrink-0 px-8 py-4 flex items-center justify-around"
-            style={{
-              borderTop: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(9,7,14,0.85)",
-              backdropFilter: "blur(10px)",
-            }}
-          >
+          <div className="cr-playback-bar justify-around">
             {/* Voice Chat */}
             <ActionBtn
               icon={isInVoice ? (isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />) : <Mic className="w-5 h-5" />}
@@ -1434,10 +1417,7 @@ export function RoomPage() {
       </DemoDropzone>
 
       {/* ═══════ RIGHT SIDEBAR ═══════ */}
-      <aside
-        className="w-[268px] flex flex-col shrink-0"
-        style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}
-      >
+      <aside className="cr-app-rail !p-0 flex flex-col overflow-hidden">
 
         {/* People section */}
         <div className="flex flex-col" style={{ height: "44%" }}>

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useGetMyProfile, useCreateProfile } from "@workspace/api-client-react";
 import { useUser } from "@clerk/react";
 import { ArrowRight, Loader2, Check } from "lucide-react";
-import logoImg from "../assets/images/creative-rooms-logo-v4.png";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 /* ── Step definitions ──────────────────────────────────────── */
 const STEPS = [
@@ -185,16 +185,7 @@ export function ProfileSetupPage() {
 
       {/* ── BRAND ── */}
       <div className="w-full flex justify-center pt-8 relative z-10">
-        <img
-          src={logoImg}
-          alt="Creative Room"
-          style={{
-            height: 28,
-            width: "auto",
-            objectFit: "contain",
-            filter: "brightness(1.1) drop-shadow(0 0 10px rgba(212,163,65,0.3))",
-          }}
-        />
+        <BrandLogo variant="full" size="nav" className="cr-brand-logo--glow" />
       </div>
 
       {/* ── STEP CONTENT ── */}

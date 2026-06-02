@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import logoImg from "../assets/images/creative-rooms-logo-v4.png";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 /* ── Floating dust particles ── */
 const PARTICLES = [
@@ -173,27 +173,7 @@ export function AboutPage() {
         className="relative z-10 flex items-center justify-between px-6 md:px-10 pt-6 max-w-[960px] mx-auto"
         style={{ animation: "pageIn 0.6s ease both" }}
       >
-        <Link href="/">
-          <img
-            src={logoImg}
-            alt="Creative Room"
-            style={{
-              height: "clamp(32px, 7vw, 44px)",
-              width: "auto",
-              objectFit: "contain",
-              filter: "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))",
-              transition: "filter 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLImageElement).style.filter =
-                "brightness(1.2) drop-shadow(0 0 18px rgba(212,163,65,0.5))";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLImageElement).style.filter =
-                "brightness(1.1) drop-shadow(0 0 12px rgba(212,163,65,0.35))";
-            }}
-          />
-        </Link>
+        <BrandLogo variant="full" size="auth" href="/" className="cr-brand-logo--glow" />
         <div className="flex items-center gap-5">
           <Link href="/discover">
             <span

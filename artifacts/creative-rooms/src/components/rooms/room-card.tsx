@@ -1,13 +1,46 @@
 import { Link, useLocation } from "wouter";
 import { Room } from "@workspace/api-client-react";
 import { RoomManageMenu } from "./room-manage-menu";
+import heroCover from "@/assets/images/hero.png";
+import { DEMO_ROOM_COVER_POSITIONS, DEMO_ROOM_VISUALS } from "@/lib/discover-demo-data";
+import type { RoomOverviewItem } from "@/lib/rooms-demo-data";
+import { Users, Music2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface RoomCardProps {
+interface RoomCardBaseProps {
   room: Room;
   index?: number;
   currentProfileId?: number;
   liveCount?: number;
 }
+
+interface RoomCardDefaultProps extends RoomCardBaseProps {
+  variant?: "default";
+  /** Denser card for 4-column home grid */
+  compact?: boolean;
+  /** Offline discover preview — no navigation */
+  demo?: boolean;
+  overview?: never;
+}
+
+interface RoomCardOverviewProps extends RoomCardBaseProps {
+  variant: "overview";
+  overview: RoomOverviewItem;
+  compact?: never;
+  demo?: never;
+}
+
+type RoomCardProps = RoomCardDefaultProps | RoomCardOverviewProps;
+
+const STATUS_CLASS: Record<RoomOverviewItem["status"], string> = {
+  live: "cr-room-status--live",
+  just_started: "cr-room-status--started",
+  looking_vocals: "cr-room-status--looking",
+  looking_guitar: "cr-room-status--looking",
+  in_progress: "cr-room-status--progress",
+};
+
+const AVATAR_COLORS_OVERVIEW = ["#7c4a1e", "#1e3a5f", "#4a1d6e", "#7f1d1d", "#14532d", "#1a3a2a"];
 
 const PALETTES = [
   { from: "#0d1520", to: "#1a2840", accent: "60,165,250",   glow: "rgba(60,165,250,0.18)" },
@@ -60,7 +93,19 @@ function CardWaveform({ accent, active }: { accent: string; active: boolean }) {
   );
 }
 
-export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomCardProps) {
+export function RoomCard(props: RoomCardProps) {
+  const {
+    room,
+    index = 0,
+    currentProfileId,
+    liveCount,
+  } = props;
+
+  if (props.variant === "overview") {
+    return <RoomOverviewCard room={room} index={index} overview={props.overview} />;
+  }
+
+  const { compact, demo = false } = props;
   const [, setLocation] = useLocation();
   const palette = PALETTES[index % PALETTES.length];
   const spotsLeft = (room.maxMembers || 4) - (room.memberCount || 0);
@@ -74,18 +119,29 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
   /* Genre tags — up to 3, shown as minimal editorial pills */
   const genreTags = (room.genres ?? []).slice(0, 3);
 
-  return (
-    <Link href={`/rooms/${room.id}`}>
+  const demoVisual = demo ? DEMO_ROOM_VISUALS[room.id] : undefined;
+  const coverSrc =
+    compact && demo && demoVisual
+      ? demoVisual.cover
+      : (room.coverImageUrl ?? (compact && demo ? heroCover : undefined));
+  const coverPosition =
+    demoVisual?.objectPosition ??
+    DEMO_ROOM_COVER_POSITIONS[index % DEMO_ROOM_COVER_POSITIONS.length];
+  const coverFilter = demoVisual?.coverFilter;
+  const coverScale = demoVisual?.coverScale ?? 1.08;
+  const hasCover = !!coverSrc;
+
+  const cardInner = (
       <div
-        className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500"
+        className={`group relative overflow-hidden transition-all duration-500 rounded-2xl border border-border/40 shadow-lg hover:shadow-xl hover:border-primary/20 ${
+          demo ? "cursor-default" : "cursor-pointer"
+        } cr-room-card-inner${demoVisual ? ` ${demoVisual.variantClass}` : ""}`}
         style={{
-          aspectRatio: "4/3",
-          border: isLive
-            ? "1px solid rgba(255,255,255,0.10)"
-            : "1px solid rgba(255,255,255,0.06)",
-          boxShadow: isLive
-            ? `0 4px 32px rgba(0,0,0,0.5), 0 0 0 1px ${palette.glow}`
-            : "0 4px 24px rgba(0,0,0,0.45)",
+          aspectRatio: compact ? undefined : "4/3",
+          minHeight: compact ? undefined : undefined,
+          height: compact ? "100%" : undefined,
+          borderRadius: compact ? "1.25rem" : "var(--radius-card-lg)",
+          boxShadow: isLive ? `var(--shadow-lg), 0 0 0 1px ${palette.glow}` : undefined,
           transform: "translateZ(0)",
         }}
         onMouseEnter={(e) => {
@@ -99,12 +155,17 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
             : "0 4px 24px rgba(0,0,0,0.45)";
         }}
       >
-        {/* Background */}
-        {room.coverImageUrl ? (
+        {/* Background — photo-first on discover grid */}
+        {hasCover ? (
           <img
-            src={room.coverImageUrl}
+            src={coverSrc}
             alt={room.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            className="cr-room-card-cover"
+            style={{
+              objectPosition: coverPosition,
+              ...(coverFilter ? { filter: coverFilter } : {}),
+              transform: `scale(${coverScale})`,
+            }}
           />
         ) : (
           <div
@@ -114,7 +175,22 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
         )}
 
         {/* Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/25 to-black/12" />
+        <div
+          className={`absolute inset-0 ${
+            hasCover
+              ? "bg-gradient-to-t from-black via-black/70 to-black/25"
+              : "bg-gradient-to-t from-black/92 via-black/25 to-black/12"
+          }`}
+        />
+        {hasCover && (
+          <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+        )}
+        {demoVisual && (
+          <div
+            className={`absolute inset-0 pointer-events-none ${demoVisual.tintClass}`}
+            aria-hidden
+          />
+        )}
 
         {/* Resting ambient glow */}
         <div
@@ -200,7 +276,7 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
         )}
 
         {/* Card body */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2.5">
+        <div className={`absolute bottom-0 left-0 right-0 flex flex-col gap-2 ${compact ? "p-3" : "p-4 gap-2.5"}`}>
 
           {/* Room name */}
           <h3
@@ -210,8 +286,8 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
             {room.name}
           </h3>
 
-          {/* Genre tags — real data only, no invented copy */}
-          {genreTags.length > 0 && (
+          {/* Genre tags — hidden on compact discover grid (reference uses title + avatars only) */}
+          {!compact && genreTags.length > 0 && (
             <div className="flex items-center gap-1.5 flex-wrap">
               {genreTags.map((g) => (
                 <span
@@ -229,9 +305,8 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
           <div className="flex items-center justify-between">
 
             {isLive ? (
-              /* Real presence — actual people are here */
-              <div className="flex items-center gap-2.5">
-                <div className="flex -space-x-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex -space-x-2 shrink-0">
                   {Array.from({ length: Math.min(realCount, 4) }).map((_, i) => (
                     <div
                       key={i}
@@ -243,9 +318,16 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
                     />
                   ))}
                 </div>
-                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.42)" }}>
-                  {realCount === 1 ? "1 creating" : `${realCount} creating`}
-                </span>
+                {compact ? (
+                  <span className="cr-room-capacity">
+                    <span className="cr-room-capacity-dot" />
+                    {room.memberCount}/{room.maxMembers}
+                  </span>
+                ) : (
+                  <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.42)" }}>
+                    {realCount === 1 ? "1 creating" : `${realCount} creating`}
+                  </span>
+                )}
               </div>
             ) : (
               /* Empty — atmospheric state, never fake metrics */
@@ -276,6 +358,80 @@ export function RoomCard({ room, index = 0, currentProfileId, liveCount }: RoomC
               <CardWaveform accent={palette.accent} active={isLive} />
             </div>
           </div>
+        </div>
+      </div>
+  );
+
+  if (demo) {
+    return cardInner;
+  }
+
+  return <Link href={`/rooms/${room.id}`}>{cardInner}</Link>;
+}
+
+function RoomOverviewCard({
+  room,
+  index,
+  overview,
+}: {
+  room: Room;
+  index: number;
+  overview: RoomOverviewItem;
+}) {
+  const demoVisual = DEMO_ROOM_VISUALS[room.id];
+  const coverSrc =
+    demoVisual?.cover ?? room.coverImageUrl ?? heroCover;
+  const coverPosition =
+    demoVisual?.objectPosition ??
+    DEMO_ROOM_COVER_POSITIONS[index % DEMO_ROOM_COVER_POSITIONS.length];
+
+  return (
+    <Link href={overview.href} className="cr-room-overview-card group block h-full">
+      <div className="cr-room-overview-cover-wrap">
+        <img
+          src={coverSrc}
+          alt=""
+          className="cr-room-overview-cover"
+          style={{ objectPosition: coverPosition }}
+        />
+        <div className="cr-room-overview-cover-gradient" aria-hidden />
+        <div className="cr-room-overview-cover-vignette" aria-hidden />
+        <span className={cn("cr-room-status", STATUS_CLASS[overview.status])}>
+          {overview.status === "live" && (
+            <span className="cr-room-status-pulse" aria-hidden />
+          )}
+          {overview.statusLabel}
+        </span>
+        <span className="cr-room-overview-count">
+          <Users className="w-3.5 h-3.5" strokeWidth={1.75} />
+          {overview.peopleCount}
+        </span>
+      </div>
+
+      <div className="cr-room-overview-body">
+        <h3 className="cr-room-overview-title">{room.name}</h3>
+        <p className="cr-room-overview-space-meta">
+          <Music2 className="cr-room-overview-space-icon" strokeWidth={1.75} aria-hidden />
+          <span>{overview.spaceGenre}</span>
+          <span className="cr-room-overview-meta-dot" aria-hidden>·</span>
+          <span>{overview.spaceMood}</span>
+          <span className="cr-room-overview-meta-dot" aria-hidden>·</span>
+          <span>{overview.spaceGoal}</span>
+        </p>
+        <p className="cr-room-overview-desc">{overview.description}</p>
+        <div className="cr-room-overview-footer">
+          <div className="cr-room-overview-avatars">
+            {overview.avatarInitials.slice(0, 4).map((initial, i) => (
+              <span
+                key={i}
+                className="cr-room-overview-avatar"
+                style={{ background: AVATAR_COLORS_OVERVIEW[i % AVATAR_COLORS_OVERVIEW.length] }}
+              >
+                {initial}
+              </span>
+            ))}
+          </div>
+          <span className="cr-room-overview-join">Join room</span>
         </div>
       </div>
     </Link>

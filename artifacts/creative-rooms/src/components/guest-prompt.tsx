@@ -103,7 +103,7 @@ export function GuestSignupPrompt({ open, onClose, reason = "" }: Props) {
           </p>
 
           <div className="flex flex-col gap-2.5">
-            <Link href="/sign-up">
+            <Link href="/signup">
               <button
                 type="button"
                 onClick={onClose}
@@ -118,7 +118,7 @@ export function GuestSignupPrompt({ open, onClose, reason = "" }: Props) {
               </button>
             </Link>
 
-            <Link href="/sign-in">
+            <Link href="/login">
               <button
                 type="button"
                 onClick={onClose}

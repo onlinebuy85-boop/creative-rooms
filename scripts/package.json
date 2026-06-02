@@ -5,10 +5,19 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:supabase:migrate": "tsx ./src/apply-supabase-migrations.ts",
+    "verify:supabase-env": "tsx ./src/verify-supabase-env.ts",
+    "generate:brand": "tsx ./src/generate-brand-assets.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "^8.20.0",
+    "sharp": "^0.34.5",
     "tsx": "catalog:"
   }
 }

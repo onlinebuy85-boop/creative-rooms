@@ -10,16 +10,20 @@ import { DiscoverPage } from "@/pages/discover";
 import { NewRoomPage } from "@/pages/room-new";
 import { RoomPage } from "@/pages/room-view";
 import { RoomStudioPage } from "@/pages/room-studio";
-import { ProfilePage } from "@/pages/profile-view";
+import { ProfilePage } from "@/pages/profile";
 import { EditProfilePage } from "@/pages/profile-edit";
 import { HooksPage } from "@/pages/hooks";
+import { RoomsPage } from "@/pages/rooms";
+import { MessagesPage } from "@/pages/messages";
+import { NotificationsPage } from "@/pages/notifications";
+import { SettingsPage } from "@/pages/settings";
 import { AboutPage } from "@/pages/about";
+import { LoginPage } from "@/pages/login";
+import { SignupPage } from "@/pages/signup";
+import { ForgotPasswordPage } from "@/pages/forgot-password";
+import { LandingPage } from "@/pages/index";
 import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/layout/app-layout";
-
-function HomeRedirect() {
-  return <Redirect to="/discover" />;
-}
 
 function DevGuestRoute({
   component: Component,
@@ -44,12 +48,15 @@ export function DevAppRoutes() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Switch>
-          <Route path="/" component={HomeRedirect} />
+          <Route path="/" component={LandingPage} />
+          <Route path="/login" component={LoginPage} />
+          <Route path="/signup" component={SignupPage} />
+          <Route path="/forgot-password" component={ForgotPasswordPage} />
           <Route path="/sign-in/*?">
-            <Redirect to="/discover" />
+            <Redirect to="/login" />
           </Route>
           <Route path="/sign-up/*?">
-            <Redirect to="/discover" />
+            <Redirect to="/signup" />
           </Route>
           <Route path="/profile/setup">
             <DevGuestRoute component={ProfileSetupPage} />
@@ -63,12 +70,24 @@ export function DevAppRoutes() {
           <Route path="/hooks">
             <DevGuestRoute component={HooksPage} />
           </Route>
+          <Route path="/messages">
+            <DevGuestRoute component={MessagesPage} />
+          </Route>
+          <Route path="/notifications">
+            <DevGuestRoute component={NotificationsPage} />
+          </Route>
+          <Route path="/settings">
+            <DevGuestRoute component={SettingsPage} />
+          </Route>
           <Route path="/about" component={AboutPage} />
           <Route path="/rooms/new">
             <DevGuestRoute component={NewRoomPage} />
           </Route>
           <Route path="/rooms/demo">
             <RoomStudioPage />
+          </Route>
+          <Route path="/rooms">
+            <DevGuestRoute component={RoomsPage} />
           </Route>
           <Route path="/rooms/:id">
             <DevGuestRoute component={RoomPage} hideLayout />
@@ -77,6 +96,9 @@ export function DevAppRoutes() {
             <DevGuestRoute component={EditProfilePage} />
           </Route>
           <Route path="/profile/:id">
+            <DevGuestRoute component={ProfilePage} />
+          </Route>
+          <Route path="/profile">
             <DevGuestRoute component={ProfilePage} />
           </Route>
           <Route>

@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
 import { useUser } from "@clerk/react";
 import { useListHooks, useGetMyProfile, useActivateCreator, getGetMyProfileQueryKey } from "@workspace/api-client-react";
+import { useSupabaseHooksList } from "@/hooks/use-supabase-hooks-list";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useQueryClient } from "@tanstack/react-query";
 import { HookFeedCard } from "@/components/hooks/hook-feed-card";
 import { HooksToolbar } from "@/components/hooks/hooks-toolbar";
-import { HooksAppShell } from "@/components/hooks/hooks-app-shell";
+import { PageShell } from "@/components/layout/page-shell";
+import { HooksRail } from "@/components/hooks/hooks-rail";
+import { HooksPlayer } from "@/components/hooks/hooks-player";
 import { DropHookModal } from "@/components/hooks/drop-hook-modal";
 import { GuestSignupPrompt } from "@/components/guest-prompt";
 import { CreatorUpgradePrompt } from "@/components/creator-upgrade-prompt";
@@ -20,7 +24,18 @@ import { Radio, Loader2 } from "lucide-react";
 export function HooksPage() {
   const { isSignedIn } = useUser();
   const queryClient = useQueryClient();
-  const { data: hooks, isLoading } = useListHooks();
+  const { data: apiHooks, isLoading: apiHooksLoading } = useListHooks();
+  const supabaseOn = isSupabaseConfigured();
+  const { data: sbHooks, isLoading: sbHooksLoading } = useSupabaseHooksList();
+
+  const hooks = useMemo(() => {
+    if (apiHooks?.length) return apiHooks;
+    if (supabaseOn && sbHooks?.length) return sbHooks;
+    return apiHooks;
+  }, [apiHooks, sbHooks, supabaseOn]);
+
+  const isLoading =
+    apiHooksLoading || (supabaseOn && sbHooksLoading && !apiHooks?.length);
   const { data: myProfile } = useGetMyProfile({
     query: { queryKey: getGetMyProfileQueryKey(), enabled: isSignedIn === true, retry: false },
   });
@@ -52,7 +67,11 @@ export function HooksPage() {
   };
 
   return (
-    <HooksAppShell activeHook={activeHook}>
+    <PageShell
+      className="cr-page--hooks"
+      rail={<HooksRail />}
+      footer={<HooksPlayer hook={activeHook} />}
+    >
       <div className="cr-hooks-page">
         <HooksToolbar
           search={search}
@@ -116,6 +135,6 @@ export function HooksPage() {
           activating={activateCreator.isPending}
         />
       </div>
-    </HooksAppShell>
+    </PageShell>
   );
 }

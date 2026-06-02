@@ -8,17 +8,23 @@ import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { LandingPage } from "@/pages/index";
 import { SignInPage } from "@/pages/sign-in";
 import { SignUpPage } from "@/pages/sign-up";
+import { ForgotPasswordPage } from "@/pages/forgot-password";
 import { DashboardPage } from "@/pages/dashboard";
 import { ProfileSetupPage } from "@/pages/profile-setup";
 import { DiscoverPage } from "@/pages/discover";
 import { NewRoomPage } from "@/pages/room-new";
 import { RoomPage } from "@/pages/room-view";
 import { RoomStudioPage } from "@/pages/room-studio";
-import { ProfilePage } from "@/pages/profile-view";
+import { ProfilePage } from "@/pages/profile";
 import { EditProfilePage } from "@/pages/profile-edit";
 import { HooksPage } from "@/pages/hooks";
+import { RoomsPage } from "@/pages/rooms";
+import { MessagesPage } from "@/pages/messages";
+import { NotificationsPage } from "@/pages/notifications";
+import { SettingsPage } from "@/pages/settings";
 import { AboutPage } from "@/pages/about";
 import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/layout/app-layout";
@@ -47,7 +53,7 @@ const clerkAppearance = {
   options: {
     logoPlacement: "inside" as const,
     logoLinkUrl: basePath || "/",
-    logoImageUrl: `${window.location.origin}${basePath}/logo.svg`,
+    logoImageUrl: `${window.location.origin}${basePath}/favicon.png`,
   },
   variables: {
     colorPrimary: "hsl(30 65% 53%)",
@@ -90,9 +96,6 @@ const clerkAppearance = {
   },
 };
 
-function HomeRedirect() {
-  return <Redirect to="/discover" />;
-}
 
 function ProtectedRoute({
   component: Component,
@@ -165,8 +168,8 @@ function ProductionApp() {
       publishableKey={clerkPubKey}
       proxyUrl={clerkProxyUrl}
       appearance={clerkAppearance}
-      signInUrl={`${basePath}/sign-in`}
-      signUpUrl={`${basePath}/sign-up`}
+      signInUrl={`${basePath}/login`}
+      signUpUrl={`${basePath}/signup`}
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
@@ -174,16 +177,23 @@ function ProductionApp() {
         <ClerkQueryClientCacheInvalidator />
         <TooltipProvider>
           <Switch>
-            <Route path="/" component={HomeRedirect} />
-            <Route path="/sign-in/*?" component={SignInPage} />
-            <Route path="/sign-up/*?" component={SignUpPage} />
+            <Route path="/" component={LandingPage} />
+            <Route path="/login" component={SignInPage} />
+            <Route path="/signup" component={SignUpPage} />
+            <Route path="/forgot-password" component={ForgotPasswordPage} />
+            <Route path="/sign-in/*?">
+              <Redirect to="/login" />
+            </Route>
+            <Route path="/sign-up/*?">
+              <Redirect to="/signup" />
+            </Route>
 
             <Route path="/profile/setup">
               <Show when="signed-in">
                 <ProfileSetupPage />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <Redirect to="/login" />
               </Show>
             </Route>
 
@@ -192,7 +202,7 @@ function ProductionApp() {
                 <ProtectedRoute component={DashboardPage} />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <Redirect to="/login" />
               </Show>
             </Route>
 
@@ -214,6 +224,33 @@ function ProductionApp() {
               </Show>
             </Route>
 
+            <Route path="/messages">
+              <Show when="signed-in">
+                <ProtectedRoute component={MessagesPage} />
+              </Show>
+              <Show when="signed-out">
+                <GuestRoute component={MessagesPage} />
+              </Show>
+            </Route>
+
+            <Route path="/notifications">
+              <Show when="signed-in">
+                <ProtectedRoute component={NotificationsPage} />
+              </Show>
+              <Show when="signed-out">
+                <GuestRoute component={NotificationsPage} />
+              </Show>
+            </Route>
+
+            <Route path="/settings">
+              <Show when="signed-in">
+                <ProtectedRoute component={SettingsPage} />
+              </Show>
+              <Show when="signed-out">
+                <GuestRoute component={SettingsPage} />
+              </Show>
+            </Route>
+
             <Route path="/about" component={AboutPage} />
 
             <Route path="/rooms/new">
@@ -221,11 +258,20 @@ function ProductionApp() {
                 <ProtectedRoute component={NewRoomPage} />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <Redirect to="/login" />
               </Show>
             </Route>
 
             <Route path="/rooms/demo" component={RoomStudioPage} />
+
+            <Route path="/rooms">
+              <Show when="signed-in">
+                <ProtectedRoute component={RoomsPage} />
+              </Show>
+              <Show when="signed-out">
+                <GuestRoute component={RoomsPage} />
+              </Show>
+            </Route>
 
             <Route path="/rooms/:id">
               <Show when="signed-in">
@@ -241,7 +287,7 @@ function ProductionApp() {
                 <ProtectedRoute component={EditProfilePage} />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <Redirect to="/login" />
               </Show>
             </Route>
 
@@ -250,7 +296,16 @@ function ProductionApp() {
                 <ProtectedRoute component={ProfilePage} />
               </Show>
               <Show when="signed-out">
-                <Redirect to="/sign-in" />
+                <GuestRoute component={ProfilePage} />
+              </Show>
+            </Route>
+
+            <Route path="/profile">
+              <Show when="signed-in">
+                <ProtectedRoute component={ProfilePage} />
+              </Show>
+              <Show when="signed-out">
+                <GuestRoute component={ProfilePage} />
               </Show>
             </Route>
 

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
-import logoImg from "@/assets/images/creative-rooms-logo-v4.png";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import heroImg from "@/assets/images/hero.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,7 +16,6 @@ import {
   Settings,
   LogOut,
   ArrowRight,
-  AudioWaveform,
 } from "lucide-react";
 
 interface NavItemProps {
@@ -51,10 +50,15 @@ export function SidebarNav() {
 
   const isHome = location === "/" || location === "/discover";
   const isRooms =
-    location === "/rooms/demo" ||
+    location === "/rooms" ||
     (location.startsWith("/rooms/") && location !== "/rooms/new");
   const isHooks = location === "/hooks" || location.startsWith("/hooks");
-  const isProfile = location.startsWith("/profile");
+  const isMessages = location === "/messages" || location.startsWith("/messages");
+  const isNotifications =
+    location === "/notifications" || location.startsWith("/notifications");
+  const isSettings = location === "/settings" || location.startsWith("/settings");
+  const pathname = location;
+  const isProfile = pathname.startsWith("/profile");
 
   const handleSignOut = () => {
     signOut({ redirectUrl: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
@@ -63,35 +67,25 @@ export function SidebarNav() {
   return (
     <div className="cr-sidebar-inner">
       <div className="cr-sidebar-brand">
-        <Link href="/discover" className="cr-sidebar-logo group">
-          <AudioWaveform className="cr-sidebar-logo-icon" strokeWidth={1.5} />
-          <img
-            src={logoImg}
-            alt="Creative Room"
-            className="cr-sidebar-logo-img"
-            draggable={false}
-          />
-        </Link>
+        <BrandLogo variant="icon" size="sidebar" href="/discover" className="group" />
       </div>
 
       <nav className="cr-sidebar-nav">
         <NavItem href="/discover" icon={Home} label="Home" active={isHome && !isHooks} />
         <NavItem href="/discover" icon={Compass} label="Discover" active={false} />
-        <NavItem href="/rooms/demo" icon={LayoutGrid} label="Rooms" active={isRooms} />
+        <NavItem href="/rooms" icon={LayoutGrid} label="Rooms" active={isRooms} />
         <NavItem href="/hooks" icon={Radio} label="Hooks" active={isHooks} />
         <NavItem href="/discover" icon={Activity} label="Activity" active={false} />
-        <NavItem href="/discover" icon={MessageCircle} label="Messages" active={false} badge={3} />
-        <NavItem href="/discover" icon={Bell} label="Notifications" active={false} badge={8} />
+        <NavItem href="/messages" icon={MessageCircle} label="Messages" active={isMessages} badge={3} />
+        <NavItem href="/notifications" icon={Bell} label="Notifications" active={isNotifications} badge={6} />
+        <NavItem href="/settings" icon={Settings} label="Settings" active={isSettings} />
         {user && profile && (
-          <>
-            <NavItem
-              href={`/profile/${profile.id}`}
-              icon={User}
-              label="Profile"
-              active={isProfile}
-            />
-            <NavItem href="/profile/edit" icon={Settings} label="Settings" active={location === "/profile/edit"} />
-          </>
+          <NavItem
+            href={`/profile/${profile.id}`}
+            icon={User}
+            label="Profile"
+            active={isProfile}
+          />
         )}
       </nav>
 
@@ -125,7 +119,7 @@ export function SidebarNav() {
               <p className="cr-sidebar-auth-quote">
                 The room is always open. No pressure. Just presence.
               </p>
-              <Link href="/sign-in">
+              <Link href="/login">
                 <button type="button" className="cr-sidebar-auth-btn">
                   Log in / Sign up
                 </button>

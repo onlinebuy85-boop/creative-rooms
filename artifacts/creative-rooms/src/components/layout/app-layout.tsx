@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useClerk, useUser } from "@clerk/react";
 import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
-import logoImg from "../../assets/images/creative-rooms-logo-v4.png";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { AppShell } from "@/components/layout/app-shell";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { UtilityRail } from "@/components/home/utility-rail";
@@ -67,16 +67,42 @@ export function AppLayout({ children, hideRail = false, rail }: AppLayoutProps) 
     query: { enabled: !!user, queryKey: getGetMyProfileQueryKey() },
   });
 
-  const isHome = location === "/discover" || location === "/dashboard" || location === "/";
-  const isHooks = location === "/hooks";
-  const isProfile = location.startsWith("/profile");
+  const pathname = location;
+
+  const isHome = pathname === "/discover" || pathname === "/dashboard";
+  const isHooks = pathname === "/hooks";
+  const isRoomsOverview = pathname === "/rooms";
+  const isMessages = pathname === "/messages";
+  const isNotifications = pathname === "/notifications";
+  const isSettings = pathname.startsWith("/settings");
+  const isProfile = pathname.startsWith("/profile");
+  const isProfileView =
+    pathname === "/profile" ||
+    (pathname.startsWith("/profile/") &&
+      pathname !== "/profile/edit" &&
+      pathname !== "/profile/setup");
+
+  const usesPageShell =
+    isHome ||
+    isHooks ||
+    isRoomsOverview ||
+    isMessages ||
+    isNotifications ||
+    isSettings ||
+    isProfileView;
 
   return (
-    <div className="min-h-[100dvh] bg-background relative w-full max-w-[100vw] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full max-w-full overflow-hidden bg-background relative">
       <div className="bg-noise" />
 
-      <div className={isHooks ? "hidden md:block min-h-[100dvh] cr-hooks-viewport" : "hidden md:block min-h-[100dvh]"}>
-        {isHooks ? (
+      <div
+        className={
+          usesPageShell
+            ? "hidden md:flex md:flex-1 md:min-w-0 md:min-h-0 cr-page-viewport w-full max-w-full overflow-hidden"
+            : "hidden md:flex md:flex-1 md:min-w-0 md:min-h-0 w-full max-w-full overflow-hidden"
+        }
+      >
+        {usesPageShell ? (
           children
         ) : (
           <AppShell
@@ -91,9 +117,7 @@ export function AppLayout({ children, hideRail = false, rail }: AppLayoutProps) 
       {/* Mobile: single column + bottom nav */}
       <div className="md:hidden flex flex-col min-h-[100dvh]">
         <header className="cr-mobile-header">
-          <Link href="/discover">
-            <img src={logoImg} alt="Creative Room" className="h-6 w-auto" />
-          </Link>
+          <BrandLogo variant="icon" size="nav" href="/discover" />
           {user && profile ? (
             <Link href={`/profile/${profile.id}`}>
               <div className="w-8 h-8 rounded-full overflow-hidden border border-border/50">
@@ -107,7 +131,7 @@ export function AppLayout({ children, hideRail = false, rail }: AppLayoutProps) 
               </div>
             </Link>
           ) : (
-            <Link href="/sign-in" className="text-xs text-muted-foreground">
+            <Link href="/login" className="text-xs text-muted-foreground">
               Log in
             </Link>
           )}
@@ -121,7 +145,7 @@ export function AppLayout({ children, hideRail = false, rail }: AppLayoutProps) 
         <nav className="cr-mobile-nav">
           <BottomNavItem href="/discover" icon={Home} label="Home" active={isHome} />
           <BottomNavItem href="/hooks" icon={Radio} label="Hooks" active={isHooks} />
-          <Link href={user ? "/rooms/new" : "/sign-in"}>
+          <Link href={user ? "/rooms/new" : "/login"}>
             <div className="flex flex-col items-center -mt-5">
               <div className="w-12 h-12 rounded-full cr-btn-primary flex items-center justify-center shadow-lg">
                 <Plus className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
@@ -132,7 +156,7 @@ export function AppLayout({ children, hideRail = false, rail }: AppLayoutProps) 
             </div>
           </Link>
           <BottomNavItem
-            href={user && profile ? `/profile/${profile.id}` : "/sign-in"}
+            href={user && profile ? `/profile/${profile.id}` : "/login"}
             icon={UserIcon}
             label="Profile"
             active={isProfile}
