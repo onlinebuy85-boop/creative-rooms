@@ -4,6 +4,11 @@
   "outputDirectory": "dist",
   "installCommand": "cd ../.. && pnpm install",
   "framework": null,
+  "build": {
+    "env": {
+      "BASE_PATH": "/"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
