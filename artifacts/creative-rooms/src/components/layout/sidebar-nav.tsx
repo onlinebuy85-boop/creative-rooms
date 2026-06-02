@@ -16,11 +16,12 @@ import {
   Settings,
   LogOut,
   ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
 
 interface NavItemProps {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   label: string;
   active: boolean;
   badge?: number;

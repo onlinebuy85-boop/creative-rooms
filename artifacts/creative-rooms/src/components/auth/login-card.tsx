@@ -6,15 +6,28 @@ import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AUTH_COPY, type AuthMode } from "@/lib/auth-copy";
 
+type OAuthStrategy = "oauth_apple" | "oauth_google" | "oauth_discord";
+
 interface LoginCardProps {
   mode?: AuthMode;
+}
+
+function clerkErrorMessage(err: unknown): string {
+  if (err && typeof err === "object" && "errors" in err) {
+    const errors = (err as { errors: { message: string }[] }).errors;
+    return errors[0]?.message ?? "Something went wrong. Check your details and try again.";
+  }
+  if (err && typeof err === "object" && "message" in err) {
+    return String((err as { message: string }).message);
+  }
+  return "Something went wrong. Check your details and try again.";
 }
 
 export function LoginCard({ mode = "login" }: LoginCardProps) {
   const copy = AUTH_COPY[mode];
   const [, setLocation] = useLocation();
-  const { signIn, isLoaded: signInLoaded } = useSignIn();
-  const { signUp, isLoaded: signUpLoaded } = useSignUp();
+  const { signIn, fetchStatus: signInFetchStatus } = useSignIn();
+  const { signUp, fetchStatus: signUpFetchStatus } = useSignUp();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,24 +37,25 @@ export function LoginCard({ mode = "login" }: LoginCardProps) {
   const [error, setError] = useState<string | null>(null);
 
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
+  const authReady = signInFetchStatus !== "fetching" && signUpFetchStatus !== "fetching";
 
-  const handleOAuth = async (strategy: "oauth_apple" | "oauth_google" | "oauth_discord") => {
+  const handleOAuth = async (strategy: OAuthStrategy) => {
     if (import.meta.env.DEV) {
       setLocation("/discover");
       return;
     }
-    const auth = mode === "signup" ? signUp : signIn;
-    if (!auth) return;
     setLoading(true);
     setError(null);
     try {
-      await auth.authenticateWithRedirect({
-        strategy,
-        redirectUrl: `${basePath}/login`,
-        redirectUrlComplete: `${basePath}/discover`,
-      });
-    } catch {
-      setError("Could not start social sign-in. Please try again.");
+      const redirectUrl = `${basePath}/login`;
+      const redirectCallbackUrl = `${basePath}/discover`;
+      const { error: oauthError } =
+        mode === "signup"
+          ? await signUp.sso({ strategy, redirectUrl, redirectCallbackUrl })
+          : await signIn.sso({ strategy, redirectUrl, redirectCallbackUrl });
+      if (oauthError) throw oauthError;
+    } catch (err) {
+      setError(clerkErrorMessage(err));
       setLoading(false);
     }
   };
@@ -55,45 +69,48 @@ export function LoginCard({ mode = "login" }: LoginCardProps) {
       return;
     }
 
+    if (!authReady) {
+      setError("Auth is still loading. Please try again.");
+      return;
+    }
+
     setLoading(true);
     try {
       if (mode === "forgot") {
-        if (!signInLoaded || !signIn) throw new Error("Auth not ready");
-        await signIn.create({
-          strategy: "reset_password_email_code",
-          identifier: email,
-        });
-        setError(null);
+        const { error: createError } = await signIn.create({ identifier: email });
+        if (createError) throw createError;
+        const { error: resetError } = await signIn.resetPasswordEmailCode.sendCode();
+        if (resetError) throw resetError;
         setLocation("/login");
         return;
       }
 
       if (mode === "signup") {
-        if (!signUpLoaded || !signUp) throw new Error("Auth not ready");
-        await signUp.create({
+        const { error: createError } = await signUp.create({
           emailAddress: email,
           password,
         });
-        await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+        if (createError) throw createError;
+        if (signUp.status === "complete") {
+          const { error: finalizeError } = await signUp.finalize();
+          if (finalizeError) throw finalizeError;
+        }
         setLocation("/discover");
         return;
       }
 
-      if (!signInLoaded || !signIn) throw new Error("Auth not ready");
-      const result = await signIn.create({
-        identifier: email,
+      const { error: passwordError } = await signIn.password({
+        emailAddress: email,
         password,
       });
-      if (result.status === "complete" && result.createdSessionId) {
-        await signIn.setActive({ session: result.createdSessionId });
+      if (passwordError) throw passwordError;
+      if (signIn.status === "complete") {
+        const { error: finalizeError } = await signIn.finalize();
+        if (finalizeError) throw finalizeError;
         setLocation("/discover");
       }
     } catch (err) {
-      const message =
-        err && typeof err === "object" && "errors" in err
-          ? (err as { errors: { message: string }[] }).errors[0]?.message
-          : "Something went wrong. Check your details and try again.";
-      setError(message ?? "Something went wrong.");
+      setError(clerkErrorMessage(err));
     } finally {
       setLoading(false);
     }

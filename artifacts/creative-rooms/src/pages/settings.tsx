@@ -40,10 +40,10 @@ function buildRoomDefaults(): RoomAudioState {
 export function SettingsPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<SettingsTab>("Audio");
-  const [inputDevice, setInputDevice] = useState(DEFAULT_AUDIO_STATE.inputDevice);
-  const [outputDevice, setOutputDevice] = useState(DEFAULT_AUDIO_STATE.outputDevice);
-  const [sampleRate, setSampleRate] = useState(DEFAULT_AUDIO_STATE.sampleRate);
-  const [bufferSize, setBufferSize] = useState(DEFAULT_AUDIO_STATE.bufferSize);
+  const [inputDevice, setInputDevice] = useState<string>(DEFAULT_AUDIO_STATE.inputDevice);
+  const [outputDevice, setOutputDevice] = useState<string>(DEFAULT_AUDIO_STATE.outputDevice);
+  const [sampleRate, setSampleRate] = useState<string>(DEFAULT_AUDIO_STATE.sampleRate);
+  const [bufferSize, setBufferSize] = useState<string>(DEFAULT_AUDIO_STATE.bufferSize);
   const [inputLevel, setInputLevel] = useState(DEFAULT_AUDIO_STATE.inputLevel);
   const [outputLevel, setOutputLevel] = useState(DEFAULT_AUDIO_STATE.outputLevel);
   const [preferences, setPreferences] = useState<PreferenceState>(buildPreferenceDefaults);

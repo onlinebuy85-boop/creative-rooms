@@ -1,8 +1,8 @@
-import { LayoutGrid, Radio, Activity, User, Sparkles } from "lucide-react";
+import { LayoutGrid, Radio, Activity, User, Sparkles, type LucideIcon } from "lucide-react";
 import { PROFILE_TABS, type ProfileTab } from "@/lib/profile-data";
 import { cn } from "@/lib/utils";
 
-const TAB_ICONS: Record<ProfileTab, React.ComponentType<{ className?: string }>> = {
+const TAB_ICONS: Record<ProfileTab, LucideIcon> = {
   Overview: Sparkles,
   Hooks: Radio,
   Rooms: LayoutGrid,

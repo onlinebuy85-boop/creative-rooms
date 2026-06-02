@@ -8,7 +8,7 @@ export function LandingWaitlist() {
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [creatorType, setCreatorType] = useState(CREATOR_TYPES[0]);
+  const [creatorType, setCreatorType] = useState<string>(CREATOR_TYPES[0]);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,7 +79,7 @@ export function LandingWaitlist() {
                   <select
                     className="cr-landing-select"
                     value={creatorType}
-                    onChange={(e) => setCreatorType(e.target.value as (typeof CREATOR_TYPES)[number])}
+                    onChange={(e) => setCreatorType(e.target.value)}
                   >
                     {CREATOR_TYPES.map((t) => (
                       <option key={t} value={t}>

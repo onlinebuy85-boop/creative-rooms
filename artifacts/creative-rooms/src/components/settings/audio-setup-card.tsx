@@ -1,4 +1,4 @@
-import { ChevronDown, Headphones, Mic, Play } from "lucide-react";
+import { ChevronDown, Headphones, Mic, Play, type LucideIcon } from "lucide-react";
 import {
   BUFFER_SIZES,
   INPUT_DEVICES,
@@ -34,7 +34,7 @@ function DeviceSelect({
 }: {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   value: string;
   options: readonly string[];
   onChange: (v: string) => void;
