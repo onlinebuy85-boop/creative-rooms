@@ -5,9 +5,6 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const configDir = path.resolve(import.meta.dirname);
-/** Production static output — must stay `dist`, never `dist/public`. */
-const buildOutDir = path.resolve(configDir, "dist");
-const staticPublicDir = path.resolve(configDir, "public");
 
 function resolvePort(mode: string): number {
   const env = loadEnv(mode, configDir, "");
@@ -37,35 +34,31 @@ function resolveBasePath(mode: string): string {
 export default defineConfig(async ({ mode }) => {
   const port = resolvePort(mode);
   const basePath = resolveBasePath(mode);
-
-  if (mode === "production") {
-    console.info(`[vite] outDir=${buildOutDir}`);
-  }
+  const isDev = mode !== "production";
 
   return {
     base: basePath,
     plugins: [
-    react(),
-    tailwindcss({ optimize: false }),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
+      react(),
+      tailwindcss({ optimize: false }),
+      ...(isDev ? [runtimeErrorOverlay()] : []),
+      ...(isDev && process.env.REPL_ID !== undefined
+        ? [
+            await import("@replit/vite-plugin-cartographer").then((m) =>
+              m.cartographer({
+                root: path.resolve(import.meta.dirname, ".."),
+              }),
+            ),
+            await import("@replit/vite-plugin-dev-banner").then((m) =>
+              m.devBanner(),
+            ),
+          ]
+        : []),
     ],
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "src"),
-        ...(mode === "development"
+        ...(isDev
           ? {
               "@clerk/react": path.resolve(
                 import.meta.dirname,
@@ -81,9 +74,9 @@ export default defineConfig(async ({ mode }) => {
       dedupe: ["react", "react-dom"],
     },
     root: configDir,
-    publicDir: staticPublicDir,
+    publicDir: "public",
     build: {
-      outDir: buildOutDir,
+      outDir: "dist",
       emptyOutDir: true,
     },
     server: {
