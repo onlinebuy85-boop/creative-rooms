@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @workspace/creative-rooms run build",
+  "outputDirectory": "artifacts/creative-rooms/dist",
   "framework": null,
   "git": {
     "deploymentEnabled": {
