@@ -2,5 +2,6 @@
   "app": "creative-rooms",
   "branch": "main",
   "outputDirectory": "dist",
+  "viteOutDir": "dist",
   "repository": "onlinebuy85-boop/creative-rooms"
 }

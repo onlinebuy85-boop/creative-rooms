@@ -100,7 +100,7 @@ The app currently runs on Replit. The `artifact.toml` files in each `artifacts/*
 
 To deploy elsewhere (Vercel, Render, Fly, your own server, etc.):
 
-1. Build the web frontend: `pnpm --filter @workspace/creative-rooms run build` → static files appear in `artifacts/creative-rooms/dist/public/`.
+1. Build the web frontend: `pnpm --filter @workspace/creative-rooms run build` → static files appear in `artifacts/creative-rooms/dist/`.
 2. Build the API server: `pnpm --filter @workspace/api-server run build` → single bundle at `artifacts/api-server/dist/index.mjs`.
 3. Configure your reverse proxy so that:
    - `/api/*` → API server

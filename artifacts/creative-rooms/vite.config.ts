@@ -5,6 +5,9 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const configDir = path.resolve(import.meta.dirname);
+/** Production static output — must stay `dist`, never `dist/public`. */
+const buildOutDir = path.resolve(configDir, "dist");
+const staticPublicDir = path.resolve(configDir, "public");
 
 function resolvePort(mode: string): number {
   const env = loadEnv(mode, configDir, "");
@@ -34,6 +37,10 @@ function resolveBasePath(mode: string): string {
 export default defineConfig(async ({ mode }) => {
   const port = resolvePort(mode);
   const basePath = resolveBasePath(mode);
+
+  if (mode === "production") {
+    console.info(`[vite] outDir=${buildOutDir}`);
+  }
 
   return {
     base: basePath,
@@ -73,9 +80,10 @@ export default defineConfig(async ({ mode }) => {
       },
       dedupe: ["react", "react-dom"],
     },
-    root: path.resolve(import.meta.dirname),
+    root: configDir,
+    publicDir: staticPublicDir,
     build: {
-      outDir: "dist",
+      outDir: buildOutDir,
       emptyOutDir: true,
     },
     server: {
